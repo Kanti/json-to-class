@@ -1,0 +1,5 @@
+.idea/
+vendor/
+var/
+src/TestsT/
+test.php
