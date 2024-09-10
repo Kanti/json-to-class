@@ -3,3 +3,4 @@ vendor/
 var/
 src/TestsT/
 test.php
+test-result/

@@ -11,7 +11,7 @@ compsoer require kanti/json-to-class
 ## Usage
 
 ````php
-$person = \Kanti\JsonToClass\DevelopmentConverter::createInstance()
+$person = (new \Kanti\JsonToClass\DevelopmentConverter())
     ->convert(\MyCode\Person::class, ['name' => 'Kanti', 'age' => 30]);
 assert($person instanceof \MyCode\Person);
 assert($person->name === 'Kanti');
@@ -60,7 +60,6 @@ class Person
 - [ ] generate PHP Classes from JSON Schema
 - [ ] generate JSON Schema from data structures (JSON, CSV, DB, etc.)
 
-
 ## TODOs
 - default wenn zu viele Felder kommen: Warning im Logging (PSR Logger / Sentry Logger)
 - decide if we should use reflection or `::from` methods
@@ -78,9 +77,6 @@ class Person {
 
 #[FromSchema('./schema/person.json')]
 #[FromSchema('https://json-schema.org/draft/2020-12/schema')]
-class Person {
-}
-
 class Person {
 }
 `````

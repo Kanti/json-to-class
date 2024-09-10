@@ -1,1 +1,11 @@
 parameters:
+	ignoreErrors:
+		-
+			message: "#^Call to an undefined static method T of object\\:\\:from\\(\\)\\.$#"
+			count: 1
+			path: src/ProductionConverter.php
+
+		-
+			message: "#^Class Kanti\\\\JsonToClass\\\\Tests\\\\GeneratedFixture\\\\Generated not found\\.$#"
+			count: 4
+			path: tests/DevelopmentConverterTest.php

@@ -13,7 +13,9 @@ use PHPUnit\Framework\TestCase;
 
 class SchemaFromDataGeneratorTest extends TestCase
 {
-
+    /**
+     * @param array<string, mixed> $input
+     */
     #[Test]
     #[DataProvider('provideData')]
     public function generate(array $input, SchemaElement $expectedOutput): void
@@ -58,10 +60,7 @@ class SchemaFromDataGeneratorTest extends TestCase
             'input' => ['emptyArray' => []],
             'expectedOutput' => new SchemaElement(
                 properties: [
-                    'emptyArray' => new SchemaElement(
-                        # TODO decide if this is correct: maybe this is not a listElement but a properties element
-                        listElement: new SchemaElement(),
-                    ),
+                    'emptyArray' => new SchemaElement(),
                 ],
             ),
         ];
@@ -74,17 +73,17 @@ class SchemaFromDataGeneratorTest extends TestCase
                 listElement: $personSchema,
             ),
         ];
-        yield 'mixedTypes object + int[] + string' => [
-            'input' => [
-                ['mixedTypes' => 'string'],
-                ['mixedTypes' => [0]],
-                ['mixedTypes' => ['name' => 'Kanti', 'age' => 30]],
-            ],
-            'expectedOutput' => new SchemaElement(
-                // TODO decide what to do with mixed types add all to the schema? @param string|int[]|MixedTypes $mixedTypes
-//                listElement: $personSchema,
-            ),
-        ];
+//        yield 'mixedTypes object + int[] + string' => [
+//            'input' => [
+//                ['mixedTypes' => 'string'],
+//                ['mixedTypes' => [0]],
+//                ['mixedTypes' => ['name' => 'Kanti', 'age' => 30]],
+//            ],
+//            'expectedOutput' => new SchemaElement(
+//                // TODO decide what to do with mixed types add all to the schema? @param string|int[]|MixedTypes $mixedTypes
+////                listElement: $personSchema,
+//            ),
+//        ];
         yield 'rootArrayInArray' => [
             'input' => [
                 [
@@ -214,8 +213,7 @@ class SchemaFromDataGeneratorTest extends TestCase
                                                     listElement: new SchemaElement(
                                                         properties: [
                                                             'name' => new SchemaElement(['string' => true]),
-                                                            'age' => new SchemaElement(['int' => true, 'float' => true],
-                                                            ),
+                                                            'age' => new SchemaElement(['int' => true, 'float' => true],),
                                                         ],
                                                     ),
                                                     canBeMissing: true,

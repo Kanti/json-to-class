@@ -4,20 +4,18 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\Code;
 
+use Generator;
 use Kanti\JsonToClass\Code\CodeGenerator;
 use Kanti\JsonToClass\Dto\FullyQualifiedClassName;
 use Kanti\JsonToClass\Schema\SchemaElement;
-use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\PsrPrinter;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-use function PHPUnit\Framework\assertEquals;
-
 class CodeGeneratorTest extends TestCase
 {
-    public static function fromSchemaDataProvider(): \Generator
+    public static function fromSchemaDataProvider(): Generator
     {
         $personSchemaElement = new SchemaElement(
             properties: [
@@ -100,27 +98,41 @@ class CodeGeneratorTest extends TestCase
                 'Kanti\JsonToClass\Dto\Data\Persons' => __DIR__ . '/../__fixtures__/0.0.0.Persons.php.dist',
             ],
         ];
-
-    }
-
-    #[Test]
-    #[DataProvider('fromSchemaDataProvider')]
-    public function fromSchema(SchemaElement $schema, array $files): void
-    {
-        $this->assertTrue($schema->isValid(), 'Invalid schema given');
-        $printer = new PsrPrinter();
-        $codeGenerator = new CodeGenerator();
-        $class = new FullyQualifiedClassName('Kanti\JsonToClass\Dto\Data');
-        $classes = $codeGenerator->fromSchema($class, $schema);
-        foreach ($classes as $key => $value) {
-            $this->assertArrayHasKey($key, $files, 'generated file not expected ' . $key);
-            $this->assertStringEqualsFile($files[$key], $printer->printFile($value['phpFile']));
-        }
-        $this->assertEquals(
-            array_keys($files),
-            array_keys(iterator_to_array($classes)),
-            'generated files count not expected',
-        );
+        yield 'EmptyArray.php.dist' => [
+            new SchemaElement(
+                properties: [
+                    'emptyArray' => new SchemaElement(),
+                ],
+            ),
+            [
+                'Kanti\JsonToClass\Dto\Data' => __DIR__ . '/../__fixtures__/EmptyArray.php.dist',
+            ],
+        ];
+        yield 'AllTheTypes.php.dist' => [
+            new SchemaElement(
+                properties: [
+                    'property' => new SchemaElement(
+                        basicTypes: ['string' => true, 'int' => true],
+                        listElement: new SchemaElement(
+                            listElement: new SchemaElement(
+                                listElement: new SchemaElement(
+                                    listElement: $personSchemaElement,
+                                ),
+                            ),
+                        ),
+                        properties: [
+                            'property' => new SchemaElement(
+                                basicTypes: ['string' => true, 'int' => true],
+                            ),
+                        ],
+                        canBeMissing: true,
+                    ),
+                ],
+            ),
+            [
+                'Kanti\JsonToClass\Dto\Data' => __DIR__ . '/../__fixtures__/AllTheTypes.php.dist',
+            ],
+        ];
     }
 
     #[Test]
@@ -138,6 +150,28 @@ class CodeGeneratorTest extends TestCase
         );
         $this->expectExceptionMessage('Invalid schema given');
         $codeGenerator->fromSchema($class, $invalidSchema);
+    }
+
+    /**
+     * @param array<string, string> $files
+     */
+    #[Test]
+    #[DataProvider('fromSchemaDataProvider')]
+    public function fromSchema(SchemaElement $schema, array $files): void
+    {
+        $codeGenerator = new CodeGenerator();
+        $class = new FullyQualifiedClassName('Kanti\JsonToClass\Dto\Data');
+        $classes = $codeGenerator->fromSchema($class, $schema);
+        foreach ($classes as $key => $value) {
+            $this->assertArrayHasKey($key, $files, 'generated file not expected ' . $key);
+            $this->assertStringEqualsFile($files[$key], $value);
+        }
+
+        $expected = array_keys($files);
+        sort($expected);
+        $actual = array_keys(iterator_to_array($classes));
+        sort($actual);
+        $this->assertEquals($expected, $actual, 'generated files count not expected');
     }
 
     #[Test]

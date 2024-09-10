@@ -12,22 +12,9 @@ use PHPUnit\Framework\TestCase;
 
 class SchemaElementTest extends TestCase
 {
-
-    #[Test]
-    public function isValid()
-    {
-        $invalidSchema = new SchemaElement(
-            basicTypes: ['string' => true],
-            listElement: new SchemaElement(
-                basicTypes: ['string' => true],
-            ),
-        );
-        $schema = new SchemaElement(properties: [
-            'name' => $invalidSchema,
-        ]);
-        $this->assertFalse($schema->isValid());
-    }
-
+    /**
+     * @param list<string> $basicTypes
+     */
     #[Test]
     #[DataProvider('getBasicTypesDataProvider')]
     public function getBasicTypes(SchemaElement $schema, array $basicTypes): void

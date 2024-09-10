@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Schema;
 
+use InvalidArgumentException;
 use Kanti\JsonToClass\Dto\FullyQualifiedClassName;
 
 final class SchemaElement
 {
     public function __construct(
-        /** @var list<string> */
+        /** @var array<string, true> */
         public array $basicTypes = [],
         public ?SchemaElement $listElement = null,
         /** @var array<string, SchemaElement> */
         public array $properties = [],
         public bool $canBeMissing = false,
-    ) {}
+    ) {
+    }
 
     /**
      * @return list<string>
@@ -26,21 +28,20 @@ final class SchemaElement
         if ($this->canBeMissing) {
             $basicTypes1['null'] = true;
         }
+
         $basicTypes = array_keys($basicTypes1);
-        usort($basicTypes, static function (string $a, string $b) {
-            return match ($a) {
-                    'string' => 1,
-                    'float' => 2,
-                    'int' => 3,
-                    'bool' => 4,
-                    'null' => 5,
-                } <=> match ($b) {
-                    'string' => 1,
-                    'float' => 2,
-                    'int' => 3,
-                    'bool' => 4,
-                    'null' => 5,
-                };
+        usort($basicTypes, static function (string|int $a, string|int $b): int {
+            $ranking = [
+                'string' => 1,
+                'float' => 2,
+                'int' => 3,
+                'bool' => 4,
+                'null' => 5,
+            ];
+
+            $aInt = $ranking[$a] ?? throw new InvalidArgumentException(sprintf('Unknown type %s', $a));
+            $bInt = $ranking[$b] ?? throw new InvalidArgumentException(sprintf('Unknown type %s', $b));
+            return $aInt <=> $bInt;
         });
         return $basicTypes;
     }
@@ -58,34 +59,30 @@ final class SchemaElement
         return $this->properties;
     }
 
-    public function isValid(): bool
-    {
-        $count = (int)(bool)$this->basicTypes + (int)(bool)$this->properties + (int)(bool)$this->listElement;
-        if ($count > 1) {
-            return false;
-        }
-        if ($this->basicTypes) {
-            return true;
-        }
-        if ($this->listElement) {
-            return true;
-        }
-        foreach ($this->properties as $property) {
-            if (!$property->isValid()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public function getTypeName(FullyQualifiedClassName $fullyQualifiedNamespace): PropertyType
     {
+        if ($this->isEmpty()) {
+            return new PropertyType('array');
+        }
+
         if ($this->basicTypes) {
-            return new PropertyType($this->getBasicTypesString(), nullable: $this->canBeMissing, canBeMissing: $this->canBeMissing);
+            return new PropertyType($this->getBasicTypesString());
         }
+
         if ($this->listElement) {
-            return $this->listElement->getTypeName($fullyQualifiedNamespace)->withOneMoreDepth()->withCanBeMissing($this->canBeMissing);
+            return $this->listElement->getTypeName($fullyQualifiedNamespace)->withOneMoreDepth();
         }
-        return new PropertyType($fullyQualifiedNamespace->__toString(), isClass: true, nullable: $this->canBeMissing, canBeMissing: $this->canBeMissing);
+
+        return new PropertyType($fullyQualifiedNamespace->__toString(), isClass: true);
+    }
+
+    public function isEmpty(): bool
+    {
+        return $this->count() === 0;
+    }
+
+    private function count(): int
+    {
+        return (int)(bool)$this->basicTypes + (int)(bool)$this->properties + (int)(bool)$this->listElement;
     }
 }

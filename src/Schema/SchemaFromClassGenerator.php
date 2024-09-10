@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\Schema;
 
 use Kanti\JsonToClass\Dto\FullyQualifiedClassName;
-
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Parameter;
 
 final class SchemaFromClassGenerator
 {
-
     public function generate(FullyQualifiedClassName $class): SchemaElement
     {
         $classType = ClassType::from((string)$class);
@@ -23,10 +21,7 @@ final class SchemaFromClassGenerator
         foreach ($parameters as $parameter) {
             $schemaElement->properties[$parameter->getName()] = new SchemaElement();
         }
-        dd($parameters, $schemaElement);
-    }
 
-    private function generateFromParameter(Parameter $parameter): SchemaElement
-    {
+        dd($parameters, $schemaElement);
     }
 }

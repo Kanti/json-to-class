@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Schema;
 
+use Exception;
+
 final class SchemaFromDataGenerator
 {
     /**
-     * @param null|bool|int|float|string|array<string, mixed> $data
+     * @param null|bool|int|float|string|array<array-key, mixed> $data
      */
     public function generate(null|bool|int|float|string|array $data): SchemaElement
     {
@@ -15,14 +17,11 @@ final class SchemaFromDataGenerator
 
         $this->generateInternal($data, $schema);
 
-        if (!$schema->isValid()) {
-            throw new \Exception('Invalid schema generated');
-        }
         return $schema;
     }
 
     /**
-     * @param null|bool|int|float|string|array<string, mixed> $data
+     * @param null|bool|int|float|string|array<array-key, mixed> $data
      */
     public function generateInternal(null|bool|int|float|string|array $data, SchemaElement $currentSchema): void
     {
@@ -39,12 +38,15 @@ final class SchemaFromDataGenerator
                 $this->generateInternal($value, $currentSchema->listElement);
                 continue;
             }
+
             $currentSchema->properties[$property] ??= new SchemaElement();
             $this->generateInternal($value, $currentSchema->properties[$property]);
         }
+
         if ($isList) {
             return;
         }
+
         if ($beforeThisRun) {
             foreach (array_keys($data) as $property) {
                 if (!array_key_exists($property, $beforeThisRun)) {
@@ -53,6 +55,7 @@ final class SchemaFromDataGenerator
                     $currentSchema->properties[$property]->canBeMissing = true;
                 }
             }
+
             foreach (array_keys($beforeThisRun) as $property) {
                 if (!array_key_exists($property, $data)) {
                     // was missing in current iteration so it is sometimes unset
@@ -63,9 +66,9 @@ final class SchemaFromDataGenerator
         }
     }
 
-    protected function getType(float|bool|int|string|null $data): ?string
+    private function getType(float|bool|int|string|null $data): string
     {
-        return match(gettype($data)) {
+        return match (gettype($data)) {
             'NULL' => 'null',
             'boolean' => 'bool',
             'integer' => 'int',

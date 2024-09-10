@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\Code;
 
 use Composer\Autoload\ClassLoader;
+use Exception;
+use Kanti\JsonToClass\Abstraction\FileSystem;
+use Kanti\JsonToClass\Abstraction\FileSystemInterface;
 use Kanti\JsonToClass\Dto\FullyQualifiedClassName;
-use Nette\PhpGenerator\PsrPrinter;
 
 final readonly class FileWriter
 {
@@ -14,46 +16,44 @@ final readonly class FileWriter
 
     public function __construct(
         ?ClassLoader $classLoader = null,
-        private PsrPrinter $printer = new PsrPrinter(),
+        private FileSystemInterface $fileSystem = new FileSystem(),
     ) {
         $this->classLoader = $classLoader ?? require __DIR__ . '/../../vendor/autoload.php';
     }
 
     public function writeIfNeeded(Classes $classes): bool
     {
-        $classChanged = false;
-        foreach ($classes as $className => $class) {
-            $content = $this->printer->printFile($class['phpFile']);
+        $needsRestart = false;
+        foreach ($classes as $className => $content) {
+            $location = $this->getFileLocation($className);
 
-            $location = $this->getFileLocation($class['class']);
-
-            $oldContent = null;
-            if (file_exists($location)) {
-                $oldContent = file_get_contents($location);
-            }
+            $oldContent = $this->fileSystem->readContentIfExists($location);
             if ($oldContent === $content) {
-                // no change, continue
+                // no change, continue with next class
                 continue;
             }
-            $this->writeContent($location, $content);
+
+            $this->fileSystem->writeContent($location, $content);
 
             if (class_exists($className, false)) {
                 // we already have the class loaded, so we would need to reload it, but we can't (no monkey patching in PHP)
-                $classChanged = true;
+                $needsRestart = true;
                 continue;
             }
 
-            require_once $location; // load if not loaded already (composer autoloader ignores the new file)
+            $this->fileSystem->requireFile($location); // load if not loaded already (composer autoloader ignores the new file)
         }
-        return $classChanged;
+
+        return $needsRestart;
     }
 
-    private function getFileLocation(FullyQualifiedClassName $class): string
+    private function getFileLocation(string $className): string
     {
+        $class = new FullyQualifiedClassName($className);
         $psr4 = $this->classLoader->getPrefixesPsr4();
 
-        // already exists:
-        $file = $this->classLoader->findFile((string)$class);
+        // find location of the existing file, if present
+        $file = $this->classLoader->findFile($className);
         if ($file) {
             return $file;
         }
@@ -66,31 +66,21 @@ final readonly class FileWriter
             if (isset($psr4[$currentNamespacePrefix])) {
                 $possiblePaths = $psr4[$currentNamespacePrefix];
                 if (count($possiblePaths) > 1) {
-                    throw new \Exception('Multiple possible paths found'); // TODO do we want an exception here?
+                    throw new Exception('Multiple possible paths found'); // TODO do we want an exception here?
                 }
-                $path = $possiblePaths[0] ?? throw new \Exception('Path not found');
+
+                $path = $possiblePaths[0] ?? throw new Exception('Path not found');
+                $path = rtrim($path, '/');
 
                 $missingParts = array_slice($originalNamespaceParts, count($namespaceParts));
                 foreach ($missingParts as $missingPart) {
                     $path .= '/' . $missingPart;
                 }
+
                 return $path . '/' . $class->className . '.php';
             }
         } while (array_pop($namespaceParts));
 
-        throw new \Exception('Path not found no psr4 path found in composer autoload for ' . (string)$class);
+        throw new Exception('Path not found no psr4 path found in composer autoload for ' . $className);
     }
-
-    private function writeContent(string $location, string $content): void
-    {
-        $directory = dirname($location);
-        if (!is_dir($directory)) {
-            if (!mkdir($directory, recursive: true) && !is_dir($directory)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $directory));
-            }
-        }
-
-        file_put_contents($location, $content);
-    }
-
 }

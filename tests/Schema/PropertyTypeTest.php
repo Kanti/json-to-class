@@ -12,7 +12,8 @@ use PHPUnit\Framework\TestCase;
 class PropertyTypeTest extends TestCase
 {
     #[Test]
-    public function construct() {
+    public function construct(): void
+    {
         $this->expectException(InvalidArgumentException::class);
         new PropertyType('FakeClassAndNotMarkedAsClass');
     }
