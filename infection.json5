@@ -10,8 +10,12 @@
     },
     "logs": {
         "text": "test-result/infection.log",
-        "html": "test-result/infection.html"
+        "html": "test-result/infection.html",
+        "github": true,
     },
+    "minCoveredMsi": 100,
+    "minMsi": 100,
+    "initialTestsPhpOptions": "-d xdebug.mode=coverage",
     "mutators": {
         "@default": true
     }

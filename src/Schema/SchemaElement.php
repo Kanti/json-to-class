@@ -78,11 +78,15 @@ final class SchemaElement
 
     public function isEmpty(): bool
     {
-        return $this->count() === 0;
-    }
-
-    private function count(): int
-    {
-        return (int)(bool)$this->basicTypes + (int)(bool)$this->properties + (int)(bool)$this->listElement;
+        if ($this->basicTypes) {
+            return false;
+        }
+        if ($this->properties) {
+            return false;
+        }
+        if ($this->listElement) {
+            return false;
+        }
+        return true;
     }
 }

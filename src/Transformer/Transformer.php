@@ -21,6 +21,23 @@ final class Transformer implements LoggerAwareInterface
     }
 
     /**
+     * @param class-string $classString
+     * @param array $data
+     * @return object|string|null
+     * @throws \ReflectionException
+     */
+    public function transform(string $classString, array $data): object
+    {
+        $class = new \ReflectionClass($classString);
+        $params = $class->getConstructor()->getParameters();
+        $args = [];
+        foreach ($params as $param) {
+            $args[] = $this->transformParam($param, $data);
+        }
+        return $class->newInstanceArgs($args);
+    }
+
+    /**
      * @param array<string, mixed> $data
      */
     public function for(array $data): TransformerInstance

@@ -31,35 +31,6 @@ final class DevelopmentConverter implements Converter
     /**
      * @template T of object
      * @param class-string<T> $className
-     * @param array<string, mixed> $data
-     * @phpstan-param array<mixed> $data
-     *
-     * @return T
-     */
-    public function convert(string $className, array $data, ?Transformer $transformer = null): object
-    {
-        if (array_is_list($data)) {
-            throw new RuntimeException('Data is a list, but expected an object (did you mean to use `->convertList()` ?)');
-        }
-
-        $class = new FullyQualifiedClassName($className);
-
-        $schemaFromData = $this->schemaFromDataGenerator->generate($data);
-//        $schemaFromClass = $this->schemaFromClassGenerator->generate($class);
-        // generate Schema:
-        $classes = $this->codeGenerator->fromSchema($class, $schemaFromData);
-        // generate Schema:
-        $changes = $this->codeWriter->writeIfNeeded($classes);
-        if ($changes) {
-            throw new RuntimeException('Schema Changed, needed to write php files. You need to restart the process!!!');
-        }
-
-        return $this->productionConverter->convert($className, $data, $transformer ?? $this->transformer);
-    }
-
-    /**
-     * @template T of object
-     * @param class-string<T> $className
      * @param list<array<string, mixed>> $data
      * @phpstan-param array<mixed> $data
      *
@@ -84,5 +55,34 @@ final class DevelopmentConverter implements Converter
         }
 
         return $this->productionConverter->convertList($className, $data, $transformer ?? $this->transformer);
+    }
+
+    /**
+     * @template T of object
+     * @param class-string<T> $className
+     * @param array<string, mixed> $data
+     * @phpstan-param array<mixed> $data
+     *
+     * @return T
+     */
+    public function convert(string $className, array $data, ?Transformer $transformer = null): object
+    {
+        if (array_is_list($data)) {
+            throw new RuntimeException('Data is a list, but expected an object (did you mean to use `->convertList()` ?)');
+        }
+
+        $class = new FullyQualifiedClassName($className);
+
+        $schemaFromData = $this->schemaFromDataGenerator->generate($data);
+//        $schemaFromClass = $this->schemaFromClassGenerator->generate($class);
+        // generate Schema:
+        $classes = $this->codeGenerator->fromSchema($class, $schemaFromData);
+        // generate Schema:
+        $changes = $this->codeWriter->writeIfNeeded($classes);
+        if ($changes) {
+            throw new RuntimeException('Schema Changed, needed to write php files. You need to restart the process!!!');
+        }
+
+        return $this->productionConverter->convert($className, $data, $transformer ?? $this->transformer);
     }
 }

@@ -14,8 +14,9 @@
   },
   "require-dev": {
     "infection/infection": "^0.29.6",
-    "phpunit/phpunit": "^11.3.4",
+    "phpunit/phpunit": "^11.3.5",
     "pluswerk/grumphp-config": "^7.1",
+    "spatie/phpunit-snapshot-assertions": "^5.1.6",
     "symfony/var-dumper": "^7.1.4"
   },
   "autoload": {
@@ -42,7 +43,10 @@
       "composer bump -D",
       "composer normalize"
     ],
-    "infection": "infection --min-msi=100 --min-covered-msi=100 --threads=4",
-    "test": "XDEBUG_MODE=coverage phpunit"
+    "infection": "infection --only-covered --threads=8 --ansi",
+    "phpcs": "phpcs --standard=PSR12",
+    "phpstan": "phpstan -c phpstan.neon",
+    "test": "XDEBUG_MODE=coverage phpunit --color=always",
+    "test:update": "XDEBUG_MODE=coverage phpunit --color=always -d --update-snapshots"
   }
 }

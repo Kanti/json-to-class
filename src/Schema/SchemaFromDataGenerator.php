@@ -26,7 +26,7 @@ final class SchemaFromDataGenerator
     public function generateInternal(null|bool|int|float|string|array $data, SchemaElement $currentSchema): void
     {
         if (!is_array($data)) {
-            $currentSchema->basicTypes[$this->getType($data)] = true;
+            $currentSchema->basicTypes[self::getType($data)] = true;
             return;
         }
 
@@ -66,14 +66,19 @@ final class SchemaFromDataGenerator
         }
     }
 
-    private function getType(float|bool|int|string|null $data): string
+    /**
+     * TODO move to a helper class
+     */
+    public static function getType(float|bool|int|string|null|array $data): string
     {
-        return match (gettype($data)) {
+        $type = gettype($data);
+        return match ($type) {
             'NULL' => 'null',
             'boolean' => 'bool',
             'integer' => 'int',
             'double' => 'float',
-            default => gettype($data),
+            'array' => array_is_list($data) ? 'list' : 'object',
+            default => $type,
         };
     }
 }
