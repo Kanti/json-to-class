@@ -18,24 +18,31 @@ final class Validator
         if (is_null($data)) {
             return;
         }
+
         if (is_bool($data)) {
             return;
         }
+
         if (is_int($data)) {
             return;
         }
+
         if (is_float($data)) {
             return;
         }
+
         if (is_string($data)) {
             return;
         }
+
         if (is_array($data) && array_is_list($data)) {
             foreach ($data as $item) {
                 $this->validateData($item, $config);
             }
+
             return;
         }
+
         assert($data instanceof stdClass || is_array($data));
         foreach ($data as $key => $value) {
             $this->validateKey((string)$key, $config);
@@ -48,15 +55,19 @@ final class Validator
         if (Helpers::isIdentifier($key)) {
             return;
         }
+
         if ($config->onInvalidCharacterProperties === OnInvalidCharacterProperties::REPLACE_INVALID_CHARACTERS_WITH_UNDERSCORE) {
             throw new Exception('Not implemented yet');
         }
+
         if ($config->onInvalidCharacterProperties === OnInvalidCharacterProperties::TRY_PREFIX_WITH_UNDERSCORE) {
             if (Helpers::isIdentifier('_' . $key)) {
                 return;
             }
+
             throw new InvalidArgumentException('Key is not valid: ' . $key);
         }
+
         if ($config->onInvalidCharacterProperties === OnInvalidCharacterProperties::THROW_EXCEPTION) {
             throw new InvalidArgumentException('Key is not valid: ' . $key);
         }

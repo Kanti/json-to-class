@@ -7,7 +7,7 @@ namespace Kanti\JsonToClass\v2\Writer;
 use Kanti\JsonToClass\v2\FileSystemAbstraction\ClassLocator;
 use Kanti\JsonToClass\v2\FileSystemAbstraction\FileSystemInterface;
 
-final class FileWriter
+final readonly class FileWriter
 {
     public function __construct(
         private ClassLocator $classLocator,

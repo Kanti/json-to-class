@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\v2\Converter;
 
+use InvalidArgumentException;
 use Kanti\JsonToClass\v2\ClassCreator\ClassCreatorInterface;
 use Kanti\JsonToClass\v2\Config\Config;
 use Kanti\JsonToClass\v2\Config\SaneConfig;
@@ -42,7 +43,7 @@ final readonly class Converter
     public function convert(string $className, array|stdClass $data, Config $config = new SaneConfig()): object
     {
         if (!str_contains($className, '\\')) {
-            throw new \InvalidArgumentException('Class name must contain namespace');
+            throw new InvalidArgumentException('Class name must contain namespace');
         }
 
         $this->validator->validateData($data, $config);
@@ -64,6 +65,11 @@ final readonly class Converter
      */
     private function convertToClass(string $className, array|stdClass $data, Config $config): object
     {
+        // TODO
+        if ($config) {
+            return new $className();
+        }
+
         return new $className(...$data);
     }
 }

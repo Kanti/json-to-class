@@ -25,6 +25,7 @@ final readonly class CodeCreator
         if ($schema->basicTypes) {
             throw new Exception('Basic types not supported at this level ' . json_encode($schema, JSON_THROW_ON_ERROR));
         }
+
         return $this->createFilesLoop($schema, $schema->className);
     }
 
@@ -35,6 +36,7 @@ final readonly class CodeCreator
         if ($schema->listElement) {
             $resultingClasses = $this->createFilesLoop($schema->listElement, $rootClassName);
         }
+
         if ($schema->properties === null) {
             return $resultingClasses;
         }
@@ -58,6 +60,7 @@ final readonly class CodeCreator
             $namespace->addUse($rootClassName, Helpers::extractShortName($rootClassName));
             $class->addAttribute(RootClass::class, [new Literal(Helpers::extractShortName($rootClassName) . '::class')]);
         }
+
         $constructor = $class
             ->addMethod('__construct')->setPublic();
 
@@ -83,6 +86,7 @@ final readonly class CodeCreator
                 if (isset($resultingClasses[$className])) {
                     throw new Exception('Class already exists ' . $className);
                 }
+
                 $resultingClasses[$className] = $classContent;
             }
         }
@@ -90,10 +94,11 @@ final readonly class CodeCreator
         if (isset($resultingClasses[$schema->className])) {
             throw new Exception('Class already exists ' . $schema->className);
         }
+
         $resultingClasses[$schema->className] = $this->printer->printFile($file);
 
         ksort($resultingClasses);
-        uksort($resultingClasses, fn($a, $b) => strlen($a) <=> strlen($b));
+        uksort($resultingClasses, fn($a, $b): int => strlen((string) $a) <=> strlen((string) $b));
         return $resultingClasses;
     }
 }

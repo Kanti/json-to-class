@@ -3,7 +3,9 @@
 {
     "schema": {
         "canBeMissing": true,
-        "basicTypes": [],
+        "basicTypes": {
+            "null": true
+        },
         "listElement": {
             "canBeMissing": false,
             "basicTypes": [],
@@ -11,7 +13,7 @@
                 "canBeMissing": false,
                 "basicTypes": [],
                 "listElement": {
-                    "canBeMissing": true,
+                    "canBeMissing": false,
                     "basicTypes": [],
                     "listElement": null,
                     "properties": {
@@ -61,7 +63,7 @@ final readonly class Data
      * @param list<list<list<L>>>|null $a
      */
     public function __construct(
-        #[Types([[[L::class]]], null)]
+        #[Types([[[L::class]]], 'null')]
         public array|null $a = null,
     ) {
     }

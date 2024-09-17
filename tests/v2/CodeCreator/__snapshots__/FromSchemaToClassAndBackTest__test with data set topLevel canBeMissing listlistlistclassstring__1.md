@@ -1,17 +1,21 @@
-# Tested "canBeMissing list<list<list<class>>>"
+# Tested "topLevel canBeMissing list<list<list<class>>|string>"
 ````json
 {
     "schema": {
-        "canBeMissing": false,
-        "basicTypes": [],
+        "canBeMissing": true,
+        "basicTypes": {
+            "null": true
+        },
         "listElement": {
             "canBeMissing": false,
-            "basicTypes": [],
+            "basicTypes": {
+                "string": true
+            },
             "listElement": {
                 "canBeMissing": false,
                 "basicTypes": [],
                 "listElement": {
-                    "canBeMissing": true,
+                    "canBeMissing": false,
                     "basicTypes": [],
                     "listElement": null,
                     "properties": {
@@ -31,8 +35,8 @@
         },
         "properties": null
     },
-    "expectedPhpType": "array",
-    "expectedDocBlockType": "list<list<list<L>>>",
+    "expectedPhpType": "array|null",
+    "expectedDocBlockType": "list<list<list<L>>|string>|null",
     "expectedAttribute": {},
     "expectedUses": {
         "L": "Kanti\\GeneratedTest\\Data\\L\\L\\L"
@@ -58,11 +62,11 @@ use Kanti\JsonToClass\v2\Attribute\Types;
 final readonly class Data
 {
     /**
-     * @param list<list<list<L>>> $a
+     * @param list<list<list<L>>|string>|null $a
      */
     public function __construct(
-        #[Types([[[L::class]]])]
-        public array $a,
+        #[Types([[[L::class]]], ['string'], 'null')]
+        public array|null $a = null,
     ) {
     }
 }

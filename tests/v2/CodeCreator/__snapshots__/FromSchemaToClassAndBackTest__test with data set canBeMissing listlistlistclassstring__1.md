@@ -13,7 +13,7 @@
                 "canBeMissing": false,
                 "basicTypes": [],
                 "listElement": {
-                    "canBeMissing": true,
+                    "canBeMissing": false,
                     "basicTypes": [],
                     "listElement": null,
                     "properties": {

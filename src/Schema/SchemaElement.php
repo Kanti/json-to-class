@@ -81,12 +81,11 @@ final class SchemaElement
         if ($this->basicTypes) {
             return false;
         }
+
         if ($this->properties) {
             return false;
         }
-        if ($this->listElement) {
-            return false;
-        }
-        return true;
+
+        return !$this->listElement;
     }
 }

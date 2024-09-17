@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\v2\FileSystemAbstraction;
 
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RegexIterator;
+use RecursiveRegexIterator;
 use RuntimeException;
 
 final readonly class FileSystem implements FileSystemInterface
@@ -27,6 +31,7 @@ final readonly class FileSystem implements FileSystemInterface
         if (str_starts_with($filename, '/')) {
             return $this->realpathIfPossible($filename);
         }
+
         // on windows it is possible that the root directory is a drive letter
         if (str_contains($filename, ':')) {
             return $this->realpathIfPossible($filename);
@@ -35,15 +40,15 @@ final readonly class FileSystem implements FileSystemInterface
         return $this->realpathIfPossible($this->rootDirectory . $filename);
     }
 
-    public function writeContent(string $location, string $content): void
+    public function writeContent(string $filename, string $content): void
     {
-        $location = $this->makePathAbsolute($location);
-        $directory = dirname($location);
+        $filename = $this->makePathAbsolute($filename);
+        $directory = dirname($filename);
         if (!is_dir($directory) && (!@mkdir($directory, recursive: true) && !is_dir($directory))) {
             throw new RuntimeException(sprintf('Directory "%s" was not created', $directory));
         }
 
-        file_put_contents($location, $content);
+        file_put_contents($filename, $content);
     }
 
     public function readContent(string $filename): string
@@ -53,6 +58,7 @@ final readonly class FileSystem implements FileSystemInterface
         if ($result === null) {
             throw new RuntimeException('File does not exist: ' . $filename);
         }
+
         return $result;
     }
 
@@ -74,10 +80,11 @@ final readonly class FileSystem implements FileSystemInterface
         if (!$recursive) {
             return glob($directory . '/*.' . $extension) ?: [];
         }
+
         $files = [];
-        $directoryIterator = new \RecursiveDirectoryIterator($directory);
-        $iterator = new \RecursiveIteratorIterator($directoryIterator);
-        $regex = new \RegexIterator($iterator, '/^.+\.' . $extension . '$/i', \RecursiveRegexIterator::GET_MATCH);
+        $directoryIterator = new RecursiveDirectoryIterator($directory);
+        $iterator = new RecursiveIteratorIterator($directoryIterator);
+        $regex = new RegexIterator($iterator, '/^.+\.' . $extension . '$/i', RecursiveRegexIterator::GET_MATCH);
         foreach ($regex as $file) {
             $files[] = $file[0];
         }

@@ -12,12 +12,9 @@ interface FileSystemInterface
 
     public function readContentIfExists(string $filename): ?string;
 
-    public function writeContent(string $location, string $content): void;
+    public function writeContent(string $filename, string $content): void;
 
     /**
-     * @param string $directory
-     * @param string $extension
-     * @param bool $recursive
      * @return list<string>
      */
     public function listFiles(string $directory, string $extension, bool $recursive = true): array;

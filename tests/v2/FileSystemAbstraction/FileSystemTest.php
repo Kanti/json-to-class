@@ -9,6 +9,10 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
+use function Safe\unlink;
+use function Safe\rmdir;
+use function Safe\symlink;
+
 class FileSystemTest extends TestCase
 {
     #[Test]
@@ -31,12 +35,12 @@ class FileSystemTest extends TestCase
             $actual = $fileSystem->readContentIfExists($fileName);
             $this->assertEquals($content, $actual, 'File should exist and have content');
 
-            \Safe\unlink($fileName);
+            unlink($fileName);
             $actual = $fileSystem->readContentIfExists($fileName);
             $this->assertNull($actual, 'File should not exist');
         } finally {
             if (file_exists($fileName)) {
-                \Safe\unlink($fileName);
+                unlink($fileName);
             }
         }
     }
@@ -49,24 +53,27 @@ class FileSystemTest extends TestCase
             $fileSystem->writeContent(__DIR__ . '/' . __FUNCTION__ . '/test.txt', __FUNCTION__);
             $this->assertDirectoryExists(__DIR__ . '/' . __FUNCTION__, 'Directory should exist');
             $this->assertFileExists(__DIR__ . '/' . __FUNCTION__ . '/test.txt', 'File should exist');
-            \Safe\unlink(__DIR__ . '/' . __FUNCTION__ . '/test.txt');
-            \Safe\rmdir(__DIR__ . '/' . __FUNCTION__);
-            \Safe\symlink(__FILE__, __DIR__ . '/' . __FUNCTION__);
+            unlink(__DIR__ . '/' . __FUNCTION__ . '/test.txt');
+            rmdir(__DIR__ . '/' . __FUNCTION__);
+            symlink(__FILE__, __DIR__ . '/' . __FUNCTION__);
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('Directory "' . __DIR__ . '/' . __FUNCTION__ . '" was not created');
             $fileSystem->writeContent(__DIR__ . '/' . __FUNCTION__ . '/test.txt', __FUNCTION__);
         } finally {
             if (file_exists(__DIR__ . '/' . __FUNCTION__ . '/test.txt')) {
-                \Safe\unlink(__DIR__ . '/' . __FUNCTION__ . '/test.txt');
+                unlink(__DIR__ . '/' . __FUNCTION__ . '/test.txt');
             }
+
             if (file_exists(__DIR__ . '/' . __FUNCTION__)) {
-                \Safe\unlink(__DIR__ . '/' . __FUNCTION__);
+                unlink(__DIR__ . '/' . __FUNCTION__);
             }
+
             if (is_link(__DIR__ . '/' . __FUNCTION__)) {
-                \Safe\unlink(__DIR__ . '/' . __FUNCTION__);
+                unlink(__DIR__ . '/' . __FUNCTION__);
             }
+
             if (is_dir(__DIR__ . '/' . __FUNCTION__)) {
-                \Safe\rmdir(__DIR__ . '/' . __FUNCTION__);
+                rmdir(__DIR__ . '/' . __FUNCTION__);
             }
         }
     }

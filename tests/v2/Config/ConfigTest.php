@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\v2\Config;
 
+use Generator;
 use Kanti\JsonToClass\v2\Config\Config;
 use PHPUnit\Framework\Attributes\BackupGlobals;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -24,11 +25,12 @@ class ConfigTest extends TestCase
         foreach ($envs as $env => $value) {
             putenv($env . '=' . $value);
         }
+
         $config = new Config();
         $this->assertEquals($expected, $config->shouldCreateClasses());
     }
 
-    public static function dataProvider(): \Generator
+    public static function dataProvider(): Generator
     {
         yield 'JSON_TO_CLASS_CREATE=no' => [
             'envs' => [

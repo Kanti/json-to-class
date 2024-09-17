@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\v2\Schema;
 
-use Nette\PhpGenerator\Helpers;
+use InvalidArgumentException;
+use Kanti\JsonToClass\v2\Helpers\StringHelpers;
 
 final class NamedSchema
 {
@@ -22,16 +23,14 @@ final class NamedSchema
     public static function fromSchema(string $className, Schema $schema): NamedSchema
     {
         if (!str_contains($className, '\\')) {
-            throw new \InvalidArgumentException('Class name must contain namespace');
+            throw new InvalidArgumentException('Class name must contain namespace');
         }
+
         $properties = $schema->properties === null ? null : [];
         foreach ($schema->properties ?? [] as $property => $propertySchema) {
-            $className2 = ucfirst($property);
-            if (Helpers::Keywords[strtolower($property)] ?? false) {
-                $className2 = '_' . $className2;
-            }
-            $properties[$property] = self::fromSchema($className . '\\' . $className2, $propertySchema);
+            $properties[$property] = self::fromSchema(StringHelpers::getChildClass($className, (string)$property), $propertySchema);
         }
+
         return new NamedSchema(
             $className,
             $schema->canBeMissing,
@@ -46,12 +45,15 @@ final class NamedSchema
         if ($this->basicTypes) {
             return false;
         }
+
         if ($this->properties === null) {
             return false;
         }
+
         if ($this->canBeMissing) {
             return false;
         }
+
         return (bool)$this->listElement;
     }
 }

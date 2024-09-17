@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Transformer;
 
+use ReflectionClass;
+use ReflectionException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
@@ -22,18 +24,18 @@ final class Transformer implements LoggerAwareInterface
 
     /**
      * @param class-string $classString
-     * @param array $data
      * @return object|string|null
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function transform(string $classString, array $data): object
     {
-        $class = new \ReflectionClass($classString);
+        $class = new ReflectionClass($classString);
         $params = $class->getConstructor()->getParameters();
         $args = [];
         foreach ($params as $param) {
             $args[] = $this->transformParam($param, $data);
         }
+
         return $class->newInstanceArgs($args);
     }
 

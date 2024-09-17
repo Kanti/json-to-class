@@ -37,7 +37,6 @@ final class JsonToClassContainer implements ContainerInterface
 
     /**
      * @param class-string $id
-     * @return bool
      */
     public function has(string $id): bool
     {
@@ -46,6 +45,7 @@ final class JsonToClassContainer implements ContainerInterface
         } catch (ContainerException) {
             return false;
         }
+
         return true;
     }
 
@@ -71,14 +71,20 @@ final class JsonToClassContainer implements ContainerInterface
             return $this->fromFactory($this->factories[$className], $className);
         }
 
+        if (str_ends_with($className, 'Interface')) {
+            $className = str_replace('Interface', '', $className);
+        }
+
         if (!class_exists($className)) {
             throw new ContainerException('Class ' . $className . ' not found');
         }
+
         $reflection = new ReflectionClass($className);
         // no constructor no injection
         if (!$reflection->hasMethod('__construct')) {
             return new $className();
         }
+
         $constructor = $reflection->getMethod('__construct');
         $parameters = [];
         foreach ($constructor->getParameters() as $parameter) {
@@ -86,34 +92,36 @@ final class JsonToClassContainer implements ContainerInterface
             if (!$childClassName) {
                 throw new ContainerException('Parameter ' . $className . '->' . $parameter->getName() . ' has no type');
             }
-            if (str_ends_with($childClassName, 'Interface')) {
-                $childClassName = str_replace('Interface', '', $childClassName);
-            }
 
-            if (!class_exists($childClassName)) {
+            if (!str_contains((string) $childClassName, '\\')) {
                 if ($parameter->isDefaultValueAvailable()) {
                     continue;
                 }
+
                 throw new ContainerException('Parameter ' . $className . '->' . $parameter->getName() . ' type not possible ' . $childClassName);
             }
 
             $parameters[$parameter->getName()] = $this->get($childClassName);
         }
+
         return new $className(...$parameters);
     }
 
-    protected function fromFactory(object|callable $factory, string $className)
+    private function fromFactory(object|callable $factory, string $className): object
     {
         if (is_a($factory, $className, false)) {
             return $factory;
         }
+
         if (!is_callable($factory)) {
             throw new ContainerException('Factory for ' . $className . ' is not callable or instance of ' . $className);
         }
+
         $result ??= $factory();
         if (!$result instanceof $className) {
-            throw new ContainerException('Factory for ' . $className . ' dose not produce instance of ' . $className . ' but ' . is_object($result) ? get_class($result) : gettype($result));
+            throw new ContainerException('Factory for ' . $className . ' dose not produce instance of ' . $className . ' but ' . is_object($result) ? $result::class : gettype($result));
         }
+
         return $result;
     }
 }

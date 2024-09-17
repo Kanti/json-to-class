@@ -98,6 +98,7 @@ final class ProductionConverter implements Converter
             assert($newInstance instanceof Types);
             return $newInstance->types;
         }
+
         dd($attribute);
     }
 
@@ -108,11 +109,14 @@ final class ProductionConverter implements Converter
             if (!is_array($type)) {
                 continue;
             }
+
             if (count($type) > 1) {
                 throw new RuntimeException('Only one type is allowed in child types ' . json_encode($type));
             }
+
             $result[] = $type[0];
         }
+
         return $result;
     }
 
@@ -126,17 +130,21 @@ final class ProductionConverter implements Converter
                     return $this->convert($target, $data, $transformer);
                 }
             }
+
             throw new RuntimeException('No matching type found');
         }
+
         if ($sourceType === 'list') {
             return array_map(
                 fn(mixed $item): mixed => $this->transformType($item, $targetChildTypes, $transformer),
                 $data,
             );
         }
+
         if (in_array($sourceType, $targetTypes, true)) {
             return $data;
         }
+
         throw new RuntimeException('No matching type found');
     }
 }

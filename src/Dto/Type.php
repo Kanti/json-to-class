@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Dto;
 
+use InvalidArgumentException;
+
 final readonly class Type
 {
     /**
      * name can be empty string if the type is an empty array{}
-     * @param string $name
-     * @param int $depth
      */
     public function __construct(
         public string $name,
@@ -22,8 +22,9 @@ final readonly class Type
         $depth = 0;
         while (is_array($type)) {
             if (count($type) > 1) {
-                throw new \InvalidArgumentException('Only one type is allowed');
+                throw new InvalidArgumentException('Only one type is allowed');
             }
+
             $type = $type[0] ?? '';
             $depth++;
         }

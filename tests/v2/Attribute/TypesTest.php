@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\v2\Attribute;
 
+use Generator;
 use Kanti\JsonToClass\v2\Attribute\Types;
 use Kanti\JsonToClass\v2\Dto\Type;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -19,7 +20,7 @@ class TypesTest extends TestCase
         $this->assertEquals($expected, (new Types(...$input))->types);
     }
 
-    public static function dataProvider(): \Generator
+    public static function dataProvider(): Generator
     {
         yield 'string' => [
             'input' => ['string'],

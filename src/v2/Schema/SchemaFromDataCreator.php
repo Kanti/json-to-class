@@ -18,7 +18,7 @@ final class SchemaFromDataCreator implements SchemaFromDataCreatorInterface
     }
 
     /**
-     * @param null|bool|int|float|string|array<array-key, mixed> $data
+     * @param null|bool|int|float|string|array<array-key, mixed>|stdClass $data
      */
     private function generateInternal(null|bool|int|float|string|array|stdClass $data, Schema $currentSchema): void
     {
@@ -35,6 +35,7 @@ final class SchemaFromDataCreator implements SchemaFromDataCreatorInterface
         } else {
             $currentSchema->properties ??= [];
         }
+
         foreach ($data as $property => $value) {
             if ($isList) {
                 $this->generateInternal($value, $currentSchema->listElement);
@@ -53,12 +54,14 @@ final class SchemaFromDataCreator implements SchemaFromDataCreatorInterface
             // skip if it was empty
             return;
         }
+
         // canBeMissing implementation:
         foreach (array_keys((array)$data) as $property) {
             if (!array_key_exists($property, $beforeThisRun)) {
                 // was missing in a previous iteration so it is sometimes unset:
                 $currentSchema->properties[$property] ??= new Schema();
                 $currentSchema->properties[$property]->canBeMissing = true;
+                $currentSchema->properties[$property]->basicTypes['null'] = true;
             }
         }
 
@@ -66,6 +69,7 @@ final class SchemaFromDataCreator implements SchemaFromDataCreatorInterface
             if (!array_key_exists($property, (array)$data)) {
                 // was missing in current iteration so it is sometimes unset
                 $currentSchema->properties[$property]->canBeMissing = true;
+                $currentSchema->properties[$property]->basicTypes['null'] = true;
             }
         }
     }

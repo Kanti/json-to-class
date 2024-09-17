@@ -8,6 +8,10 @@ use PHPUnit\Framework\Assert;
 use Spatie\Snapshots\Driver;
 use Spatie\Snapshots\Exceptions\CantBeSerialized;
 
+use function Safe\file_put_contents;
+use function Safe\shell_exec;
+use function Safe\unlink;
+
 final class PhpFilesDriver implements Driver
 {
     public function extension(): string
@@ -38,7 +42,7 @@ final class PhpFilesDriver implements Driver
 
         $result .= '````' . PHP_EOL;
 
-        foreach ($data->phpCode as $className => $value) {
+        foreach ($data->phpClasses as $className => $value) {
             Assert::assertIsString($className);
             Assert::assertIsString($value);
 
@@ -58,20 +62,19 @@ final class PhpFilesDriver implements Driver
 
     private function lintPhpFile(string $value, string $className): void
     {
-        if (strpos($value, '<?php') !== 0) {
+        if (!str_starts_with($value, '<?php')) {
             throw new CantBeSerialized('Php code must start with "<?php"');
         }
 
         try {
             $filename = 'test' . time() . '.php';
-            \Safe\file_put_contents($filename, $value);
-            $output = \Safe\shell_exec('php -l ' . $filename . ' 2>&1');
+            file_put_contents($filename, $value);
+            $output = shell_exec('php -l ' . $filename . ' 2>&1');
             Assert::assertStringContainsString('No syntax errors detected', $output, '?? Invalid php code detected for class: ' . $className . PHP_EOL . $value);
         } finally {
             if (file_exists($filename)) {
-                \Safe\unlink($filename);
+                unlink($filename);
             }
         }
     }
-
 }

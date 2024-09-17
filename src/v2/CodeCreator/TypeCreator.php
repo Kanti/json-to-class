@@ -19,16 +19,16 @@ final class TypeCreator
         foreach (array_keys($property->basicTypes) as $type) {
             $types[] = (string)$type;
         }
+
         if ($property->properties !== null) {
             $namespace->addUse($property->className, Helpers::extractShortName($property->className));
             $types[] = $property->className;
         }
+
         if ($property->listElement) {
             $types[] = 'array';
         }
-        if ($property->canBeMissing) {
-            $types[] = 'null';
-        }
+
         $types = $this->sortTypes($types);
 
         return implode('|', $types);
@@ -52,10 +52,12 @@ final class TypeCreator
             if (!$this->isListType($a)) {
                 $aInt = $ranking[$a] ?? 1;
             }
+
             $bInt = 0;
             if (!$this->isListType($b)) {
                 $bInt = $ranking[$b] ?? 1;
             }
+
             return $aInt <=> $bInt;
         });
         return $types;
@@ -66,17 +68,16 @@ final class TypeCreator
         if (is_array($value)) {
             return true;
         }
+
         if ($value === 'array{}') {
             return true;
         }
+
         if (str_starts_with($value, 'list<')) {
             return true;
         }
-        if (str_starts_with($value, '[')) {
-            return true;
-        }
 
-        return false;
+        return str_starts_with($value, '[');
     }
 
     public function getDocBlockType(NamedSchema $property, PhpNamespace $namespace): ?string
@@ -85,10 +86,8 @@ final class TypeCreator
             // if the first level does not have a list element, we don't need a doc block for this property
             return null;
         }
+
         $types = $this->getDocBlockTypes($property, $namespace);
-        if ($property->canBeMissing) {
-            $types[] = 'null';
-        }
         return implode('|', $types);
     }
 
@@ -98,10 +97,12 @@ final class TypeCreator
         foreach (array_keys($property->basicTypes) as $type) {
             $types[] = (string)$type;
         }
+
         if ($property->properties !== null) {
             $namespace->addUse($property->className, Helpers::extractShortName($property->className));
             $types[] = $namespace->simplifyName($property->className);
         }
+
         if ($property->listElement) {
             $childType = $this->getDocBlockTypes($property->listElement, $namespace);
             if ($childType) {
@@ -110,6 +111,7 @@ final class TypeCreator
                 $types[] = 'array{}';
             }
         }
+
         return $this->sortTypes($types);
     }
 
@@ -118,10 +120,8 @@ final class TypeCreator
         if (!$property->listElement) {
             return null;
         }
+
         $types = $this->getAttributeTypes($property, $namespace);
-        if ($property->canBeMissing) {
-            $types[] = null;
-        }
         $namespace->addUse(Types::class, Helpers::extractShortName(Types::class));
         return new Attribute(Types::class, $types);
     }
@@ -135,19 +135,23 @@ final class TypeCreator
         foreach (array_keys($property->basicTypes) as $type) {
             $types[] = (string)$type;
         }
+
         if ($property->properties !== null) {
             $namespace->addUse($property->className, Helpers::extractShortName($property->className));
             $types[] = new Literal($namespace->simplifyName($property->className) . '::class');
         }
+
         if ($property->listElement) {
             $childTypes = $this->getAttributeTypes($property->listElement, $namespace);
             foreach ($childTypes as $childType) {
                 $types[] = [$childType];
             }
+
             if (!$childTypes) {
                 $types[] = [];
             }
         }
+
         return $this->sortTypes($types);
     }
 }

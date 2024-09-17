@@ -1,9 +1,11 @@
-# Tested "topLevel canBeMissing Data"
+# Tested "canBeMissing Data"
 ````json
 {
     "schema": {
         "canBeMissing": true,
-        "basicTypes": [],
+        "basicTypes": {
+            "null": true
+        },
         "listElement": null,
         "properties": {
             "int": {

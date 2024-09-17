@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\v2\CodeCreator;
 
+use Kanti\GeneratedTest\Data;
 use Generator;
 use Kanti\JsonToClass\v2\Attribute\Types;
 use Kanti\JsonToClass\v2\CodeCreator\TypeCreator;
@@ -76,7 +77,7 @@ class TypeCreatorTest extends TestCase
             ],
         ];
         yield 'list<class>|class' => [
-            'schema' => new Schema(listElement: $classSchema, properties: ['empty' => new Schema(canBeMissing: true)]),
+            'schema' => new Schema(listElement: $classSchema, properties: ['empty' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
             'expectedPhpType' => 'Kanti\GeneratedTest\Data|array',
             'expectedDocBlockType' => 'list<L>|Data',
             'expectedAttribute' => new Attribute(Types::class, [
@@ -110,10 +111,11 @@ class TypeCreatorTest extends TestCase
                 'L' => 'Kanti\GeneratedTest\Data\L\L\L',
             ],
         ];
-        $classSchema = clone $classSchema;
-        $classSchema->canBeMissing = true;
+        $missingClassSchema = clone $classSchema;
+        $missingClassSchema->canBeMissing = true;
+        $missingClassSchema->basicTypes['null'] = true;
         yield 'canBeMissing Data' => [
-            'schema' => $classSchema,
+            'schema' => $missingClassSchema,
             'expectedPhpType' => 'Kanti\GeneratedTest\Data|null',
         ];
         yield 'canBeMissing list<class>' => [
@@ -163,54 +165,54 @@ class TypeCreatorTest extends TestCase
             ],
         ];
         yield 'topLevel canBeMissing Data' => [
-            'schema' => $classSchema,
+            'schema' => $missingClassSchema,
             'expectedPhpType' => 'Kanti\GeneratedTest\Data|null',
         ];
         yield 'topLevel canBeMissing list<class>' => [
-            'schema' => new Schema(canBeMissing: true, listElement: $classSchema),
+            'schema' => new Schema(canBeMissing: true, basicTypes: ['null' => true], listElement: $classSchema),
             'expectedPhpType' => 'array|null',
             'expectedDocBlockType' => 'list<L>|null',
             'expectedAttribute' => new Attribute(Types::class, [
                 [new Literal('L::class')],
-                null,
+                'null',
             ]),
             'expectedUses' => [
                 'L' => 'Kanti\GeneratedTest\Data\L',
             ],
         ];
         yield 'topLevel canBeMissing list<class>|class|null' => [
-            'schema' => new Schema(canBeMissing: true, listElement: $classSchema, properties: []),
+            'schema' => new Schema(canBeMissing: true, basicTypes: ['null' => true], listElement: $classSchema, properties: []),
             'expectedPhpType' => 'Kanti\GeneratedTest\Data|array|null',
             'expectedDocBlockType' => 'list<L>|Data|null',
             'expectedAttribute' => new Attribute(Types::class, [
                 [new Literal('L::class')],
                 new Literal('Data::class'),
-                null,
+                'null',
             ]),
             'expectedUses' => [
                 'L' => 'Kanti\GeneratedTest\Data\L',
             ],
         ];
         yield 'topLevel canBeMissing list<list<list<class>>>' => [
-            'schema' => new Schema(canBeMissing: true, listElement: new Schema(listElement: new Schema(listElement: $classSchema))),
+            'schema' => new Schema(canBeMissing: true, basicTypes: ['null' => true], listElement: new Schema(listElement: new Schema(listElement: $classSchema))),
             'expectedPhpType' => 'array|null',
             'expectedDocBlockType' => 'list<list<list<L>>>|null',
             'expectedAttribute' => new Attribute(Types::class, [
                 [[[new Literal('L::class')]]],
-                null,
+                'null',
             ]),
             'expectedUses' => [
                 'L' => 'Kanti\GeneratedTest\Data\L\L\L',
             ],
         ];
         yield 'topLevel canBeMissing list<list<list<class>>|string>' => [
-            'schema' => new Schema(canBeMissing: true, listElement: new Schema(basicTypes: ['string' => true], listElement: new Schema(listElement: $classSchema))),
+            'schema' => new Schema(canBeMissing: true, basicTypes: ['null' => true], listElement: new Schema(basicTypes: ['string' => true], listElement: new Schema(listElement: $classSchema))),
             'expectedPhpType' => 'array|null',
             'expectedDocBlockType' => 'list<list<list<L>>|string>|null',
             'expectedAttribute' => new Attribute(Types::class, [
                 [[[new Literal('L::class')]]],
                 ['string'],
-                null,
+                'null',
             ]),
             'expectedUses' => [
                 'L' => 'Kanti\GeneratedTest\Data\L\L\L',
@@ -224,8 +226,8 @@ class TypeCreatorTest extends TestCase
     public function getPhpType(Schema $schema, string $expectedPhpType, array $expectedUses = [], ...$_): void
     {
         $typeCreator = new TypeCreator();
-        $namespace = new PhpNamespace(Helpers::extractNamespace(\Kanti\GeneratedTest\Data::class));
-        $result = $typeCreator->getPhpType(NamedSchema::fromSchema(\Kanti\GeneratedTest\Data::class, $schema), $namespace);
+        $namespace = new PhpNamespace(Helpers::extractNamespace(Data::class));
+        $result = $typeCreator->getPhpType(NamedSchema::fromSchema(Data::class, $schema), $namespace);
         $this->assertEquals($expectedPhpType, $result);
         $this->assertEquals([], $namespace->getUses());
     }
@@ -236,8 +238,8 @@ class TypeCreatorTest extends TestCase
     public function getDocBlockType(Schema $schema, ?string $expectedDocBlockType = null, array $expectedUses = [], ...$_): void
     {
         $typeCreator = new TypeCreator();
-        $namespace = new PhpNamespace(Helpers::extractNamespace(\Kanti\GeneratedTest\Data::class));
-        $result = $typeCreator->getDocBlockType(NamedSchema::fromSchema(\Kanti\GeneratedTest\Data::class, $schema), $namespace);
+        $namespace = new PhpNamespace(Helpers::extractNamespace(Data::class));
+        $result = $typeCreator->getDocBlockType(NamedSchema::fromSchema(Data::class, $schema), $namespace);
         $this->assertEquals($expectedDocBlockType, $result);
         $this->assertEquals($expectedUses, $namespace->getUses());
     }
@@ -248,14 +250,15 @@ class TypeCreatorTest extends TestCase
     public function getAttribute(Schema $schema, ?Attribute $expectedAttribute = null, array $expectedUses = [], ...$_): void
     {
         $typeCreator = new TypeCreator();
-        $namespace = new PhpNamespace(Helpers::extractNamespace(\Kanti\GeneratedTest\Data::class));
-        $result = $typeCreator->getAttribute(NamedSchema::fromSchema(\Kanti\GeneratedTest\Data::class, $schema), $namespace);
+        $namespace = new PhpNamespace(Helpers::extractNamespace(Data::class));
+        $result = $typeCreator->getAttribute(NamedSchema::fromSchema(Data::class, $schema), $namespace);
         if ($expectedAttribute) {
             $this->assertNotNull($result, '🤢 Attribute is expected but not created');
             $expectedUses = [...$expectedUses, 'Types' => Types::class];
         } else {
             $this->assertNull($result, '🤨 Attribute is not expected but was created');
         }
+
         $this->assertEquals($expectedAttribute, $result);
         $this->assertEquals($expectedUses, $namespace->getUses());
     }

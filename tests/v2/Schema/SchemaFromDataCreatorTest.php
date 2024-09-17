@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\v2\Schema;
 
+use Generator;
 use Kanti\JsonToClass\v2\Schema\Schema;
 use Kanti\JsonToClass\v2\Schema\SchemaFromDataCreator;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -21,7 +22,7 @@ class SchemaFromDataCreatorTest extends TestCase
         $this->assertEquals($expectedSchema, $schemaFromDataCreator->fromData($data), 'schema from array');
     }
 
-    public static function dataProvider(): \Generator
+    public static function dataProvider(): Generator
     {
         yield '__empty' => [
             'data' => [],
@@ -109,7 +110,7 @@ class SchemaFromDataCreatorTest extends TestCase
                     properties: [
                         'mixedTypes' => new Schema(
                             canBeMissing: true,
-                            basicTypes: ['string' => true],
+                            basicTypes: ['string' => true, 'null' => true],
                             listElement: new Schema(basicTypes: ['int' => true]),
                             properties: [
                                 'name' => new Schema(basicTypes: ['string' => true]),
@@ -166,7 +167,7 @@ class SchemaFromDataCreatorTest extends TestCase
                 listElement: new Schema(
                     properties: [
                         'name' => new Schema(basicTypes: ['string' => true]),
-                        'age' => new Schema(canBeMissing: true, basicTypes: ['int' => true]),
+                        'age' => new Schema(canBeMissing: true, basicTypes: ['int' => true, 'null' => true]),
                     ],
                 ),
             ),
@@ -182,6 +183,7 @@ class SchemaFromDataCreatorTest extends TestCase
                         'name' => new Schema(basicTypes: ['string' => true]),
                         'age' => new Schema(
                             canBeMissing: true,
+                            basicTypes: ['null' => true],
                             properties: [
                                 'range' => new Schema(
                                     listElement: new Schema(basicTypes: ['int' => true]),
@@ -247,6 +249,7 @@ class SchemaFromDataCreatorTest extends TestCase
                                                 'age3' => new Schema(basicTypes: ['int' => true, 'float' => true]),
                                                 'friends3' => new Schema(
                                                     canBeMissing: true,
+                                                    basicTypes: ['null' => true],
                                                     listElement: new Schema(
                                                         properties: [
                                                             'name4' => new Schema(basicTypes: ['string' => true]),

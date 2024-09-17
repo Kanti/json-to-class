@@ -12,9 +12,13 @@ use Kanti\JsonToClass\v2\Config\Dto\OnMissingProperties;
 readonly class Config
 {
     public OnExtraProperties $onExtraProperties;
+
     public OnMissingProperties $onMissingProperties;
+
     public OnInvalidCharacterProperties $onInvalidCharacterProperties;
+
     public AppendSchema $appendSchema;
+
     /** @var RemoveOldClasses TODO implement this feature */
     public RemoveOldClasses $removeOldClasses;
 
@@ -24,22 +28,23 @@ readonly class Config
         if ($config === 'create') {
             return true;
         }
+
         if ($config === 'no') {
             return false;
         }
+
         if (getenv('IS_DDEV_PROJECT')) {
             return true;
         }
+
         if (getenv('TYPO3_CONTEXT') === 'Development/docker') {
             return true;
         }
+
         if (getenv('APP_ENV') === 'dev') {
             return true;
         }
-        if (getenv('APP_ENV') === 'local') {
-            return true;
-        }
 
-        return false;
+        return getenv('APP_ENV') === 'local';
     }
 }

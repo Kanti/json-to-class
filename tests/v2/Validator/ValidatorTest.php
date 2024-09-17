@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\v2\Validator;
 
+use Generator;
+use stdClass;
 use InvalidArgumentException;
 use Kanti\JsonToClass\v2\Config\Config;
 use Kanti\JsonToClass\v2\Config\SaneConfig;
@@ -24,13 +26,14 @@ class ValidatorTest extends TestCase
             $this->expectException(InvalidArgumentException::class);
             $this->expectExceptionMessage($invalidMessage);
         }
+
         $validator->validateData($data, $config);
         if (!$invalidMessage) {
             $this->assertTrue(true);
         }
     }
 
-    public static function dataProvider(): \Generator
+    public static function dataProvider(): Generator
     {
         yield 'null' => [
             'data' => null,
@@ -58,7 +61,7 @@ class ValidatorTest extends TestCase
             'config' => new StrictConfig(),
         ];
         yield 'empty record' => [
-            'data' => new \stdClass(),
+            'data' => new stdClass(),
         ];
         yield 'record with valid Key' => [
             'data' => ['validKey' => 'value'],
