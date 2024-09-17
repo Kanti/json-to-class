@@ -64,5 +64,30 @@ class SchemaMergerTest extends TestCase
             new Schema(properties: ['y' => new Schema()]),
             new Schema(properties: ['x' => new Schema(), 'y' => new Schema()]),
         ];
+        yield 'a and b with same key but different types' => [
+            new Schema(properties: ['x' => new Schema(basicTypes: ['string' => true])]),
+            new Schema(properties: ['x' => new Schema(basicTypes: ['int' => true])]),
+            new Schema(properties: ['x' => new Schema(basicTypes: ['string' => true, 'int' => true])]),
+        ];
+        yield 'a canBeMissing' => [
+            new Schema(properties: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
+            new Schema(properties: ['x' => new Schema(basicTypes: ['int' => true])]),
+            new Schema(properties: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true, 'int' => true])]),
+        ];
+        yield 'b canBeMissing' => [
+            new Schema(properties: ['x' => new Schema(basicTypes: ['int' => true])]),
+            new Schema(properties: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
+            new Schema(properties: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true, 'int' => true])]),
+        ];
+        yield 'a and b canBeMissing' => [
+            new Schema(properties: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
+            new Schema(properties: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
+            new Schema(properties: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
+        ];
+        yield 'a has properties b is a list' => [
+            new Schema(properties: ['x' => new Schema()]),
+            new Schema(listElement: new Schema()),
+            new Schema(listElement: new Schema(), properties: ['x' => new Schema()]),
+        ];
     }
 }

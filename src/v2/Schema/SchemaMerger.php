@@ -27,7 +27,11 @@ final class SchemaMerger
         $result->basicTypes = $schema->basicTypes + $schemaFromClass->basicTypes;
         $result->listElement = $this->merge($schema->listElement, $schemaFromClass->listElement);
 
-        if ($schema->properties !== null || $schemaFromClass->properties !== null) {
+        if (is_array($schema->properties)) {
+            $result->properties = [];
+        }
+
+        if (is_array($schemaFromClass->properties)) {
             $result->properties = [];
         }
 

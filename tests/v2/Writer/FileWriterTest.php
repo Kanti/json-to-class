@@ -8,13 +8,20 @@ use Composer\Autoload\ClassLoader;
 use Generator;
 use Kanti\JsonToClass\Tests\v2\_helper\FakeFileSystem;
 use Kanti\JsonToClass\v2\Container\JsonToClassContainer;
+use Kanti\JsonToClass\v2\FileSystemAbstraction\ClassLocator;
 use Kanti\JsonToClass\v2\FileSystemAbstraction\FileSystemInterface;
 use Kanti\JsonToClass\v2\Writer\FileWriter;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
+#[UsesClass(JsonToClassContainer::class)]
+#[UsesClass(ClassLoader::class)]
+#[CoversClass(FileWriter::class)]
+#[CoversClass(ClassLocator::class)]
 class FileWriterTest extends TestCase
 {
     #[Test]
@@ -82,17 +89,14 @@ class FileWriterTest extends TestCase
     #[Test]
     public function classLoaderFindRealFileLocation(): void
     {
-        // TODO
-        $this->markTestSkipped('This test is not working with infection. It will delete itself because infection will manipulate something and than the file is not found anymore.');
-
         // use real class loader to find the real file location
         $container = new JsonToClassContainer([
             FileSystemInterface::class => new FakeFileSystem([__FILE__ => true], [__FILE__ => true]),
         ]);
 
         $fileWriter = $container->get(FileWriter::class);
-
-        $actual = $fileWriter->writeIfNeeded([__CLASS__ => FakeFileSystem::CONTENT]);
+        assert($fileWriter instanceof FileWriter);
+        $actual = $fileWriter->writeIfNeeded([self::class => FakeFileSystem::CONTENT]);
         $this->assertFalse($actual, 'no restart needed nothing written');
     }
 
@@ -116,22 +120,18 @@ class FileWriterTest extends TestCase
             'fileLocationsWrittenTo' => ['fake-src/Test/L/L/Sub.php' => true],
             'needsRestart' => false,
         ];
-        // TODO This test is not working with infection. It will delete itself because infection will manipulate something and than the file is not found anymore.
-        // TODO //////////////////////////////////////////////////////////////////////////////////////
-        // TODO maybe it will work if we say that this test does not cover the JsonToClassContainer???
-        // TODO //////////////////////////////////////////////////////////////////////////////////////
-//        $fileNameCurrentClass = 'fake-src/' . str_replace('Kanti/', '', str_replace('\\', '/', __CLASS__)) . '.php';
-//        yield 'no overwrite needed so no restart needed even if the class was already loaded' => [
-//            'classes' => [__CLASS__ => FakeFileSystem::CONTENT],
-//            'alreadyWrittenFiles' => [$fileNameCurrentClass => true],
-//            'fileLocationsWrittenTo' => [],
-//            'needsRestart' => false,
-//        ];
-//        yield 'overwrite needed so restart needed because the class was already loaded' => [
-//            'classes' => [__CLASS__ => FakeFileSystem::CONTENT],
-//            'alreadyWrittenFiles' => [],
-//            'fileLocationsWrittenTo' => [$fileNameCurrentClass => true],
-//            'needsRestart' => true,
-//        ];
+        $fileNameCurrentClass = 'fake-src/' . str_replace('Kanti/', '', str_replace('\\', '/', self::class)) . '.php';
+        yield 'no overwrite needed so no restart needed even if the class was already loaded' => [
+            'classes' => [self::class => FakeFileSystem::CONTENT],
+            'alreadyWrittenFiles' => [$fileNameCurrentClass => true],
+            'fileLocationsWrittenTo' => [],
+            'needsRestart' => false,
+        ];
+        yield 'overwrite needed so restart needed because the class was already loaded' => [
+            'classes' => [self::class => FakeFileSystem::CONTENT],
+            'alreadyWrittenFiles' => [],
+            'fileLocationsWrittenTo' => [$fileNameCurrentClass => true],
+            'needsRestart' => true,
+        ];
     }
 }
