@@ -8,7 +8,7 @@
     "logs": {
         "text": "test-result/infection.log",
         "html": "test-result/infection.html",
-        "github": true,
+        "github": false,
     },
     "minCoveredMsi": 100,
     "minMsi": 100,

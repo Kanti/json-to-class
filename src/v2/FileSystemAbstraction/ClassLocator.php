@@ -6,12 +6,23 @@ namespace Kanti\JsonToClass\v2\FileSystemAbstraction;
 
 use Composer\Autoload\ClassLoader;
 use Exception;
+use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Helpers;
+use Nette\PhpGenerator\PhpFile;
 
-final readonly class ClassLocator
+final readonly class ClassLocator implements ClassLocatorInterface
 {
-    public function __construct(private ClassLoader $classLoader)
+    public function __construct(
+        private ClassLoader $classLoader,
+        private FileSystemInterface $fileSystem,
+    ) {
+    }
+
+    public function getClass(string $className): ClassType
     {
+        $location = $this->getFileLocation($className);
+        $content = $this->fileSystem->readContent($location);
+        return PhpFile::fromCode($content)->getClasses()[$className] ?? throw new Exception('Class not found');
     }
 
     public function getFileLocation(string $className): string

@@ -16,6 +16,14 @@ use PHPUnit\Framework\TestCase;
 class SchemaMergerTest extends TestCase
 {
     #[Test]
+    public function exception1(): void
+    {
+        $schemaMerger = new SchemaMerger();
+        $this->expectExceptionMessage('Class names must be the same Kanti\A !== Kanti\B');
+        $schemaMerger->merge(NamedSchema::fromSchema('Kanti\A', new Schema()), NamedSchema::fromSchema('Kanti\B', new Schema()));
+    }
+
+    #[Test]
     #[DataProvider('dataProvider')]
     public function merge(?Schema $a, ?Schema $b, ?Schema $expected): void
     {

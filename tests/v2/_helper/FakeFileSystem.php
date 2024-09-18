@@ -62,9 +62,4 @@ final class FakeFileSystem implements FileSystemInterface
         $filename = realpath($filename) ?: $filename;
         return $this->alreadyWrittenFiles[$filename] ?? null;
     }
-
-    public function listFiles(string $directory, string $extension, bool $recursive = true): array
-    {
-        throw new RuntimeException('Not implemented');
-    }
 }

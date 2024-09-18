@@ -23,7 +23,7 @@ final class NamedSchema
     public static function fromSchema(string $className, Schema $schema): NamedSchema
     {
         if (!str_contains($className, '\\')) {
-            throw new InvalidArgumentException('Class name must contain namespace');
+            throw new InvalidArgumentException('Class name must contain namespace given: ' . $className);
         }
 
         $properties = $schema->properties === null ? null : [];
@@ -46,7 +46,7 @@ final class NamedSchema
             return false;
         }
 
-        if ($this->properties === null) {
+        if ($this->properties !== null) {
             return false;
         }
 

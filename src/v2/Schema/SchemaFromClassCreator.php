@@ -8,31 +8,27 @@ use Exception;
 use Kanti\JsonToClass\v2\Attribute\Types;
 use Kanti\JsonToClass\v2\Dto\Type;
 use Kanti\JsonToClass\v2\FileSystemAbstraction\ClassLocator;
-use Kanti\JsonToClass\v2\FileSystemAbstraction\FileSystemInterface;
 use Kanti\JsonToClass\v2\Helpers\StringHelpers;
 use Nette\PhpGenerator\ClassType;
-use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\PromotedParameter;
-use Throwable;
 
 final readonly class SchemaFromClassCreator
 {
     public function __construct(
         private ClassLocator $classLocator,
-        private FileSystemInterface $fileSystem,
     ) {
     }
 
     public function fromClasses(string $className): NamedSchema
     {
         $schema = new NamedSchema($className);
-        $this->loopSchema($schema);
+        $class = $this->classLocator->getClass($schema->className);
+        $this->loopSchema($schema, $class);
         return $schema;
     }
 
-    private function loopSchema(NamedSchema $schema): void
+    public function loopSchema(NamedSchema $schema, ClassType $class): void
     {
-        $class = $this->getClass($schema->className);
         $schema->properties ??= [];
 
         foreach ($this->getPromotedParameters($class, $schema->className) as $parameter) {
@@ -42,7 +38,7 @@ final readonly class SchemaFromClassCreator
             foreach ($types as $type) {
                 $schema->properties[$propertyName] ??= new NamedSchema($childClassName);
 
-                $this->setType($type, $schema->properties[$propertyName]);
+                $this->addType($type, $schema->properties[$propertyName]);
 
                 if ($parameter->hasDefaultValue()) {
                     $schema->properties[$propertyName]->canBeMissing = true;
@@ -51,17 +47,10 @@ final readonly class SchemaFromClassCreator
         }
     }
 
-    private function getClass(string $className): ClassType
-    {
-        $location = $this->classLocator->getFileLocation($className);
-        $content = $this->fileSystem->readContent($location);
-        return PhpFile::fromCode($content)->getClasses()[$className] ?? throw new Exception('Class not found');
-    }
-
     /**
      * @return list<PromotedParameter>
      */
-    public function getPromotedParameters(ClassType $class, string $className): array
+    private function getPromotedParameters(ClassType $class, string $className): array
     {
         $result = [];
         foreach ($class->getMethod('__construct')->getParameters() as $parameter) {
@@ -104,28 +93,21 @@ final readonly class SchemaFromClassCreator
                 return $types;
             }
 
-            if ($type->isSimple()) {
-                return [Type::from($type->getSingleName())];
-            }
-
-            if ($parameter->hasDefaultValue()) {
-                return [Type::from(gettype($parameter->getDefaultValue()))];
-            }
-
-            throw new Exception('Can not convert type ' . $type);
+            return [Type::from($type->getSingleName())];
         } catch (Exception $exception) {
             throw new Exception('Error in ' . $className . '->' . $parameter->getName() . ': ' . $exception->getMessage(), $exception->getCode(), previous: $exception);
         }
     }
 
-    private function setType(Type $type, NamedSchema $schema): void
+    private function addType(Type $type, NamedSchema $schema): void
     {
         if ($type->isClass()) {
             if ($schema->className !== $type->name) {
                 throw new Exception('Class name mismatch ' . $schema->className . ' !== ' . $type->name . ' this must be a BUG please report it');
             }
 
-            $this->loopSchema($schema);
+            $class = $this->classLocator->getClass($schema->className);
+            $this->loopSchema($schema, $class);
             return;
         }
 
@@ -139,12 +121,7 @@ final readonly class SchemaFromClassCreator
             return;
         }
 
-        if ($type->isArray()) {
-            $schema->listElement ??= new NamedSchema($schema->className . '\\L');
-            $this->setType($type->unpackOnce(), $schema->listElement);
-            return;
-        }
-
-        throw new Exception('Unknown type ' . json_encode($type));
+        $schema->listElement ??= new NamedSchema($schema->className . '\\L');
+        $this->addType($type->unpackOnce(), $schema->listElement);
     }
 }

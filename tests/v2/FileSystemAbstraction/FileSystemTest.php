@@ -9,9 +9,9 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
-use function Safe\unlink;
 use function Safe\rmdir;
 use function Safe\symlink;
+use function Safe\unlink;
 
 class FileSystemTest extends TestCase
 {
@@ -32,12 +32,19 @@ class FileSystemTest extends TestCase
             $fileSystem->requireFile($fileName);
             $this->assertTrue(function_exists($functionName), 'Function should exist');
 
+            $actual = $fileSystem->readContent($fileName);
+            $this->assertEquals($content, $actual, 'File should exist and have content');
+
             $actual = $fileSystem->readContentIfExists($fileName);
             $this->assertEquals($content, $actual, 'File should exist and have content');
 
             unlink($fileName);
             $actual = $fileSystem->readContentIfExists($fileName);
             $this->assertNull($actual, 'File should not exist');
+
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessageMatches('/File does not exist: .*/');
+            $fileSystem->readContent($fileName);
         } finally {
             if (file_exists($fileName)) {
                 unlink($fileName);
