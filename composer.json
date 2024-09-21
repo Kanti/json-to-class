@@ -14,10 +14,10 @@
   },
   "require-dev": {
     "infection/infection": "^0.29.6",
-    "phpunit/phpunit": "^11.3.5",
+    "phpunit/phpunit": "^11.3.6",
     "pluswerk/grumphp-config": "^7.1",
     "spatie/phpunit-snapshot-assertions": "^5.1.6",
-    "symfony/var-dumper": "^7.1.4"
+    "symfony/var-dumper": "^7.1.5"
   },
   "autoload": {
     "psr-4": {
@@ -26,8 +26,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Kanti\\JsonToClass\\Tests\\": "tests/",
-      "Kanti\\JsonToClass\\Tests\\v2\\": "tests/v2/"
+      "Kanti\\JsonToClass\\Tests\\": "tests/"
     }
   },
   "config": {

@@ -15,7 +15,7 @@ use Kanti\JsonToClass\Dto\Type;
  *   public Property|array|string|float|int|bool|null $property = null,
  * ) {}
  */
-#[Attribute(Attribute::TARGET_PROPERTY)]
+#[Attribute(Attribute::TARGET_PARAMETER)]
 final readonly class Types
 {
     /**

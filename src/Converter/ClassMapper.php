@@ -1,0 +1,71 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Kanti\JsonToClass\Converter;
+
+use InvalidArgumentException;
+use Kanti\JsonToClass\Config\Config;
+use Kanti\JsonToClass\Dto\Type;
+use ReflectionClass;
+use stdClass;
+
+final class ClassMapper
+{
+    public function map(string $className, array|stdClass $data, Config $config, string $path = ''): object
+    {
+        if (!class_exists($className)) {
+            throw new InvalidArgumentException(sprintf('Class %s does not exist %s', $className, $path));
+        }
+
+        $reflectionClass = new ReflectionClass($className);
+        $constructor = $reflectionClass->getConstructor();
+        if (!$constructor) {
+            throw new InvalidArgumentException(sprintf('Class %s does not have a constructor, but it is required %s', $className, $path));
+        }
+
+        $constructorParameters = $constructor->getParameters();
+        $args = [];
+        foreach ($constructorParameters as $parameter) {
+            $possibleTypes = PossibleConvertTargets::fromReflectionType($parameter);
+
+            $parameterName = $parameter->getName();
+            if (!array_key_exists($parameterName, $data)) {
+                if ($parameter->isDefaultValueAvailable()) {
+                    continue;
+                }
+
+                throw new InvalidArgumentException(sprintf('Parameter %s is missing in data %s', $parameterName, $path));
+            }
+
+            $args[$parameterName] = $this->convertType($possibleTypes, $data[$parameterName] ?? null, $config, $path . '.' . $parameterName);
+        }
+
+        return new $className(...$args);
+    }
+
+    private function convertType(PossibleConvertTargets $possibleTypes, mixed $param, Config $config, string $path): mixed
+    {
+        $sourceType = Type::fromData($param);
+
+        $type = $possibleTypes->getMatch($sourceType);
+        if (!$type) {
+            throw new TypesDoNotMatchException($possibleTypes, $sourceType, $path);
+        }
+
+        if ($type->isBasicType()) {
+            return $param;
+        }
+
+        if ($type->isArray()) {
+            $result = [];
+            foreach ($param as $key => $value) {
+                $result[$key] = $this->convertType($possibleTypes->unpackOnce(), $value, $config, $path . '.' . $key);
+            }
+
+            return $result;
+        }
+
+        return $this->map($type->name, $param, new Config(), $path);
+    }
+}
