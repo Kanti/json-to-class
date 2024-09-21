@@ -23,6 +23,7 @@ final readonly class Converter
     public function __construct(
         private Validator $validator,
         private ClassCreatorInterface $classCreator,
+        private ClassMapper $classMapper,
     ) {
     }
 
@@ -52,24 +53,6 @@ final readonly class Converter
             $this->classCreator->createClasses($className, $data, $config);
         }
 
-        return $this->convertToClass($className, $data, $config);
-    }
-
-    /**
-     * @template T of object
-     * @param class-string<T> $className
-     * @param array<string, mixed>|stdClass<mixed> $data
-     * @phpstan-param array<mixed>|stdClass<mixed> $data
-     *
-     * @return T
-     */
-    private function convertToClass(string $className, array|stdClass $data, Config $config): object
-    {
-        // TODO
-        if ($config) {
-            return new $className();
-        }
-
-        return new $className(...$data);
+        return $this->classMapper->map($className, $data, $config);
     }
 }

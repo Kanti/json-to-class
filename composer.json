@@ -26,7 +26,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Kanti\\JsonToClass\\Tests\\": "tests/"
+      "Kanti\\JsonToClass\\Tests\\": "tests/",
+      "Kanti\\JsonToClass\\Tests\\v2\\": "tests/v2/"
     }
   },
   "config": {
