@@ -28,14 +28,12 @@ class FromSchemaToClassAndBackTest extends TestCase
     #[Test]
     #[TestDox('CodeCreator->createFiles and SchemaFromClassCreator->fromClasses')]
     #[DataProviderExternal(TypeCreatorTest::class, 'dataProvider')]
-    public function test(Schema $schema, ...$_): void
+    public function test(Schema $schema, mixed ...$_): void
     {
 
         $container = new JsonToClassContainer();
         $wrappedSchema = new Schema(properties: ['a' => $schema]);
-        $codeCreator = $container->get(CodeCreator::class);
-        assert($codeCreator instanceof CodeCreator);
-        $actualFiles = $codeCreator->createFiles(NamedSchema::fromSchema(Data::class, $wrappedSchema));
+        $actualFiles = $container->get(CodeCreator::class)->createFiles(NamedSchema::fromSchema(Data::class, $wrappedSchema));
 
 
         $actual = new PhpFilesDto($actualFiles, $this->dataName(), $this->providedData());
@@ -58,9 +56,7 @@ class FromSchemaToClassAndBackTest extends TestCase
             FileSystemInterface::class => new FakeFileSystem($filesWithFilenameIndex),
         ]);
         $namedWrappedSchema = NamedSchema::fromSchema(Data::class, $wrappedSchema);
-        $schemaFromClassCreator = $container->get(SchemaFromClassCreator::class);
-        assert($schemaFromClassCreator instanceof SchemaFromClassCreator);
-        $actualReadSchema = $schemaFromClassCreator->fromClasses(Data::class);
+        $actualReadSchema = $container->get(SchemaFromClassCreator::class)->fromClasses(Data::class);
         $this->assertEquals($namedWrappedSchema, $actualReadSchema);
     }
 }

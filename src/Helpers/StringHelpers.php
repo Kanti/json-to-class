@@ -16,7 +16,11 @@ final class StringHelpers
         return new $className(...array_map(self::unpackLiterals(...), $attribute->getArguments()));
     }
 
-    public static function unpackLiterals(Literal|array|string $argument): string|array
+    /**
+     * @param list< list<mixed>|Literal|string >|Literal|string $argument
+     * @return string|list< string|list<string> >
+     */
+    private static function unpackLiterals(Literal|array|string $argument): string|array
     {
         if (is_array($argument)) {
             return array_map(self::unpackLiterals(...), $argument);

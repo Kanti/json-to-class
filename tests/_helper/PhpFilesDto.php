@@ -8,11 +8,12 @@ final class PhpFilesDto
 {
     /**
      * @param array<string, string> $phpClasses
+     * @param array<mixed> $providedTestData
      */
     public function __construct(
         public array $phpClasses,
         public int|string $dataName,
-        public array $providedData,
+        public array $providedTestData,
     ) {
     }
 }

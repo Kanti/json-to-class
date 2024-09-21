@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\Schema;
 
-use Kanti\JsonToClass\Schema\SchemaMerger;
 use Generator;
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Kanti\JsonToClass\Schema\Schema;
+use Kanti\JsonToClass\Schema\SchemaMerger;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

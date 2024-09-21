@@ -20,6 +20,9 @@ final readonly class CodeCreator
     ) {
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function createFiles(NamedSchema $schema): array
     {
         if ($schema->basicTypes) {
@@ -29,6 +32,9 @@ final readonly class CodeCreator
         return $this->createFilesLoop($schema, $schema->className);
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function createFilesLoop(NamedSchema $schema, string $rootClassName): array
     {
         $resultingClasses = [];
@@ -97,7 +103,7 @@ final readonly class CodeCreator
         $resultingClasses[$schema->className] = $this->printer->printFile($file);
 
         ksort($resultingClasses);
-        uksort($resultingClasses, fn($a, $b): int => strlen((string) $a) <=> strlen((string) $b));
+        uksort($resultingClasses, fn($a, $b): int => strlen($a) <=> strlen($b));
         return $resultingClasses;
     }
 }

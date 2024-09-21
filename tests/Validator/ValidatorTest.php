@@ -25,12 +25,11 @@ class ValidatorTest extends TestCase
         if ($invalidMessage) {
             $this->expectException(InvalidArgumentException::class);
             $this->expectExceptionMessage($invalidMessage);
+        } else {
+            $this->expectNotToPerformAssertions();
         }
 
         $validator->validateData($data, $config);
-        if (!$invalidMessage) {
-            $this->assertTrue(true);
-        }
     }
 
     public static function dataProvider(): Generator

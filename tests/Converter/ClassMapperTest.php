@@ -17,6 +17,9 @@ use stdClass;
 
 class ClassMapperTest extends TestCase
 {
+    /**
+     * @param array<mixed>|stdClass $data
+     */
     #[Test]
     #[DataProvider('dataProvider')]
     public function map(string $className, array|stdClass $data, object $expected, Config $config = new SaneConfig()): void

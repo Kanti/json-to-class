@@ -10,13 +10,15 @@ use RuntimeException;
 use function PHPUnit\Framework\assertArrayHasKey;
 use function PHPUnit\Framework\assertEquals;
 
-final class FakeFileSystem implements FileSystemInterface
+final readonly class FakeFileSystem implements FileSystemInterface
 {
     public const CONTENT = 'Content';
 
-    private array $alreadyWrittenFiles = [];
+    /** @var array<string, string>  */
+    private array $alreadyWrittenFiles;
 
-    private array $fileLocationsWrittenTo = [];
+    /** @var array<string, string>  */
+    private array $fileLocationsWrittenTo;
 
     /**
      * @param array<string, string|true> $alreadyWrittenFiles
@@ -24,13 +26,19 @@ final class FakeFileSystem implements FileSystemInterface
      */
     public function __construct(array $alreadyWrittenFiles = [], array $fileLocationsWrittenTo = [])
     {
+        $a = [];
         foreach ($alreadyWrittenFiles as $filename => $content) {
-            $this->alreadyWrittenFiles[realpath($filename) ?: $filename] = $content === true ? self::CONTENT : $content;
+            $a[realpath($filename) ?: $filename] = $content === true ? self::CONTENT : $content;
         }
 
+        $this->alreadyWrittenFiles = $a;
+
+        $f = [];
         foreach ($fileLocationsWrittenTo as $filename => $content) {
-            $this->fileLocationsWrittenTo[realpath($filename) ?: $filename] = $content === true ? self::CONTENT : $content;
+            $f[realpath($filename) ?: $filename] = $content === true ? self::CONTENT : $content;
         }
+
+        $this->fileLocationsWrittenTo = $f;
     }
 
     public function requireFile(string $filename): void

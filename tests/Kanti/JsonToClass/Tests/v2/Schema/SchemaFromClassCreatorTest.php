@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\Kanti\JsonToClass\Tests\v2\Schema;
 
+use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Schema\SchemaFromClassCreator;
 use Generator;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
@@ -19,12 +20,13 @@ class SchemaFromClassCreatorTest extends TestCase
     #[DataProvider('dataProvider')]
     public function exceptions(string $classCode, string $expectedExceptionMessage): void
     {
-        $container = new JsonToClassContainer([
-        ]);
+        $container = new JsonToClassContainer();
         $schemaFromClassCreator = $container->get(SchemaFromClassCreator::class);
-        assert($schemaFromClassCreator instanceof SchemaFromClassCreator);
-        $schema = new NamedSchema('Kanti\GeneratedTest\Data', properties: ['a' => new NamedSchema('Kanti\GeneratedTest\Data\A')]);
+
+        $schema = new NamedSchema(Data::class, properties: ['a' => new NamedSchema('Kanti\GeneratedTest\Data\A')]);
         $class = ClassType::fromCode($classCode);
+        $this->assertInstanceOf(ClassType::class, $class);
+
         $this->expectExceptionMessage($expectedExceptionMessage);
         $schemaFromClassCreator->loopSchema($schema, $class);
     }

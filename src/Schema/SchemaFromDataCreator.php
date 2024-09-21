@@ -8,8 +8,11 @@ use stdClass;
 
 use function gettype;
 
-final class SchemaFromDataCreator implements SchemaFromDataCreatorInterface
+final class SchemaFromDataCreator
 {
+    /**
+     * @param array<mixed>|stdClass $data
+     */
     public function fromData(array|stdClass $data): Schema
     {
         $schema = new Schema();

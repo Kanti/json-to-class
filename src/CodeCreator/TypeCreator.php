@@ -34,6 +34,10 @@ final class TypeCreator
         return implode('|', $types);
     }
 
+    /**
+     * @param list<string> $types
+     * @return list<string>
+     */
     private function sortTypes(array $types): array
     {
         usort($types, function (string|array $a, string|array $b): int {
@@ -63,6 +67,9 @@ final class TypeCreator
         return $types;
     }
 
+    /**
+     * @param string|array<mixed> $value
+     */
     private function isListType(string|array $value): bool
     {
         if (is_array($value)) {
@@ -91,6 +98,9 @@ final class TypeCreator
         return implode('|', $types);
     }
 
+    /**
+     * @return list<string>
+     */
     private function getDocBlockTypes(NamedSchema $property, PhpNamespace $namespace): array
     {
         $types = [];

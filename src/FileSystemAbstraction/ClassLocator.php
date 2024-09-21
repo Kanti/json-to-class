@@ -10,7 +10,7 @@ use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Helpers;
 use Nette\PhpGenerator\PhpFile;
 
-final readonly class ClassLocator implements ClassLocatorInterface
+final readonly class ClassLocator
 {
     public function __construct(
         private ClassLoader $classLoader,

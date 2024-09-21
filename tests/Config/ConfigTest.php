@@ -6,6 +6,7 @@ namespace Kanti\JsonToClass\Tests\Config;
 
 use Generator;
 use Kanti\JsonToClass\Config\Config;
+use Kanti\JsonToClass\Config\SaneConfig;
 use PHPUnit\Framework\Attributes\BackupGlobals;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -13,6 +14,9 @@ use PHPUnit\Framework\TestCase;
 
 class ConfigTest extends TestCase
 {
+    /**
+     * @param array<string, string> $envs
+     */
     #[Test]
     #[DataProvider('dataProvider')]
     #[BackupGlobals(true)]
@@ -26,7 +30,7 @@ class ConfigTest extends TestCase
             putenv($env . '=' . $value);
         }
 
-        $config = new Config();
+        $config = new SaneConfig();
         $this->assertEquals($expected, $config->shouldCreateClasses());
     }
 

@@ -8,8 +8,12 @@ use Kanti\JsonToClass\Config\Dto\AppendSchema;
 use Kanti\JsonToClass\Config\Dto\OnExtraProperties;
 use Kanti\JsonToClass\Config\Dto\OnInvalidCharacterProperties;
 use Kanti\JsonToClass\Config\Dto\OnMissingProperties;
+use Kanti\JsonToClass\Config\Dto\RemoveOldClasses;
 
-readonly class Config
+/**
+ * todo this should be an interface (with PHP 8.4 and property hooks it should be possible to refactor this)
+ */
+abstract readonly class Config
 {
     public OnExtraProperties $onExtraProperties;
 

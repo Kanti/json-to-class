@@ -13,6 +13,9 @@ use stdClass;
 
 final class Validator
 {
+    /**
+     * @param bool|int|float|string|array<mixed>|stdClass|null $data
+     */
     public function validateData(null|bool|int|float|string|array|stdClass $data, Config $config): void
     {
         if (is_null($data)) {
@@ -43,7 +46,6 @@ final class Validator
             return;
         }
 
-        assert($data instanceof stdClass || is_array($data));
         foreach ($data as $key => $value) {
             $this->validateKey((string)$key, $config);
             $this->validateData($value, $config);
@@ -52,23 +54,12 @@ final class Validator
 
     private function validateKey(string $key, Config $config): void
     {
-        if (Helpers::isIdentifier($key)) {
-            return;
-        }
-
-        if ($config->onInvalidCharacterProperties === OnInvalidCharacterProperties::REPLACE_INVALID_CHARACTERS_WITH_UNDERSCORE) {
-            throw new Exception('Not implemented yet');
-        }
-
-        if ($config->onInvalidCharacterProperties === OnInvalidCharacterProperties::TRY_PREFIX_WITH_UNDERSCORE) {
-            if (Helpers::isIdentifier('_' . $key)) {
-                return;
-            }
-
-            throw new InvalidArgumentException('Key is not valid: ' . $key);
-        }
-
-        if ($config->onInvalidCharacterProperties === OnInvalidCharacterProperties::THROW_EXCEPTION) {
+        $isValid = match ($config->onInvalidCharacterProperties) {
+            OnInvalidCharacterProperties::THROW_EXCEPTION => Helpers::isIdentifier($key),
+            OnInvalidCharacterProperties::REPLACE_INVALID_CHARACTERS_WITH_UNDERSCORE => throw new Exception('Not implemented yet'),
+            OnInvalidCharacterProperties::TRY_PREFIX_WITH_UNDERSCORE => Helpers::isIdentifier($key) || Helpers::isIdentifier('_' . $key),
+        };
+        if (!$isValid) {
             throw new InvalidArgumentException('Key is not valid: ' . $key);
         }
     }

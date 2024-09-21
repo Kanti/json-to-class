@@ -39,14 +39,11 @@ final class PhpFilesDriver implements Driver
         $result .= '# Tested "' . $data->dataName . '"' . PHP_EOL;
         $result .= '````json' . PHP_EOL;
 
-        $result .= json_encode($data->providedData, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS) . PHP_EOL;
+        $result .= json_encode($data->providedTestData, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS) . PHP_EOL;
 
         $result .= '````' . PHP_EOL;
 
         foreach ($data->phpClasses as $className => $value) {
-            Assert::assertIsString($className);
-            Assert::assertIsString($value);
-
             if ($lint) {
                 $this->lintPhpFile($value, $className);
             }

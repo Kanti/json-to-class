@@ -14,6 +14,9 @@ use stdClass;
 
 class SchemaFromDataCreatorTest extends TestCase
 {
+    /**
+     * @param array<mixed>|stdClass $data
+     */
     #[Test]
     #[DataProvider('dataProvider')]
     public function fromData(array|stdClass $data, Schema $expectedSchema): void

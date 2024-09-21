@@ -13,6 +13,10 @@ use PHPUnit\Framework\TestCase;
 
 class TypesTest extends TestCase
 {
+    /**
+     * @param list< string | list<string> | list<list<string>> | list<list<list<string>>> > $input
+     * @param list<Type> $expected
+     */
     #[Test]
     #[DataProvider('dataProvider')]
     public function construct(array $input, array $expected): void

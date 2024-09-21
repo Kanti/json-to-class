@@ -1,11 +1,26 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Call to an undefined static method T of object\\:\\:from\\(\\)\\.$#"
+			message: "#^Class Kanti\\\\JsonToClass\\\\Config\\\\Config has an uninitialized readonly property \\$appendSchema\\. Assign it in the constructor\\.$#"
 			count: 1
-			path: src/ProductionConverter.php
+			path: src/Config/Config.php
 
 		-
-			message: "#^Class Kanti\\\\JsonToClass\\\\Tests\\\\GeneratedFixture\\\\Generated not found\\.$#"
-			count: 4
-			path: tests/DevelopmentConverterTest.php
+			message: "#^Class Kanti\\\\JsonToClass\\\\Config\\\\Config has an uninitialized readonly property \\$onExtraProperties\\. Assign it in the constructor\\.$#"
+			count: 1
+			path: src/Config/Config.php
+
+		-
+			message: "#^Class Kanti\\\\JsonToClass\\\\Config\\\\Config has an uninitialized readonly property \\$onInvalidCharacterProperties\\. Assign it in the constructor\\.$#"
+			count: 1
+			path: src/Config/Config.php
+
+		-
+			message: "#^Class Kanti\\\\JsonToClass\\\\Config\\\\Config has an uninitialized readonly property \\$onMissingProperties\\. Assign it in the constructor\\.$#"
+			count: 1
+			path: src/Config/Config.php
+
+		-
+			message: "#^Class Kanti\\\\JsonToClass\\\\Config\\\\Config has an uninitialized readonly property \\$removeOldClasses\\. Assign it in the constructor\\.$#"
+			count: 1
+			path: src/Config/Config.php

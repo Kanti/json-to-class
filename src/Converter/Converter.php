@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\Converter;
 
 use InvalidArgumentException;
-use Kanti\JsonToClass\ClassCreator\ClassCreatorInterface;
+use Kanti\JsonToClass\ClassCreator\ClassCreator;
 use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
@@ -22,7 +22,7 @@ final readonly class Converter
 {
     public function __construct(
         private Validator $validator,
-        private ClassCreatorInterface $classCreator,
+        private ClassCreator $classCreator,
         private ClassMapper $classMapper,
     ) {
     }
@@ -36,8 +36,8 @@ final readonly class Converter
     /**
      * @template T of object
      * @param class-string<T> $className
-     * @param array<string, mixed>|stdClass<mixed> $data
-     * @phpstan-param array<mixed>|stdClass<mixed> $data
+     * @param array<string, mixed>|stdClass $data
+     * @phpstan-param array<mixed>|stdClass $data
      *
      * @return T
      */

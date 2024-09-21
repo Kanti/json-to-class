@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Kanti\JsonToClass\Config;
+namespace Kanti\JsonToClass\Config\Dto;
 
 enum RemoveOldClasses
 {

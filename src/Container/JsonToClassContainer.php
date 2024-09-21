@@ -27,11 +27,14 @@ final class JsonToClassContainer implements ContainerInterface
      */
     private array $instances = [];
 
+    /**
+     * @param array<string, Closure|object> $overwriteFactories
+     */
     public function __construct(array $overwriteFactories = [])
     {
         $this->factories = [
             ClassLoader::class => fn(): object => require __DIR__ . '/../../vendor/autoload.php', // TODO fix this path
-            FileSystemInterface::class => fn(): object => new FileSystem(getcwd()),
+            FileSystemInterface::class => fn(): object => new FileSystem(),
             Printer::class => fn(): object => new PsrPrinter(),
             ...$overwriteFactories,
         ];
@@ -64,7 +67,7 @@ final class JsonToClassContainer implements ContainerInterface
 
     /**
      * @template T of object
-     * @param class-string<T> $id
+     * @param class-string<T> $className
      * @return T
      */
     private function getInternal(string $className): object
@@ -90,12 +93,13 @@ final class JsonToClassContainer implements ContainerInterface
         $constructor = $reflection->getMethod('__construct');
         $parameters = [];
         foreach ($constructor->getParameters() as $parameter) {
-            $childClassName = $parameter->getType()?->getName();
+            /** @var class-string $childClassName */
+            $childClassName = (string)$parameter->getType();
             if (!$childClassName) {
                 throw new ContainerException('Parameter ' . $className . '->' . $parameter->getName() . ' has no type');
             }
 
-            if (!str_contains((string) $childClassName, '\\')) {
+            if (!str_contains($childClassName, '\\')) {
                 if ($parameter->isDefaultValueAvailable()) {
                     continue;
                 }
@@ -119,9 +123,10 @@ final class JsonToClassContainer implements ContainerInterface
             throw new ContainerException('Factory for ' . $className . ' is not callable or instance of ' . $className);
         }
 
-        $result ??= $factory();
-        if (!$result instanceof $className) {
-            throw new ContainerException('Factory for ' . $className . ' dose not produce instance of ' . $className . ' but ' . is_object($result) ? $result::class : gettype($result));
+        $result = $factory();
+        if (!is_a($result, $className, false)) {
+            $typeInfo = get_debug_type($result);
+            throw new ContainerException('Factory for ' . $className . ' dose not produce instance of ' . $className . ' but ' . $typeInfo);
         }
 
         return $result;

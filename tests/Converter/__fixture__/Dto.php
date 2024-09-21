@@ -8,6 +8,11 @@ use Kanti\JsonToClass\Attribute\Types;
 
 final class Dto
 {
+    /**
+     * @param list<Children> $children
+     * @param list<list<Children>> $childrenDeep
+     * @param list<list<Children>>|list<Children> $childrenMixedDeep
+     */
     public function __construct(
         public string $name,
         public int $id,

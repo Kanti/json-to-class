@@ -12,6 +12,9 @@ use stdClass;
 
 final class ClassMapper
 {
+    /**
+     * @param array<mixed>|stdClass $data
+     */
     public function map(string $className, array|stdClass $data, Config $config, string $path = ''): object
     {
         if (!class_exists($className)) {
@@ -66,6 +69,6 @@ final class ClassMapper
             return $result;
         }
 
-        return $this->map($type->name, $param, new Config(), $path);
+        return $this->map($type->name, $param, $config, $path);
     }
 }

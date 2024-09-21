@@ -1,7 +1,9 @@
 includes:
   - phpstan-baseline.neon
   - vendor/andersundsehr/phpstan-git-files/extension.php
-
+  - phar://phpstan.phar/conf/bleedingEdge.neon
 parameters:
-  level: 8
+  level: max
   reportUnmatchedIgnoredErrors: false
+  scanFiles:
+    - tests/_helper/Data.php

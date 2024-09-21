@@ -43,8 +43,9 @@ class FileWriterTest extends TestCase
     }
 
     /**
-     * @param list<string> $alreadyWrittenFiles
-     * @param list<string> $fileLocationsWrittenTo
+     * @param array<string, string> $classes
+     * @param array<string, string|true> $alreadyWrittenFiles
+     * @param array<string, string|true> $fileLocationsWrittenTo
      */
     #[Test]
     #[DataProvider('writeIfNeededDataProvider')]
@@ -94,9 +95,7 @@ class FileWriterTest extends TestCase
             FileSystemInterface::class => new FakeFileSystem([__FILE__ => true], [__FILE__ => true]),
         ]);
 
-        $fileWriter = $container->get(FileWriter::class);
-        assert($fileWriter instanceof FileWriter);
-        $actual = $fileWriter->writeIfNeeded([self::class => FakeFileSystem::CONTENT]);
+        $actual = $container->get(FileWriter::class)->writeIfNeeded([self::class => FakeFileSystem::CONTENT]);
         $this->assertFalse($actual, 'no restart needed nothing written');
     }
 

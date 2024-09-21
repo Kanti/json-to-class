@@ -29,6 +29,9 @@ final readonly class Type implements Stringable
         }
     }
 
+    /**
+     * @param string|array<string | array< string | array<mixed> > > $type
+     */
     public static function from(string|array $type): self
     {
         $depth = 0;

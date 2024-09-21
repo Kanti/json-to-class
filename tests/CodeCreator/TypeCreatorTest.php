@@ -47,7 +47,7 @@ class TypeCreatorTest extends TestCase
         ];
         yield 'stdClass{}' => [
             'schema' => new Schema(properties: []),
-            'expectedPhpType' => 'Kanti\GeneratedTest\Data',
+            'expectedPhpType' => Data::class,
         ];
         yield 'array{}|stdClass{}' => [
             'schema' => new Schema(listElement: new Schema(), properties: []),
@@ -63,7 +63,7 @@ class TypeCreatorTest extends TestCase
         $classSchema = new Schema(properties: ['int' => new Schema(basicTypes: ['int' => true])]);
         yield 'Data' => [
             'schema' => $classSchema,
-            'expectedPhpType' => 'Kanti\GeneratedTest\Data',
+            'expectedPhpType' => Data::class,
         ];
         yield 'list<class>' => [
             'schema' => new Schema(listElement: $classSchema),
@@ -220,10 +220,13 @@ class TypeCreatorTest extends TestCase
         ];
     }
 
+    /**
+     * @param array<string, string> $expectedUses
+     */
     #[Test]
     #[TestDox('TypeCreator->getPhpType')]
     #[DataProvider('dataProvider')]
-    public function getPhpType(Schema $schema, string $expectedPhpType, array $expectedUses = [], ...$_): void
+    public function getPhpType(Schema $schema, string $expectedPhpType, array $expectedUses = [], mixed ...$_): void
     {
         $typeCreator = new TypeCreator();
         $namespace = new PhpNamespace(Helpers::extractNamespace(Data::class));
@@ -232,10 +235,13 @@ class TypeCreatorTest extends TestCase
         $this->assertEquals([], $namespace->getUses());
     }
 
+    /**
+     * @param array<string, string> $expectedUses
+     */
     #[Test]
     #[TestDox('TypeCreator->getDocBlockType')]
     #[DataProvider('dataProvider')]
-    public function getDocBlockType(Schema $schema, ?string $expectedDocBlockType = null, array $expectedUses = [], ...$_): void
+    public function getDocBlockType(Schema $schema, ?string $expectedDocBlockType = null, array $expectedUses = [], mixed ...$_): void
     {
         $typeCreator = new TypeCreator();
         $namespace = new PhpNamespace(Helpers::extractNamespace(Data::class));
@@ -244,10 +250,13 @@ class TypeCreatorTest extends TestCase
         $this->assertEquals($expectedUses, $namespace->getUses());
     }
 
+    /**
+     * @param array<string, string> $expectedUses
+     */
     #[Test]
     #[TestDox('TypeCreator->getAttribute')]
     #[DataProvider('dataProvider')]
-    public function getAttribute(Schema $schema, ?Attribute $expectedAttribute = null, array $expectedUses = [], ...$_): void
+    public function getAttribute(Schema $schema, ?Attribute $expectedAttribute = null, array $expectedUses = [], mixed ...$_): void
     {
         $typeCreator = new TypeCreator();
         $namespace = new PhpNamespace(Helpers::extractNamespace(Data::class));
