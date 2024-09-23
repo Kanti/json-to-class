@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\Dto;
 
 use InvalidArgumentException;
+use Nette\PhpGenerator\Literal;
 use Stringable;
 
 final readonly class Type implements Stringable
@@ -30,7 +31,7 @@ final readonly class Type implements Stringable
     }
 
     /**
-     * @param string|array<string | array< string | array<mixed> > > $type
+     * @param string|array{}|list<string>|list<list<string>>|list<list<list<string>>> $type
      */
     public static function from(string|array $type): self
     {
@@ -44,7 +45,7 @@ final readonly class Type implements Stringable
             $depth++;
         }
 
-        return new self(ltrim((string) $type, '\\'), $depth);
+        return new self(ltrim($type, '\\'), $depth);
     }
 
     public function unpackOnce(): self

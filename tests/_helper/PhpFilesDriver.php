@@ -22,9 +22,10 @@ final class PhpFilesDriver implements Driver
 
     public function match(mixed $expected, mixed $actual): void
     {
+        Assert::assertInstanceOf(PhpFilesDto::class, $actual);
         Assert::assertEquals($expected, $this->serialize($actual, false));
 
-        foreach ($actual->phpCode as $className => $value) {
+        foreach ($actual->phpClasses as $className => $value) {
             $this->lintPhpFile($value, $className);
         }
     }

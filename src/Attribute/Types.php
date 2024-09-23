@@ -24,7 +24,7 @@ final readonly class Types
     public array $types;
 
     /**
-     * @param string|list<string|list<mixed>>|array{} ...$types
+     * @param string|array{}|list<string>|list<list<string>>|list<list<list<string>>> ...$types
      */
     public function __construct(
         string|array ...$types,

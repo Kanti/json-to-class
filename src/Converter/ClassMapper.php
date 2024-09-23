@@ -70,9 +70,11 @@ final class ClassMapper
             return $param;
         }
 
+        assert(is_array($param) || $param instanceof stdClass, 'This should be an array or stdClass at this point in the code');
+
         if ($type->isArray()) {
             $result = [];
-            foreach ($param as $key => $value) {
+            foreach ((array)$param as $key => $value) {
                 $result[$key] = $this->convertType($possibleTypes->unpackOnce(), $value, $config, $path . '.' . $key);
             }
 

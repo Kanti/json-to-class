@@ -17,9 +17,12 @@ use stdClass;
 
 class ValidatorTest extends TestCase
 {
+    /**
+     * @param bool|int|float|string|array<mixed>|stdClass|null $data
+     */
     #[Test]
     #[DataProvider('dataProvider')]
-    public function validateData(mixed $data, Config $config = new SaneConfig(), ?string $invalidMessage = null): void
+    public function validateData(null|bool|int|float|string|array|stdClass $data, Config $config = new SaneConfig(), ?string $invalidMessage = null): void
     {
         $validator = new Validator();
         if ($invalidMessage) {

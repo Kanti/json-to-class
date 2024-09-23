@@ -13,12 +13,12 @@ final class StringHelpers
     public static function getAttributes(Attribute $attribute): object
     {
         $className = $attribute->getName();
-        return new $className(...array_map(self::unpackLiterals(...), $attribute->getArguments()));
+        return new $className(...self::unpackLiterals($attribute->getArguments()));
     }
 
     /**
-     * @param list< list<mixed>|Literal|string >|Literal|string $argument
-     * @return string|list< string|list<mixed> >
+     * @param Literal|string|list<Literal|string>|list<list<Literal|string>> $argument
+     * @return string|list<string>|list<list<string>>
      */
     private static function unpackLiterals(Literal|array|string $argument): string|array
     {
