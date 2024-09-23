@@ -27,8 +27,15 @@ jobs:
       - run: composer install --no-interaction --no-progress --ignore-platform-req=php+
       - run: composer lint
       - run: composer test
-      - run: composer infection
-      - uses: codecov/codecov-action@v3
+      - run: composer infection -- --coverage=test-result/ --skip-initial-tests
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: test-result/clover.xml
+          files: test-result/clover.xml
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: test-result/junit.xml

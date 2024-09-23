@@ -66,9 +66,9 @@ final class PhpFilesDriver implements Driver
         }
 
         try {
-            $filename = 'test' . time() . '.php';
+            $filename = sys_get_temp_dir() . '/test' . time() . '.php';
             file_put_contents($filename, $value);
-            $output = shell_exec('php -l ' . $filename . ' 2>&1');
+            $output = shell_exec('php -l ' . $filename . ' 2>&1 && rm -f ' . $filename);
             Assert::assertStringContainsString('No syntax errors detected', $output, '?? Invalid php code detected for class: ' . $className . PHP_EOL . $value);
         } finally {
             if (file_exists($filename)) {

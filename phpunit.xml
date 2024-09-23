@@ -41,6 +41,12 @@
             <directory>src</directory>
         </include>
     </source>
+    <logging>
+        <junit outputFile="test-result/junit.xml"/>
+        <teamcity outputFile="test-result/teamcity.txt"/>
+        <testdoxHtml outputFile="test-result/testdox.html"/>
+        <testdoxText outputFile="test-result/testdox.txt"/>
+    </logging>
     <coverage>
         <report>
             <clover outputFile="test-result/clover.xml"/>
