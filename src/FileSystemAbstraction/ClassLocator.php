@@ -27,6 +27,7 @@ final readonly class ClassLocator
         if (!$object instanceof ClassType) {
             throw new RuntimeException('Class ' . $className . ' not found it is a ' . ExceptionHelper::getTypeOfClass($object));
         }
+
         return $object;
     }
 

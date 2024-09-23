@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Helpers;
 
+use ReflectionClass;
+
 final readonly class ExceptionHelper
 {
     public static function getTypeOfClass(object $object): string
     {
-        $reflection = new \ReflectionClass($object);
+        $reflection = new ReflectionClass($object);
 
         if ($reflection->isTrait()) {
             return 'trait';

@@ -25,6 +25,7 @@ final class ClassMapper
         if (!class_exists($className)) {
             throw new InvalidArgumentException(sprintf('Class %s does not exist %s', $className, $path));
         }
+
         $data = (array)$data;
         if (array_is_list($data)) {
             throw new InvalidArgumentException(sprintf('Data must be an associative array %s', $path));

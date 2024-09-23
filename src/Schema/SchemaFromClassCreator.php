@@ -80,6 +80,8 @@ final readonly class SchemaFromClassCreator
             }
 
             $type = $parameter->getType(true);
+            assert($type !== null, 'Type is not defined');
+
             if ($type->isIntersection()) {
                 throw new Exception('Intersection types not supported');
             }
@@ -87,13 +89,13 @@ final readonly class SchemaFromClassCreator
             if ($type->isUnion()) {
                 $types = [];
                 foreach ($type->getTypes() as $subType) {
-                    $types[] = Type::from($subType->getSingleName());
+                    $types[] = Type::from($subType->getSingleName() ?? throw new Exception('Union type must have a single type'));
                 }
 
                 return $types;
             }
 
-            return [Type::from($type->getSingleName())];
+            return [Type::from($type->getSingleName() ?? throw new Exception('Type must have a single type'))];
         } catch (Exception $exception) {
             throw new Exception('Error in ' . $className . '->' . $parameter->getName() . ': ' . $exception->getMessage(), $exception->getCode(), previous: $exception);
         }

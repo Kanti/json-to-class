@@ -56,4 +56,18 @@ final class NamedSchema
 
         return (bool)$this->listElement;
     }
+
+    public function getFirstNonListChild(): NamedSchema
+    {
+        $schema = $this;
+        while ($schema->isOnlyAList() && $schema->listElement) {
+            $schema = $schema->listElement;
+        }
+
+        if ($schema->isOnlyAList()) {
+            throw new InvalidArgumentException('This schema is only a list :/ this should never happen');
+        }
+
+        return $schema;
+    }
 }

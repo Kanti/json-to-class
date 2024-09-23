@@ -8,39 +8,41 @@ use InvalidArgumentException;
 
 final class SchemaMerger
 {
-    public function merge(?NamedSchema $schema, ?NamedSchema $schemaFromClass): ?NamedSchema
+    /**
+     * @return ($schemaA is NamedSchema ? NamedSchema : ($schemaB is NamedSchema ? NamedSchema : null))
+     */
+    public function merge(?NamedSchema $schemaA, ?NamedSchema $schemaB): ?NamedSchema
     {
-        if (!$schema) {
-            return $schemaFromClass;
+        if (!$schemaA) {
+            return $schemaB;
         }
 
-        if (!$schemaFromClass) {
-            return $schema;
+        if (!$schemaB) {
+            return $schemaA;
         }
 
-        if ($schema->className !== $schemaFromClass->className) {
-            throw new InvalidArgumentException('Class names must be the same ' . $schema->className . ' !== ' . $schemaFromClass->className);
+        if ($schemaA->className !== $schemaB->className) {
+            throw new InvalidArgumentException('Class names must be the same ' . $schemaA->className . ' !== ' . $schemaB->className);
         }
 
-        $result = new NamedSchema($schema->className);
-        $result->canBeMissing = $schema->canBeMissing || $schemaFromClass->canBeMissing;
-        $result->basicTypes = $schema->basicTypes + $schemaFromClass->basicTypes;
-        $result->listElement = $this->merge($schema->listElement, $schemaFromClass->listElement);
+        $result = new NamedSchema($schemaA->className);
+        $result->canBeMissing = $schemaA->canBeMissing || $schemaB->canBeMissing;
+        $result->basicTypes = $schemaA->basicTypes + $schemaB->basicTypes;
+        $result->listElement = $this->merge($schemaA->listElement, $schemaB->listElement);
 
-        if (is_array($schema->properties)) {
+        if (is_array($schemaA->properties)) {
             $result->properties = [];
         }
 
-        if (is_array($schemaFromClass->properties)) {
+        if (is_array($schemaB->properties)) {
             $result->properties = [];
         }
 
-        $keys = [...array_keys($schema->properties ?? []), ...array_keys($schemaFromClass->properties ?? [])];
+        $keys = [...array_keys($schemaA->properties ?? []), ...array_keys($schemaB->properties ?? [])];
         foreach ($keys as $name) {
-            $result->properties[$name] = $this->merge(
-                $schema->properties[$name] ?? null,
-                $schemaFromClass->properties[$name] ?? null,
-            );
+            $propertySchema = $this->merge($schemaA->properties[$name] ?? null, $schemaB->properties[$name] ?? null);
+            assert($propertySchema instanceof NamedSchema);
+            $result->properties[$name] = $propertySchema;
         }
 
         return $result;

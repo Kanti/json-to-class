@@ -73,6 +73,7 @@ final class SchemaFromDataCreator
         foreach (array_keys($beforeThisRun) as $property) {
             if (!array_key_exists($property, (array)$data)) {
                 // was missing in current iteration so it is sometimes unset
+                assert(isset($currentSchema->properties[$property]));
                 $currentSchema->properties[$property]->canBeMissing = true;
                 $currentSchema->properties[$property]->basicTypes['null'] = true;
             }

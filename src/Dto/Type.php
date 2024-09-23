@@ -64,6 +64,7 @@ final readonly class Type implements Stringable
         if (!class_exists($this->name)) {
             throw new InvalidArgumentException('Class does not exist');
         }
+
         return $this->name;
     }
 

@@ -73,15 +73,14 @@ final class JsonToClassContainer implements ContainerInterface
             return $this->fromFactory($this->factories[$className], $className);
         }
 
-        if (str_ends_with($className, 'Interface')) {
-            if (interface_exists($className)) {
-                $concreateClassName = str_replace('Interface', '', $className);
-                if (class_exists($concreateClassName)) {
-                    if (!is_subclass_of($concreateClassName, $className)) {
-                        throw new ContainerException('Class ' . $concreateClassName . ' dose not implement ' . $className);
-                    }
-                    $className = $concreateClassName;
+        if (str_ends_with($className, 'Interface') && interface_exists($className)) {
+            $concreateClassName = str_replace('Interface', '', $className);
+            if (class_exists($concreateClassName)) {
+                if (!is_subclass_of($concreateClassName, $className)) {
+                    throw new ContainerException('Class ' . $concreateClassName . ' dose not implement ' . $className);
                 }
+
+                $className = $concreateClassName;
             }
         }
 
@@ -120,14 +119,13 @@ final class JsonToClassContainer implements ContainerInterface
 
     /**
      * @template T of object
-     * @param object|callable $factory
      * @param class-string<T> $className
      * @return T
      */
     private function fromFactory(object|callable $factory, string $className): object
     {
         if (!is_callable($factory)) {
-            if (is_a($factory, $className, false)) {
+            if ($factory instanceof $className) {
                 return $factory;
             }
 

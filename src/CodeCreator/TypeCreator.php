@@ -78,6 +78,7 @@ final class TypeCreator
         if ($value instanceof Literal) {
             return false;
         }
+
         if (is_array($value)) {
             return true;
         }

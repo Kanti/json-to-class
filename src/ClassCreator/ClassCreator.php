@@ -46,12 +46,7 @@ final readonly class ClassCreator
             $schema = $this->schemaMerger->merge($schema, $schemaFromClass);
         }
 
-        while ($schema->isOnlyAList()) {
-            // if the first level(s) are a list, than ignore that level for class creation
-            $schema = $schema->listElement;
-        }
-
-        $files = $this->codeCreator->createFiles($schema);
+        $files = $this->codeCreator->createFiles($schema->getFirstNonListChild());
 
         $this->fileWriter->writeIfNeeded($files);
     }
