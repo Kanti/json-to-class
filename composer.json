@@ -9,8 +9,8 @@
     }
   ],
   "require": {
-    "php": "~8.2.0 || ~8.3.0",
-    "nette/php-generator": "^4.1"
+    "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
+    "nette/php-generator": "^4.1.6"
   },
   "require-dev": {
     "infection/infection": "^0.29.6",
@@ -45,6 +45,7 @@
       "composer normalize"
     ],
     "infection": "infection --only-covered --threads=8 --ansi",
+    "lint": "grumphp run --ansi",
     "phpcs": "phpcs --standard=PSR12",
     "phpstan": "phpstan -c phpstan.neon",
     "test": "XDEBUG_MODE=coverage phpunit --color=always",
