@@ -21,6 +21,14 @@ class NamedSchemaTest extends TestCase
     }
 
     #[Test]
+    public function getFirstNonListChild(): void
+    {
+        $schema = NamedSchema::fromSchema('Kanti\A', new Schema(listElement: new Schema()));
+        $expectedSchema = $schema->listElement;
+        $this->assertSame($expectedSchema, $schema->getFirstNonListChild());
+    }
+
+    #[Test]
     #[DataProvider('dataProvider')]
     public function isOnlyAList(Schema $schema, bool $expected): void
     {

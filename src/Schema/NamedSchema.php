@@ -40,6 +40,9 @@ final class NamedSchema
         );
     }
 
+    /**
+     * @phpstan-assert-if-true NamedSchema $this->listElement
+     */
     public function isOnlyAList(): bool
     {
         if ($this->basicTypes) {
@@ -60,12 +63,8 @@ final class NamedSchema
     public function getFirstNonListChild(): NamedSchema
     {
         $schema = $this;
-        while ($schema->isOnlyAList() && $schema->listElement) {
+        while ($schema->isOnlyAList()) {
             $schema = $schema->listElement;
-        }
-
-        if ($schema->isOnlyAList()) {
-            throw new InvalidArgumentException('This schema is only a list :/ this should never happen');
         }
 
         return $schema;
