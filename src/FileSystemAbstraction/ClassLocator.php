@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\FileSystemAbstraction;
 
 use Composer\Autoload\ClassLoader;
-use Exception;
+use Kanti\JsonToClass\Helpers\ExceptionHelper;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Helpers;
 use Nette\PhpGenerator\PhpFile;
+use RuntimeException;
 
 final readonly class ClassLocator
 {
@@ -22,7 +23,11 @@ final readonly class ClassLocator
     {
         $location = $this->getFileLocation($className);
         $content = $this->fileSystem->readContent($location);
-        return PhpFile::fromCode($content)->getClasses()[$className] ?? throw new Exception('Class not found');
+        $object = PhpFile::fromCode($content)->getClasses()[$className] ?? throw new RuntimeException('Class not found');
+        if (!$object instanceof ClassType) {
+            throw new RuntimeException('Class ' . $className . ' not found it is a ' . ExceptionHelper::getTypeOfClass($object));
+        }
+        return $object;
     }
 
     public function getFileLocation(string $className): string
@@ -43,10 +48,10 @@ final readonly class ClassLocator
             if (isset($psr4[$currentNamespacePrefix])) {
                 $possiblePaths = $psr4[$currentNamespacePrefix];
                 if (count($possiblePaths) > 1) {
-                    throw new Exception('Multiple possible paths found'); // TODO do we want an exception here?
+                    throw new RuntimeException('Multiple possible paths found'); // TODO do we want an exception here?
                 }
 
-                $path = $possiblePaths[0] ?? throw new Exception('Path not found');
+                $path = $possiblePaths[0] ?? throw new RuntimeException('Path not found');
                 $path = rtrim($path, '/');
 
                 $missingParts = array_slice($originalNamespaceParts, count($namespaceParts));
@@ -58,6 +63,6 @@ final readonly class ClassLocator
             }
         } while (array_pop($namespaceParts));
 
-        throw new Exception('Path not found no psr4 path found in composer autoload for ' . $className);
+        throw new RuntimeException('Path not found no psr4 path found in composer autoload for ' . $className);
     }
 }

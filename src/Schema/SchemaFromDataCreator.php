@@ -41,7 +41,7 @@ final class SchemaFromDataCreator
             $currentSchema->properties ??= [];
         }
 
-        foreach ($data as $property => $value) {
+        foreach ((array)$data as $property => $value) {
             if ($isList) {
                 $this->generateInternal($value, $currentSchema->listElement);
                 continue;

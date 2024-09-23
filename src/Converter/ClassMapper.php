@@ -13,12 +13,21 @@ use stdClass;
 final class ClassMapper
 {
     /**
-     * @param array<mixed>|stdClass $data
+     * @template T of object
+     * @param class-string<T> $className
+     * @param array<string, mixed>|stdClass $data
+     * @phpstan-param array<mixed>|stdClass $data
+     *
+     * @return T
      */
     public function map(string $className, array|stdClass $data, Config $config, string $path = ''): object
     {
         if (!class_exists($className)) {
             throw new InvalidArgumentException(sprintf('Class %s does not exist %s', $className, $path));
+        }
+        $data = (array)$data;
+        if (array_is_list($data)) {
+            throw new InvalidArgumentException(sprintf('Data must be an associative array %s', $path));
         }
 
         $reflectionClass = new ReflectionClass($className);
@@ -69,6 +78,6 @@ final class ClassMapper
             return $result;
         }
 
-        return $this->map($type->name, $param, $config, $path);
+        return $this->map($type->getClassName(), $param, $config, $path);
     }
 }

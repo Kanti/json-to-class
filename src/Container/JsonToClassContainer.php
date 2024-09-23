@@ -13,8 +13,6 @@ use Nette\PhpGenerator\PsrPrinter;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 
-use function gettype;
-
 final class JsonToClassContainer implements ContainerInterface
 {
     /**
@@ -23,7 +21,7 @@ final class JsonToClassContainer implements ContainerInterface
     private readonly array $factories;
 
     /**
-     * @var array<string, object>
+     * @var array<class-string, object>
      */
     private array $instances = [];
 
@@ -61,8 +59,7 @@ final class JsonToClassContainer implements ContainerInterface
      */
     public function get(string $className): object
     {
-        $this->instances[$className] ??= $this->getInternal($className);
-        return $this->instances[$className];
+        return $this->instances[$className] ??= $this->getInternal($className);
     }
 
     /**
@@ -77,7 +74,15 @@ final class JsonToClassContainer implements ContainerInterface
         }
 
         if (str_ends_with($className, 'Interface')) {
-            $className = str_replace('Interface', '', $className);
+            if (interface_exists($className)) {
+                $concreateClassName = str_replace('Interface', '', $className);
+                if (class_exists($concreateClassName)) {
+                    if (!is_subclass_of($concreateClassName, $className)) {
+                        throw new ContainerException('Class ' . $concreateClassName . ' dose not implement ' . $className);
+                    }
+                    $className = $concreateClassName;
+                }
+            }
         }
 
         if (!class_exists($className)) {
@@ -113,13 +118,19 @@ final class JsonToClassContainer implements ContainerInterface
         return new $className(...$parameters);
     }
 
+    /**
+     * @template T of object
+     * @param object|callable $factory
+     * @param class-string<T> $className
+     * @return T
+     */
     private function fromFactory(object|callable $factory, string $className): object
     {
-        if (is_a($factory, $className, false)) {
-            return $factory;
-        }
-
         if (!is_callable($factory)) {
+            if (is_a($factory, $className, false)) {
+                return $factory;
+            }
+
             throw new ContainerException('Factory for ' . $className . ' is not callable or instance of ' . $className);
         }
 

@@ -18,7 +18,10 @@ use stdClass;
 class ClassMapperTest extends TestCase
 {
     /**
+     * @template T of object
+     * @param class-string<T> $className
      * @param array<mixed>|stdClass $data
+     * @param T $expected
      */
     #[Test]
     #[DataProvider('dataProvider')]

@@ -18,7 +18,7 @@ final class StringHelpers
 
     /**
      * @param list< list<mixed>|Literal|string >|Literal|string $argument
-     * @return string|list< string|list<string> >
+     * @return string|list< string|list<mixed> >
      */
     private static function unpackLiterals(Literal|array|string $argument): string|array
     {
@@ -27,7 +27,8 @@ final class StringHelpers
         }
 
         if ($argument instanceof Literal) {
-            eval('$argument = ' . $argument . ';');
+            $argument = eval('return ' . $argument . ';');
+            assert(is_string($argument));
         }
 
         return $argument;

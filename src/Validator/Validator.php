@@ -46,7 +46,7 @@ final class Validator
             return;
         }
 
-        foreach ($data as $key => $value) {
+        foreach ((array)$data as $key => $value) {
             $this->validateKey((string)$key, $config);
             $this->validateData($value, $config);
         }

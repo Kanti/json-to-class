@@ -56,6 +56,17 @@ final readonly class Type implements Stringable
         return new self($this->name, $this->depth - 1);
     }
 
+    /**
+     * @return class-string
+     */
+    public function getClassName(): string
+    {
+        if (!class_exists($this->name)) {
+            throw new InvalidArgumentException('Class does not exist');
+        }
+        return $this->name;
+    }
+
     public function isClass(): bool
     {
         return !$this->isArray() && !$this->isBasicType();

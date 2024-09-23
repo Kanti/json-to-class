@@ -35,12 +35,13 @@ final class TypeCreator
     }
 
     /**
-     * @param list<string> $types
-     * @return list<string>
+     * @template T of string|array<mixed>|Literal
+     * @param list<T> $types
+     * @return list<T>
      */
     private function sortTypes(array $types): array
     {
-        usort($types, function (string|array $a, string|array $b): int {
+        usort($types, function (string|array|Literal $a, string|array|Literal $b): int {
             $ranking = [
                 // list => 0,
                 // class => 1,
@@ -54,12 +55,12 @@ final class TypeCreator
             // if not in list it must be a class Classes come first
             $aInt = 0;
             if (!$this->isListType($a)) {
-                $aInt = $ranking[$a] ?? 1;
+                $aInt = $ranking[(string)$a] ?? 1;
             }
 
             $bInt = 0;
             if (!$this->isListType($b)) {
-                $bInt = $ranking[$b] ?? 1;
+                $bInt = $ranking[(string)$b] ?? 1;
             }
 
             return $aInt <=> $bInt;
@@ -69,9 +70,14 @@ final class TypeCreator
 
     /**
      * @param string|array<mixed> $value
+     * @phpstan-assert-if-false !array $value
+     * @phpstan-assert-if-true !Literal $value
      */
-    private function isListType(string|array $value): bool
+    private function isListType(string|array|Literal $value): bool
     {
+        if ($value instanceof Literal) {
+            return false;
+        }
         if (is_array($value)) {
             return true;
         }
@@ -137,7 +143,7 @@ final class TypeCreator
     }
 
     /**
-     * @return list<string>
+     * @return list<string|array<mixed>|Literal>
      */
     private function getAttributeTypes(NamedSchema $property, PhpNamespace $namespace): array
     {

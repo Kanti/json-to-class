@@ -29,6 +29,6 @@ final readonly class Types
     public function __construct(
         string|array ...$types,
     ) {
-        $this->types = array_map(Type::from(...), $types);
+        $this->types = array_map(Type::from(...), array_values($types));
     }
 }
