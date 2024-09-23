@@ -73,16 +73,17 @@ final class JsonToClassContainer implements ContainerInterface
             return $this->fromFactory($this->factories[$className], $className);
         }
 
-        if (str_ends_with($className, 'Interface') && interface_exists($className)) {
-            $concreateClassName = str_replace('Interface', '', $className);
-            if (class_exists($concreateClassName)) {
-                if (!is_subclass_of($concreateClassName, $className)) {
-                    throw new ContainerException('Class ' . $concreateClassName . ' dose not implement ' . $className);
-                }
-
-                $className = $concreateClassName;
-            }
-        }
+        // This is currenlty not needed as we do not have interfaces without a factory
+        //if (str_ends_with($className, 'Interface') && interface_exists($className)) {
+        //    $concreateClassName = str_replace('Interface', '', $className);
+        //    if (class_exists($concreateClassName)) {
+        //        if (!is_subclass_of($concreateClassName, $className)) {
+        //            throw new ContainerException('Class ' . $concreateClassName . ' dose not implement ' . $className);
+        //        }
+        //
+        //        $className = $concreateClassName;
+        //    }
+        //}
 
         if (!class_exists($className)) {
             throw new ContainerException('Class ' . $className . ' not found');

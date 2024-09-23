@@ -39,3 +39,13 @@ parameters:
 			message: "#^Parameter \\#1 \\$argument of static method Kanti\\\\JsonToClass\\\\Helpers\\\\StringHelpers\\:\\:unpackLiterals\\(\\) expects list\\<list\\<Nette\\\\PhpGenerator\\\\Literal\\|string\\>\\|Nette\\\\PhpGenerator\\\\Literal\\|string\\>\\|Nette\\\\PhpGenerator\\\\Literal\\|string, array given\\.$#"
 			count: 1
 			path: src/Helpers/StringHelpers.php
+
+		-
+			message: "#^Call to method PHPUnit\\\\Framework\\\\Assert\\:\\:assertInstanceOf\\(\\) with 'Kanti\\\\\\\\JsonToClass\\\\\\\\Schema\\\\\\\\SchemaMerger' and Kanti\\\\JsonToClass\\\\Schema\\\\SchemaMerger will always evaluate to true\\.$#"
+			count: 1
+			path: tests/Container/JsonToClassContainerTest.php
+
+		-
+			message: "#^Class Kanti\\\\JsonToClass\\\\Tests\\\\Container\\\\SchemaMerger2000000000 not found\\.$#"
+			count: 1
+			path: tests/Container/JsonToClassContainerTest.php
