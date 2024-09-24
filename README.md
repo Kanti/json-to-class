@@ -54,6 +54,23 @@ class Person
 }
 ````
 
+## Performance
+
+Tests performed:
+- on a `ThinkPad` `Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz   2.11 GHz`
+- inside `WSL` with a `Docker Container` with `PHP 8.2.23`
+- the env `JSON_TO_CLASS_CREATE=no` was set.  
+- the class structure is a mix of complex and simple classes, with a total of `289` classes.
+  - some have 2-3 fields
+  - a few have ~115 fields.
+
+### Results:
+
+total classes Created: `155_078`  
+total time: `3.0614130496979s`  
+time per class: `19.741117693663µs`  
+> I could create `~50_655` classes per second, so you should be fine with the performance.
+
 ## Features
 - [x] generate PHP Classes from data structures (JSON, CSV, DB, etc.)
 - [ ] combine similar classes (e.g. `Person` and `Employee` with the same fields)

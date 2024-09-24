@@ -49,7 +49,7 @@ final readonly class ClassCreator
         $files = $this->codeCreator->createFiles($schema->getFirstNonListChild(), $config);
 
         if ($this->fileWriter->writeIfNeeded($files)) {
-            throw new InvalidArgumentException('Class already exists and cannot be reloaded');
+            throw new ShouldRestartException('Class already exists and cannot be reloaded');
         }
     }
 }
