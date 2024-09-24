@@ -7,6 +7,7 @@ namespace Kanti\JsonToClass\Converter;
 use InvalidArgumentException;
 use Kanti\JsonToClass\ClassCreator\ClassCreator;
 use Kanti\JsonToClass\Config\Config;
+use Kanti\JsonToClass\Config\Dto\OnExtraProperties;
 use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\Validator\Validator;

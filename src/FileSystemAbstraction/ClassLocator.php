@@ -18,11 +18,15 @@ final readonly class ClassLocator
     ) {
     }
 
-    public function getClass(string $className): ClassType
+    public function getClass(string $className): ?ClassType
     {
         $location = $this->getFileLocation($className);
-        $content = $this->fileSystem->readContent($location);
-        $object = PhpFile::fromCode($content)->getClasses()[$className] ?? throw new RuntimeException('Class not found');
+        $content = $this->fileSystem->readContentIfExists($location);
+        if (!$content) {
+            return null;
+        }
+
+        $object = PhpFile::fromCode($content)->getClasses()[$className] ?? throw new RuntimeException('Class ' . $className . ' not found in file ' . $location);
         if (!$object instanceof ClassType) {
             throw new RuntimeException('Class ' . $className . ' not found it is a ' . $object::class);
         }

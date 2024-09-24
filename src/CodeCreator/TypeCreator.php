@@ -116,7 +116,7 @@ final class TypeCreator
         }
 
         if ($property->properties !== null) {
-            $namespace->addUse($property->className, Helpers::extractShortName($property->className));
+            $namespace->addUse($property->className);
             $types[] = $namespace->simplifyName($property->className);
         }
 
@@ -139,7 +139,7 @@ final class TypeCreator
         }
 
         $types = $this->getAttributeTypes($property, $namespace);
-        $namespace->addUse(Types::class, Helpers::extractShortName(Types::class));
+        $namespace->addUse(Types::class);
         return new Attribute(Types::class, $types);
     }
 
@@ -154,7 +154,7 @@ final class TypeCreator
         }
 
         if ($property->properties !== null) {
-            $namespace->addUse($property->className, Helpers::extractShortName($property->className));
+            $namespace->addUse($property->className);
             $types[] = new Literal($namespace->simplifyName($property->className) . '::class');
         }
 

@@ -19,10 +19,14 @@ final readonly class SchemaFromClassCreator
     ) {
     }
 
-    public function fromClasses(string $className): NamedSchema
+    public function fromClasses(string $className): ?NamedSchema
     {
+        $class = $this->classLocator->getClass($className);
+        if (!$class) {
+            return null;
+        }
+
         $schema = new NamedSchema($className);
-        $class = $this->classLocator->getClass($schema->className);
         $this->loopSchema($schema, $class);
         return $schema;
     }
@@ -108,7 +112,7 @@ final readonly class SchemaFromClassCreator
                 throw new Exception('Class name mismatch ' . $schema->className . ' !== ' . $type->name . ' this must be a BUG please report it');
             }
 
-            $class = $this->classLocator->getClass($schema->className);
+            $class = $this->classLocator->getClass($schema->className) ?? throw new Exception('Class not found ' . $schema->className);
             $this->loopSchema($schema, $class);
             return;
         }

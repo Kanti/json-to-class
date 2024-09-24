@@ -45,12 +45,12 @@ class SchemaMergerTest extends TestCase
         yield 'null + empty' => [
             null,
             new Schema(),
-            new Schema(),
+            new Schema(canBeMissing: true),
         ];
         yield 'empty + null' => [
             new Schema(),
             null,
-            new Schema(),
+            new Schema(canBeMissing: true),
         ];
         yield 'nothing' => [
             new Schema(),
@@ -70,7 +70,7 @@ class SchemaMergerTest extends TestCase
         yield 'a and b' => [
             new Schema(properties: ['x' => new Schema()]),
             new Schema(properties: ['y' => new Schema()]),
-            new Schema(properties: ['x' => new Schema(), 'y' => new Schema()]),
+            new Schema(properties: ['x' => new Schema(canBeMissing: true), 'y' => new Schema(canBeMissing: true)]),
         ];
         yield 'a and b with same key but different types' => [
             new Schema(properties: ['x' => new Schema(basicTypes: ['string' => true])]),

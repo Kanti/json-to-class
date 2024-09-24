@@ -6,6 +6,7 @@ namespace Kanti\JsonToClass\Converter;
 
 use InvalidArgumentException;
 use Kanti\JsonToClass\Config\Config;
+use Kanti\JsonToClass\Config\Dto\OnInvalidCharacterProperties;
 use Kanti\JsonToClass\Dto\Type;
 use ReflectionClass;
 use stdClass;
@@ -26,10 +27,11 @@ final class ClassMapper
             throw new InvalidArgumentException(sprintf('Class %s does not exist %s', $className, $path));
         }
 
-        $data = (array)$data;
-        if (array_is_list($data)) {
+        if (is_array($data) && array_is_list($data)) {
             throw new InvalidArgumentException(sprintf('Data must be an associative array %s', $path));
         }
+
+        $data = (array)$data;
 
         $reflectionClass = new ReflectionClass($className);
         $constructor = $reflectionClass->getConstructor();
@@ -41,17 +43,21 @@ final class ClassMapper
         $args = [];
         foreach ($constructorParameters as $parameter) {
             $possibleTypes = PossibleConvertTargets::fromReflectionType($parameter);
+            $dataKey = $parameter->getName();
+            $parameterName = $dataKey;
+            if (str_starts_with($parameterName, '_') && $config->onInvalidCharacterProperties === OnInvalidCharacterProperties::TRY_PREFIX_WITH_UNDERSCORE) {
+                $dataKey = substr($parameterName, 1);
+            }
 
-            $parameterName = $parameter->getName();
-            if (!array_key_exists($parameterName, $data)) {
+            if (!array_key_exists($dataKey, $data)) {
                 if ($parameter->isDefaultValueAvailable()) {
                     continue;
                 }
 
-                throw new InvalidArgumentException(sprintf('Parameter %s is missing in data %s', $parameterName, $path));
+                throw new InvalidArgumentException(sprintf('Parameter %s->%s is missing in data %s', $className, $parameterName, $path));
             }
 
-            $args[$parameterName] = $this->convertType($possibleTypes, $data[$parameterName] ?? null, $config, $path . '.' . $parameterName);
+            $args[$parameterName] = $this->convertType($possibleTypes, $data[$dataKey] ?? null, $config, $path . '.' . $dataKey);
         }
 
         return new $className(...$args);

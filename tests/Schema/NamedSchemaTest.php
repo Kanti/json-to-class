@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Kanti\JsonToClass\Tests\Kanti\JsonToClass\Tests\v2\Schema;
+namespace Kanti\JsonToClass\Tests\Schema;
 
-use Kanti\JsonToClass\Schema\NamedSchema;
 use Generator;
+use Kanti\JsonToClass\Schema\NamedSchema;
 use Kanti\JsonToClass\Schema\Schema;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;

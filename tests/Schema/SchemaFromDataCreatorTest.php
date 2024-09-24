@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\Schema;
 
+use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Schema\SchemaFromDataCreator;
 use Generator;
 use Kanti\JsonToClass\Schema\Schema;
@@ -22,7 +23,7 @@ class SchemaFromDataCreatorTest extends TestCase
     public function fromData(array|stdClass $data, Schema $expectedSchema): void
     {
         $schemaFromDataCreator = new SchemaFromDataCreator();
-        $this->assertEquals($expectedSchema, $schemaFromDataCreator->fromData($data), 'schema from array');
+        $this->assertEquals($expectedSchema, $schemaFromDataCreator->fromData($data, new SaneConfig()), 'schema from array');
     }
 
     public static function dataProvider(): Generator
@@ -220,6 +221,7 @@ class SchemaFromDataCreatorTest extends TestCase
                         [
                             'name2' => 'Andi',
                             'age2' => 0,
+                            '48x48' => 'https://example.com/avatar.png',
                             'friends2' => [
                                 ['name3' => 'Andi', 'age3' => 0],
                                 [
@@ -245,6 +247,7 @@ class SchemaFromDataCreatorTest extends TestCase
                                 properties: [
                                     'name2' => new Schema(basicTypes: ['string' => true]),
                                     'age2' => new Schema(basicTypes: ['int' => true]),
+                                    '_48x48' => new Schema(basicTypes: ['string' => true]),
                                     'friends2' => new Schema(
                                         listElement: new Schema(
                                             properties: [

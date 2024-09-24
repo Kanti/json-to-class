@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\Tests\CodeCreator;
 
 use Composer\Autoload\ClassLoader;
+use Generator;
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\CodeCreator\CodeCreator;
+use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\FileSystemAbstraction\FileSystemInterface;
 use Kanti\JsonToClass\Schema\NamedSchema;
@@ -15,6 +17,7 @@ use Kanti\JsonToClass\Schema\SchemaFromClassCreator;
 use Kanti\JsonToClass\Tests\_helper\FakeFileSystem;
 use Kanti\JsonToClass\Tests\_helper\PhpFilesDriver;
 use Kanti\JsonToClass\Tests\_helper\PhpFilesDto;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\DataProviderExternal;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
@@ -28,12 +31,13 @@ class FromSchemaToClassAndBackTest extends TestCase
     #[Test]
     #[TestDox('CodeCreator->createFiles and SchemaFromClassCreator->fromClasses')]
     #[DataProviderExternal(TypeCreatorTest::class, 'dataProvider')]
+    #[DataProvider('dataProvider')]
     public function test(Schema $schema, mixed ...$_): void
     {
 
         $container = new JsonToClassContainer();
         $wrappedSchema = new Schema(properties: ['a' => $schema]);
-        $actualFiles = $container->get(CodeCreator::class)->createFiles(NamedSchema::fromSchema(Data::class, $wrappedSchema));
+        $actualFiles = $container->get(CodeCreator::class)->createFiles(NamedSchema::fromSchema(Data::class, $wrappedSchema), new SaneConfig());
 
 
         $actual = new PhpFilesDto($actualFiles, $this->dataName(), $this->providedData());
@@ -58,5 +62,14 @@ class FromSchemaToClassAndBackTest extends TestCase
         $namedWrappedSchema = NamedSchema::fromSchema(Data::class, $wrappedSchema);
         $actualReadSchema = $container->get(SchemaFromClassCreator::class)->fromClasses(Data::class);
         $this->assertEquals($namedWrappedSchema, $actualReadSchema);
+    }
+
+    public static function dataProvider(): Generator
+    {
+        yield 'starting with a number' => [
+            new Schema(properties: [
+                '_48x48' => new Schema(basicTypes: ['string' => true]),
+            ]),
+        ];
     }
 }

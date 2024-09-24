@@ -11,13 +11,21 @@ final class SchemaMerger
     /**
      * @return ($schemaA is NamedSchema ? NamedSchema : ($schemaB is NamedSchema ? NamedSchema : null))
      */
-    public function merge(?NamedSchema $schemaA, ?NamedSchema $schemaB): ?NamedSchema
+    public function merge(?NamedSchema $schemaA, ?NamedSchema $schemaB, bool $isProperty = true): ?NamedSchema
     {
         if (!$schemaA) {
+            if ($schemaB && $isProperty) {
+                $schemaB->canBeMissing = true;
+            }
+
             return $schemaB;
         }
 
         if (!$schemaB) {
+            if ($isProperty) {
+                $schemaA->canBeMissing = true;
+            }
+
             return $schemaA;
         }
 
@@ -28,19 +36,22 @@ final class SchemaMerger
         $result = new NamedSchema($schemaA->className);
         $result->canBeMissing = $schemaA->canBeMissing || $schemaB->canBeMissing;
         $result->basicTypes = $schemaA->basicTypes + $schemaB->basicTypes;
-        $result->listElement = $this->merge($schemaA->listElement, $schemaB->listElement);
+        $result->listElement = $this->merge($schemaA->listElement, $schemaB->listElement, false);
 
-        if (is_array($schemaA->properties)) {
-            $result->properties = [];
+        if ($schemaA->properties === null && $schemaB->properties === null) {
+            return $result;
         }
 
-        if (is_array($schemaB->properties)) {
-            $result->properties = [];
+        if ($schemaA->properties === null xor $schemaB->properties === null) {
+            $result->properties = $schemaA->properties ?? $schemaB->properties;
+            return $result;
         }
+
+        $result->properties = [];
 
         $keys = [...array_keys($schemaA->properties ?? []), ...array_keys($schemaB->properties ?? [])];
         foreach ($keys as $name) {
-            $propertySchema = $this->merge($schemaA->properties[$name] ?? null, $schemaB->properties[$name] ?? null);
+            $propertySchema = $this->merge($schemaA->properties[$name] ?? null, $schemaB->properties[$name] ?? null, true);
             assert($propertySchema instanceof NamedSchema);
             $result->properties[$name] = $propertySchema;
         }

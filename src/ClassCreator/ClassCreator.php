@@ -38,7 +38,7 @@ final readonly class ClassCreator
             throw new InvalidArgumentException('Class name must contain namespace');
         }
 
-        $schema = $this->schemaFromDataCreator->fromData($data);
+        $schema = $this->schemaFromDataCreator->fromData($data, $config);
         $schema = NamedSchema::fromSchema($className, $schema);
 
         if ($config->appendSchema === AppendSchema::APPEND) {
@@ -46,8 +46,10 @@ final readonly class ClassCreator
             $schema = $this->schemaMerger->merge($schema, $schemaFromClass);
         }
 
-        $files = $this->codeCreator->createFiles($schema->getFirstNonListChild());
+        $files = $this->codeCreator->createFiles($schema->getFirstNonListChild(), $config);
 
-        $this->fileWriter->writeIfNeeded($files);
+        if ($this->fileWriter->writeIfNeeded($files)) {
+            throw new InvalidArgumentException('Class already exists and cannot be reloaded');
+        }
     }
 }

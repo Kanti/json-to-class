@@ -6,6 +6,8 @@ namespace Kanti\JsonToClass\CodeCreator;
 
 use Exception;
 use Kanti\JsonToClass\Attribute\RootClass;
+use Kanti\JsonToClass\Config\Config;
+use Kanti\JsonToClass\Config\Dto\OnInvalidCharacterProperties;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Nette\PhpGenerator\Helpers;
 use Nette\PhpGenerator\Literal;
@@ -23,24 +25,24 @@ final readonly class CodeCreator
     /**
      * @return array<string, string>
      */
-    public function createFiles(NamedSchema $schema): array
+    public function createFiles(NamedSchema $schema, Config $config): array
     {
         if ($schema->basicTypes) {
             throw new Exception('Basic types not supported at this level ' . json_encode($schema, JSON_THROW_ON_ERROR));
         }
 
-        return $this->createFilesLoop($schema, $schema->className);
+        return $this->createFilesLoop($schema, $schema->className, $config);
     }
 
     /**
      * @return array<string, string>
      */
-    public function createFilesLoop(NamedSchema $schema, string $rootClassName): array
+    public function createFilesLoop(NamedSchema $schema, string $rootClassName, Config $config): array
     {
         $resultingClasses = [];
 
         if ($schema->listElement) {
-            $resultingClasses = $this->createFilesLoop($schema->listElement, $rootClassName);
+            $resultingClasses = $this->createFilesLoop($schema->listElement, $rootClassName, $config);
         }
 
         if ($schema->properties === null) {
@@ -69,13 +71,19 @@ final readonly class CodeCreator
         $constructor = $class
             ->addMethod('__construct')->setPublic();
 
-        foreach ($schema->properties as $name => $property) {
+        $properties = $this->sortProperties($schema->properties);
+        foreach ($properties as $name => $property) {
             $phpType = $this->typeCreator->getPhpType($property, $namespace);
             $docBlockType = $this->typeCreator->getDocBlockType($property, $namespace);
             $attribute = $this->typeCreator->getAttribute($property, $namespace);
 
+            $key = $name;
+            if ($config->onInvalidCharacterProperties === OnInvalidCharacterProperties::TRY_PREFIX_WITH_UNDERSCORE) {
+                $key = Helpers::isIdentifier($key) ? $key : '_' . $key;
+            }
+
             $promotedParameter = $constructor
-                ->addPromotedParameter($name)
+                ->addPromotedParameter($key)
                 ->setType($phpType)
                 ->setAttributes(array_filter([$attribute]));
 
@@ -84,10 +92,10 @@ final readonly class CodeCreator
             }
 
             if ($docBlockType) {
-                $constructor->addComment('@param ' . $docBlockType . ' $' . $name);
+                $constructor->addComment('@param ' . $docBlockType . ' $' . $key);
             }
 
-            foreach ($this->createFilesLoop($property, $rootClassName) as $className => $classContent) {
+            foreach ($this->createFilesLoop($property, $rootClassName, $config) as $className => $classContent) {
                 if (isset($resultingClasses[$className])) {
                     throw new Exception('Class already exists ' . $className);
                 }
@@ -105,5 +113,16 @@ final readonly class CodeCreator
         ksort($resultingClasses);
         uksort($resultingClasses, fn($a, $b): int => strlen($a) <=> strlen($b));
         return $resultingClasses;
+    }
+
+    /**
+     * @param array<string, NamedSchema> $properties
+     * @return array<string, NamedSchema>
+     */
+    private function sortProperties(array $properties): array
+    {
+        ksort($properties);
+        uasort($properties, fn(NamedSchema $a, NamedSchema $b): int => $a->canBeMissing <=> $b->canBeMissing);
+        return $properties;
     }
 }

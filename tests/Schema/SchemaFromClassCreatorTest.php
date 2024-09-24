@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Kanti\JsonToClass\Tests\Kanti\JsonToClass\Tests\v2\Schema;
+namespace Kanti\JsonToClass\Tests\Schema;
 
-use Kanti\GeneratedTest\Data;
-use Kanti\JsonToClass\Schema\SchemaFromClassCreator;
 use Generator;
+use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\Schema\NamedSchema;
+use Kanti\JsonToClass\Schema\SchemaFromClassCreator;
 use Nette\PhpGenerator\ClassType;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -17,8 +17,16 @@ use PHPUnit\Framework\TestCase;
 class SchemaFromClassCreatorTest extends TestCase
 {
     #[Test]
+    public function classNotFound(): void
+    {
+        $container = new JsonToClassContainer();
+        $schemaFromClassCreator = $container->get(SchemaFromClassCreator::class);
+        $this->assertNull($schemaFromClassCreator->fromClasses(self::class . '\NotExistingClass'));
+    }
+
+    #[Test]
     #[DataProvider('dataProvider')]
-    public function exceptions(string $classCode, string $expectedExceptionMessage): void
+    public function exceptions2(string $classCode, string $expectedExceptionMessage): void
     {
         $container = new JsonToClassContainer();
         $schemaFromClassCreator = $container->get(SchemaFromClassCreator::class);
