@@ -17,10 +17,11 @@ final readonly class FileWriter
 
     /**
      * @param array<string, string> $classes
+     * @return list<string>
      */
-    public function writeIfNeeded(array $classes): bool
+    public function writeIfNeeded(array $classes): array
     {
-        $needsRestart = false;
+        $needsRestart = [];
         foreach ($classes as $className => $content) {
             $location = $this->classLocator->getFileLocation($className);
 
@@ -32,13 +33,9 @@ final readonly class FileWriter
 
             $this->fileSystem->writeContent($location, $content);
 
-            if (class_exists($className, false)) {
-                // we already have the class loaded, so we would need to reload it, but we can't (no monkey patching in PHP)
-                $needsRestart = true;
-                continue;
+            if (class_exists($className, false) && !interface_exists($className, false)) {
+                $needsRestart[] = $className;
             }
-
-            $this->fileSystem->requireFile($location); // load if not loaded already (composer autoloader ignores the new file)
         }
 
         return $needsRestart;

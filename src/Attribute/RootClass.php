@@ -10,7 +10,7 @@ use Attribute;
 final readonly class RootClass
 {
     public function __construct(
-        public string $className,
+        public ?string $className = null,
     ) {
     }
 }

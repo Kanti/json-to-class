@@ -146,7 +146,7 @@ final class TypeCreator
     /**
      * @return list<string|array<mixed>|Literal>
      */
-    private function getAttributeTypes(NamedSchema $property, PhpNamespace $namespace): array
+    public function getAttributeTypes(NamedSchema $property, ?PhpNamespace $namespace): array
     {
         $types = [];
         foreach (array_keys($property->basicTypes) as $type) {
@@ -154,8 +154,12 @@ final class TypeCreator
         }
 
         if ($property->properties !== null) {
-            $namespace->addUse($property->className);
-            $types[] = new Literal($namespace->simplifyName($property->className) . '::class');
+            if ($namespace === null) {
+                $types[] = $property->className;
+            } else {
+                $namespace->addUse($property->className);
+                $types[] = new Literal($namespace->simplifyName($property->className) . '::class');
+            }
         }
 
         if ($property->listElement) {

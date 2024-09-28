@@ -6,6 +6,7 @@ namespace Kanti\JsonToClass\Converter;
 
 use InvalidArgumentException;
 use Kanti\JsonToClass\Attribute\Types;
+use Kanti\JsonToClass\Dto\Parameter;
 use Kanti\JsonToClass\Dto\Type;
 use ReflectionIntersectionType;
 use ReflectionNamedType;
@@ -45,8 +46,12 @@ final readonly class PossibleConvertTargets implements Stringable
         return null;
     }
 
-    public static function fromReflectionType(ReflectionParameter $parameter): self
+    public static function fromParameter(ReflectionParameter|Parameter $parameter): self
     {
+        if ($parameter instanceof Parameter) {
+            return new self($parameter->types);
+        }
+
         $attribute = $parameter->getAttributes(Types::class)[0] ?? null;
         if ($attribute) {
             return new self($attribute->newInstance()->types);
