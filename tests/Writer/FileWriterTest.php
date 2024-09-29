@@ -46,6 +46,7 @@ class FileWriterTest extends TestCase
      * @param array<string, string> $classes
      * @param array<string, string|true> $alreadyWrittenFiles
      * @param array<string, string|true> $fileLocationsWrittenTo
+     * @param list<string> $needsRestart
      */
     #[Test]
     #[DataProvider('writeIfNeededDataProvider')]
@@ -53,7 +54,7 @@ class FileWriterTest extends TestCase
         array $classes,
         array $alreadyWrittenFiles,
         array $fileLocationsWrittenTo,
-        bool $needsRestart,
+        array $needsRestart,
     ): void {
         $classLoader = new ClassLoader();
         $classLoader->addPsr4('Kanti\\', 'fake-src/');
@@ -96,7 +97,7 @@ class FileWriterTest extends TestCase
         ]);
 
         $actual = $container->get(FileWriter::class)->writeIfNeeded([self::class => FakeFileSystem::CONTENT]);
-        $this->assertFalse($actual, 'no restart needed nothing written');
+        $this->assertEquals([], $actual, 'no restart needed nothing written');
     }
 
     public static function writeIfNeededDataProvider(): Generator
@@ -105,32 +106,32 @@ class FileWriterTest extends TestCase
             'classes' => ['Kanti\Test' => FakeFileSystem::CONTENT],
             'alreadyWrittenFiles' => [],
             'fileLocationsWrittenTo' => ['fake-src/Test.php' => true],
-            'needsRestart' => false,
+            'needsRestart' => [],
         ];
         yield 'write one existing + one new' => [
             'classes' => ['Kanti\Test' => FakeFileSystem::CONTENT, 'Kanti\Test2' => FakeFileSystem::CONTENT],
             'alreadyWrittenFiles' => ['fake-src/Test.php' => true],
             'fileLocationsWrittenTo' => ['fake-src/Test2.php' => true],
-            'needsRestart' => false,
+            'needsRestart' => [],
         ];
         yield 'write one new subdirectory' => [
             'classes' => ['Kanti\Test\L\L\Sub' => FakeFileSystem::CONTENT],
             'alreadyWrittenFiles' => ['fake-src/Test.php' => true],
             'fileLocationsWrittenTo' => ['fake-src/Test/L/L/Sub.php' => true],
-            'needsRestart' => false,
+            'needsRestart' => [],
         ];
         $fileNameCurrentClass = 'fake-src/' . str_replace('Kanti/', '', str_replace('\\', '/', self::class)) . '.php';
         yield 'no overwrite needed so no restart needed even if the class was already loaded' => [
             'classes' => [self::class => FakeFileSystem::CONTENT],
             'alreadyWrittenFiles' => [$fileNameCurrentClass => true],
             'fileLocationsWrittenTo' => [],
-            'needsRestart' => false,
+            'needsRestart' => [],
         ];
         yield 'overwrite needed so restart needed because the class was already loaded' => [
             'classes' => [self::class => FakeFileSystem::CONTENT],
             'alreadyWrittenFiles' => [],
             'fileLocationsWrittenTo' => [$fileNameCurrentClass => true],
-            'needsRestart' => true,
+            'needsRestart' => [self::class],
         ];
     }
 }
