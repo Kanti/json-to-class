@@ -47,6 +47,10 @@ final readonly class DevelopmentCodeCreator
         $implementation = $className . '_Implementation';
 
         if (interface_exists($className, false) && class_exists($implementation, false)) {
+            if (!is_a($implementation, DataTrait::class, true)) {
+                throw new Exception(sprintf("Class %s already exists but is not a DataTrait %b", $implementation, interface_exists($implementation)));
+            }
+
             return $implementation;
         }
 
@@ -64,6 +68,10 @@ namespace {$namespace} {
 }
 PHP
         );
+        if (!is_a($implementation, DataTrait::class, true)) {
+            throw new Exception(sprintf("Class %s already exists but is not a DataTrait %b", $implementation, interface_exists($implementation)));
+        }
+
         return $implementation;
     }
 }

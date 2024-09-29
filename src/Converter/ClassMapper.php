@@ -12,7 +12,7 @@ use Kanti\JsonToClass\Dto\Type;
 use ReflectionClass;
 use stdClass;
 
-use function class_uses_recursive;
+use function Safe\class_uses;
 
 final class ClassMapper
 {
@@ -27,7 +27,12 @@ final class ClassMapper
     public function map(string $className, array|stdClass $data, Config $config, string $path = ''): object
     {
         if (interface_exists($className, false) && class_exists($className . '_Implementation', false)) {
+            $initialClassName = $className;
             $className .= '_Implementation';
+
+            if (!is_a($className, $initialClassName, true)) {
+                throw new InvalidArgumentException(sprintf('Class %s does not implement %s %s', $className, $initialClassName, $path));
+            }
 
             if (!in_array(DataTrait::class, class_uses($className, false), true)) {
                 throw new InvalidArgumentException(sprintf('Class %s must implement %s %s', $className, DataTrait::class, $path));
@@ -50,7 +55,12 @@ final class ClassMapper
             throw new InvalidArgumentException(sprintf('Class %s does not have a constructor, but it is required %s', $className, $path));
         }
 
-        $constructorParameters = is_a($className, DataTrait::class, true) ? $className::$__kanti_json_to_class_parameters : $constructor->getParameters();
+        if (is_a($className, DataTrait::class, true)) {
+            $constructorParameters = $className::$__kanti_json_to_class_parameters;
+        } else {
+            $constructorParameters = $constructor->getParameters();
+        }
+
         $args = [];
         foreach ($constructorParameters as $parameter) {
             $possibleTypes = PossibleConvertTargets::fromParameter($parameter);

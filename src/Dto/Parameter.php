@@ -7,7 +7,6 @@ namespace Kanti\JsonToClass\Dto;
 final readonly class Parameter
 {
     /**
-     * @param non-empty-string $name
      * @param list<Type> $types
      */
     public function __construct(

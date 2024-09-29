@@ -1,6 +1,16 @@
 parameters:
 	ignoreErrors:
 		-
+			message: "#^Method Kanti\\\\JsonToClass\\\\CodeCreator\\\\DevelopmentCodeCreator\\:\\:createDevelopmentClassIfNotExists\\(\\) has invalid return type Kanti\\\\JsonToClass\\\\Dto\\\\DataTrait\\.$#"
+			count: 1
+			path: src/CodeCreator/DevelopmentCodeCreator.php
+
+		-
+			message: "#^Parameter \\#1 \\.\\.\\.\\$types of class Kanti\\\\JsonToClass\\\\Attribute\\\\Types constructor expects list\\<list\\<list\\<string\\>\\|string\\>\\|string\\>\\|string, list\\<mixed\\>\\|string given\\.$#"
+			count: 1
+			path: src/CodeCreator/DevelopmentCodeCreator.php
+
+		-
 			message: "#^Class Kanti\\\\JsonToClass\\\\Config\\\\Config has an uninitialized readonly property \\$appendSchema\\. Assign it in the constructor\\.$#"
 			count: 1
 			path: src/Config/Config.php

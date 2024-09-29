@@ -144,7 +144,7 @@ final class TypeCreator
     }
 
     /**
-     * @return list<string|array<mixed>|Literal>
+     * @return ($namespace is null ? list<string|list<mixed>> : list<string|list<mixed>|Literal>)
      */
     public function getAttributeTypes(NamedSchema $property, ?PhpNamespace $namespace): array
     {
