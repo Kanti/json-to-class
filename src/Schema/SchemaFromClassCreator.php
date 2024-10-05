@@ -118,7 +118,7 @@ final readonly class SchemaFromClassCreator
         }
 
         if ($type->isEmptyArray()) {
-            $schema->listElement ??= new NamedSchema($schema->className . '\\L');
+            $schema->listElement ??= new NamedSchema($schema->className . '_');
             return;
         }
 
@@ -127,7 +127,7 @@ final readonly class SchemaFromClassCreator
             return;
         }
 
-        $schema->listElement ??= new NamedSchema($schema->className . '\\L');
+        $schema->listElement ??= new NamedSchema($schema->className . '_');
         $this->addType($type->unpackOnce(), $schema->listElement);
     }
 }

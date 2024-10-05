@@ -13,6 +13,8 @@ use Nette\PhpGenerator\PsrPrinter;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 
+use function is_string;
+
 final class JsonToClassContainer implements ContainerInterface
 {
     /**
@@ -31,7 +33,7 @@ final class JsonToClassContainer implements ContainerInterface
     public function __construct(array $overwriteFactories = [])
     {
         $this->factories = [
-            ClassLoader::class => fn(): object => require __DIR__ . '/../../vendor/autoload.php', // TODO fix this path
+            ClassLoader::class => $this->getClassLoader(...),
             FileSystemInterface::class => fn(): object => new FileSystem(),
             Printer::class => fn(): object => new PsrPrinter(),
             ...$overwriteFactories,
@@ -140,5 +142,24 @@ final class JsonToClassContainer implements ContainerInterface
         }
 
         return $result;
+    }
+
+    private function getClassLoader(): ClassLoader
+    {
+        // if defined use this: (composer wraps this file and adds this global:)
+        $possibleAutoloadLocations = [
+            $GLOBALS['_composer_autoload_path'] ?? '',
+            __DIR__ . '/../../../autoload.php',
+            __DIR__ . '/../../../vendor/autoload.php',
+            __DIR__ . '/../../vendor/autoload.php',
+            __DIR__ . '/../../../../autoload.php',
+        ];
+        foreach ($possibleAutoloadLocations as $autoloadLocation) {
+            if (is_string($autoloadLocation) && file_exists($autoloadLocation)) {
+                return require $autoloadLocation;
+            }
+        }
+
+        throw new ContainerException('Autoload file not found 😿');
     }
 }

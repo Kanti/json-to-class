@@ -35,7 +35,7 @@ final class NamedSchema
             $className,
             $schema->canBeMissing,
             $schema->basicTypes,
-            $schema->listElement ? self::fromSchema($className . '\\L', $schema->listElement) : null,
+            $schema->listElement ? self::fromSchema($className . '_', $schema->listElement) : null,
             $properties,
         );
     }

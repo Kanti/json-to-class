@@ -36,7 +36,6 @@ final class StringHelpers
 
     public static function getChildClass(string $className, string $property): string
     {
-
         $className2 = ucfirst($property);
         if (Helpers::Keywords[strtolower($property)] ?? false) {
             $className2 = '_' . $className2;

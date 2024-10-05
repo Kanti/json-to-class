@@ -16,7 +16,10 @@
             }
         }
     },
-    "expectedPhpType": "Kanti\\GeneratedTest\\Data"
+    "expectedPhpType": "Kanti\\GeneratedTest\\Data",
+    "expectedUses": {
+        "Data": "Kanti\\GeneratedTest\\Data"
+    }
 }
 ````
 ##### Kanti\GeneratedTest\Data:

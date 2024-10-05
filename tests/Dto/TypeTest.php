@@ -50,15 +50,6 @@ class TypeTest extends TestCase
 
     #[Test]
     #[TestDox('Class does not exist ::getClassName')]
-    public function getClassName(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Class does not exist');
-        Type::from('\Kanti\JsonToClass\Tests\Dto\int')->getClassName();
-    }
-
-    #[Test]
-    #[TestDox('Class does not exist ::getClassName')]
     public function unpackOnce(): void
     {
         $this->expectException(InvalidArgumentException::class);

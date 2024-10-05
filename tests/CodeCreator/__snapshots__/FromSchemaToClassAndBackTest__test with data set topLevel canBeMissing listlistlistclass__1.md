@@ -34,10 +34,10 @@
         "properties": null
     },
     "expectedPhpType": "array|null",
-    "expectedDocBlockType": "list<list<list<L>>>|null",
+    "expectedDocBlockType": "list<list<list<Data___>>>|null",
     "expectedAttribute": {},
     "expectedUses": {
-        "L": "Kanti\\GeneratedTest\\Data\\L\\L\\L"
+        "Data___": "Kanti\\GeneratedTest\\Data___"
     }
 }
 ````
@@ -49,7 +49,7 @@ declare(strict_types=1);
 
 namespace Kanti\GeneratedTest;
 
-use Kanti\GeneratedTest\Data\A\L\L\L;
+use Kanti\GeneratedTest\Data\A___;
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Attribute\Types;
 
@@ -57,28 +57,28 @@ use Kanti\JsonToClass\Attribute\Types;
 final readonly class Data
 {
     /**
-     * @param list<list<list<L>>>|null $a
+     * @param list<list<list<A___>>>|null $a
      */
     public function __construct(
-        #[Types([[[L::class]]], 'null')]
+        #[Types([[[A___::class]]], 'null')]
         public array|null $a = null,
     ) {
     }
 }
 ````
-##### Kanti\GeneratedTest\Data\A\L\L\L:
+##### Kanti\GeneratedTest\Data\A___:
 ````php
 <?php
 
 declare(strict_types=1);
 
-namespace Kanti\GeneratedTest\Data\A\L\L;
+namespace Kanti\GeneratedTest\Data;
 
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Attribute\RootClass;
 
 #[RootClass(Data::class)]
-final readonly class L
+final readonly class A___
 {
     public function __construct(
         public int $int,

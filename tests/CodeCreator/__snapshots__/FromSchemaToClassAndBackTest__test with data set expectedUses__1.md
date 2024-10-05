@@ -1,4 +1,4 @@
-# Tested "list<class>|class"
+# Tested "expectedUses"
 ````json
 {
     "schema": {
@@ -20,13 +20,20 @@
             }
         },
         "properties": {
-            "empty": {
-                "canBeMissing": true,
-                "basicTypes": {
-                    "null": true
-                },
+            "classSchema": {
+                "canBeMissing": false,
+                "basicTypes": [],
                 "listElement": null,
-                "properties": null
+                "properties": {
+                    "int": {
+                        "canBeMissing": false,
+                        "basicTypes": {
+                            "int": true
+                        },
+                        "listElement": null,
+                        "properties": null
+                    }
+                }
             }
         }
     },
@@ -74,13 +81,14 @@ declare(strict_types=1);
 namespace Kanti\GeneratedTest\Data;
 
 use Kanti\GeneratedTest\Data;
+use Kanti\GeneratedTest\Data\A\ClassSchema;
 use Kanti\JsonToClass\Attribute\RootClass;
 
 #[RootClass(Data::class)]
 final readonly class A
 {
     public function __construct(
-        public null $empty = null,
+        public ClassSchema $classSchema,
     ) {
     }
 }
@@ -98,6 +106,26 @@ use Kanti\JsonToClass\Attribute\RootClass;
 
 #[RootClass(Data::class)]
 final readonly class A_
+{
+    public function __construct(
+        public int $int,
+    ) {
+    }
+}
+````
+##### Kanti\GeneratedTest\Data\A\ClassSchema:
+````php
+<?php
+
+declare(strict_types=1);
+
+namespace Kanti\GeneratedTest\Data\A;
+
+use Kanti\GeneratedTest\Data;
+use Kanti\JsonToClass\Attribute\RootClass;
+
+#[RootClass(Data::class)]
+final readonly class ClassSchema
 {
     public function __construct(
         public int $int,
