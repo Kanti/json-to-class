@@ -9,8 +9,10 @@ use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Config\Dto\OnInvalidCharacterProperties;
 use Kanti\JsonToClass\Dto\DataTrait;
+use Kanti\JsonToClass\Dto\Parameter;
 use Kanti\JsonToClass\Dto\Type;
 use ReflectionClass;
+use ReflectionParameter;
 use stdClass;
 
 use function Safe\class_uses;
@@ -56,10 +58,11 @@ final class ClassMapper
             throw new InvalidArgumentException(sprintf('Class %s does not have a constructor, but it is required %s', $className, $path));
         }
 
+        /** @var list<ReflectionParameter|Parameter> $constructorParameters */
+        $constructorParameters = $constructor->getParameters();
+
         if (DevelopmentCodeCreator::isDevelopmentDto($className)) {
             $constructorParameters = $className::getClassParameters();
-        } else {
-            $constructorParameters = $constructor->getParameters();
         }
 
         $args = [];

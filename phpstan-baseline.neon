@@ -41,6 +41,11 @@ parameters:
 			path: src/Container/JsonToClassContainer.php
 
 		-
+			message: "#^Parameter \\#2 \\$data of method Kanti\\\\JsonToClass\\\\Converter\\\\Converter\\:\\:convertList\\(\\) expects array\\<array\\|stdClass\\>, array given\\.$#"
+			count: 1
+			path: src/Converter/Converter.php
+
+		-
 			message: "#^Method Kanti\\\\JsonToClass\\\\Helpers\\\\StringHelpers\\:\\:unpackLiterals\\(\\) should return list\\<list\\<string\\>\\|string\\>\\|string but returns list\\<list\\<list\\<string\\>\\|string\\>\\|string\\>\\.$#"
 			count: 1
 			path: src/Helpers/StringHelpers.php
