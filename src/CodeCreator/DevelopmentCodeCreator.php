@@ -28,7 +28,7 @@ final readonly class DevelopmentCodeCreator
             $this->createDevelopmentClasses($property);
 
             $types = $this->typeCreator->getAttributeTypes($property, null);
-            $parameters[] = new Parameter($name, (new Types(...$types))->types, $schema->canBeMissing);
+            $parameters[] = new Parameter($name, (new Types(...$types))->types, $property->canBeMissing);
         }
 
         $classNameImplementation = $this->createDevelopmentClassIfNotExists($schema->className);

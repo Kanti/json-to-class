@@ -14,10 +14,13 @@ use Psr\Container\ContainerInterface;
 use stdClass;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 
+use function get_debug_type;
+use function is_array;
+
 /**
  * @api
  */
-#[Autoconfigure(public: true, autowire: true)]
+#[Autoconfigure(public: true, autowire: true)] // this does not work (for TYPO3) :(
 final readonly class Converter
 {
     public function __construct(
@@ -31,6 +34,26 @@ final readonly class Converter
     {
         $container ??= new JsonToClassContainer();
         return $container->get(self::class);
+    }
+
+    /**
+     * @template T of object
+     * @param class-string<T> $className
+     *
+     * @return T|list<T>
+     */
+    public function jsonDecode(string $className, string $json, Config $config = new SaneConfig()): array|object
+    {
+        $data = json_decode($json, associative: false, flags: JSON_THROW_ON_ERROR);
+        if (!is_array($data) && !$data instanceof stdClass) {
+            throw new InvalidArgumentException('Invalid JSON given: "' . get_debug_type($data) . '" allowed: array or object');
+        }
+
+        if (is_array($data)) {
+            return $this->convertList($className, $data, $config);
+        }
+
+        return $this->convert($className, $data, $config);
     }
 
     /**
