@@ -23,16 +23,16 @@ final readonly class DevelopmentCodeCreator
             $this->createDevelopmentClasses($schema->listElement);
         }
 
-        $result = [];
+        $parameters = [];
         foreach ($schema->properties ?? [] as $name => $property) {
             $this->createDevelopmentClasses($property);
 
             $types = $this->typeCreator->getAttributeTypes($property, null);
-            $result[] = new Parameter($name, (new Types(...$types))->types, $schema->canBeMissing);
+            $parameters[] = new Parameter($name, (new Types(...$types))->types, $schema->canBeMissing);
         }
 
         $classNameImplementation = $this->createDevelopmentClassIfNotExists($schema->className);
-        $classNameImplementation::$__kanti_json_to_class_parameters = $result;
+        $classNameImplementation::setClassParameters(...$parameters);
     }
 
     /**
@@ -47,7 +47,7 @@ final readonly class DevelopmentCodeCreator
         $implementation = $className . '_Implementation';
 
         if (interface_exists($className, false) && class_exists($implementation, false)) {
-            if (!is_a($implementation, DataTrait::class, true)) {
+            if (!self::isDevelopmentDto($implementation)) {
                 throw new Exception(sprintf("Class %s already exists but is not a DataTrait %b", $implementation, interface_exists($implementation)));
             }
 
@@ -68,10 +68,20 @@ namespace {$namespace} {
 }
 PHP
         );
-        if (!is_a($implementation, DataTrait::class, true)) {
-            throw new Exception(sprintf("Class %s already exists but is not a DataTrait %b", $implementation, interface_exists($implementation)));
+        if (!class_exists($implementation, false) || !self::isDevelopmentDto($implementation)) {
+            throw new Exception(sprintf("Class %s exists but is not a DataTrait %b", $implementation, interface_exists($implementation)));
         }
 
         return $implementation;
+    }
+
+    /**
+     * @template T of object
+     * @param class-string<T> $className
+     * @phpstan-assert-if-true class-string<DataTrait> $className
+     */
+    public static function isDevelopmentDto(string $className): bool
+    {
+        return isset(class_uses($className, false)[DataTrait::class]);
     }
 }

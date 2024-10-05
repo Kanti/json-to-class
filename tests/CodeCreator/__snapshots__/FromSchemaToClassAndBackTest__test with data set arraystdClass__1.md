@@ -15,7 +15,9 @@
     "expectedPhpType": "Kanti\\GeneratedTest\\Data|array",
     "expectedDocBlockType": "array{}|Data",
     "expectedAttribute": {},
-    "expectedUses": []
+    "expectedUses": {
+        "Data": "Kanti\\GeneratedTest\\Data"
+    }
 }
 ````
 ##### Kanti\GeneratedTest\Data:

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\Converter;
 
 use InvalidArgumentException;
+use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Config\Dto\OnInvalidCharacterProperties;
 use Kanti\JsonToClass\Dto\DataTrait;
@@ -34,7 +35,7 @@ final class ClassMapper
                 throw new InvalidArgumentException(sprintf('Class %s does not implement %s %s', $className, $initialClassName, $path));
             }
 
-            if (!in_array(DataTrait::class, class_uses($className, false), true)) {
+            if (!DevelopmentCodeCreator::isDevelopmentDto($className)) {
                 throw new InvalidArgumentException(sprintf('Class %s must implement %s %s', $className, DataTrait::class, $path));
             }
         }
@@ -55,8 +56,8 @@ final class ClassMapper
             throw new InvalidArgumentException(sprintf('Class %s does not have a constructor, but it is required %s', $className, $path));
         }
 
-        if (is_a($className, DataTrait::class, true)) {
-            $constructorParameters = $className::$__kanti_json_to_class_parameters;
+        if (DevelopmentCodeCreator::isDevelopmentDto($className)) {
+            $constructorParameters = $className::getClassParameters();
         } else {
             $constructorParameters = $constructor->getParameters();
         }
@@ -108,6 +109,8 @@ final class ClassMapper
             return $result;
         }
 
-        return $this->map($type->getClassName(), $param, $config, $path);
+        /** @var class-string $className */
+        $className = $type->name;
+        return $this->map($className, $param, $config, $path);
     }
 }
