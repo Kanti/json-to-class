@@ -8,7 +8,7 @@ use Exception;
 use Kanti\JsonToClass\Attribute\Types;
 use Kanti\JsonToClass\Dto\Type;
 use Kanti\JsonToClass\FileSystemAbstraction\ClassLocator;
-use Kanti\JsonToClass\Helpers\StringHelpers;
+use Kanti\JsonToClass\Helpers\SH;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PromotedParameter;
 
@@ -19,6 +19,9 @@ final readonly class SchemaFromClassCreator
     ) {
     }
 
+    /**
+     * @param class-string $className
+     */
     public function fromClasses(string $className): ?NamedSchema
     {
         $class = $this->classLocator->getClass($className);
@@ -38,7 +41,7 @@ final readonly class SchemaFromClassCreator
         foreach ($this->getPromotedParameters($class, $schema->className) as $parameter) {
             $propertyName = $parameter->getName();
             $types = $this->getTypesFromPhpProperty($parameter, $schema->className);
-            $childClassName = StringHelpers::getChildClass($schema->className, $propertyName);
+            $childClassName = SH::getChildClass($schema->className, $propertyName);
             foreach ($types as $type) {
                 $schema->properties[$propertyName] ??= new NamedSchema($childClassName);
 
@@ -52,6 +55,7 @@ final readonly class SchemaFromClassCreator
     }
 
     /**
+     * @param class-string $className
      * @return list<PromotedParameter>
      */
     private function getPromotedParameters(ClassType $class, string $className): array
@@ -69,6 +73,7 @@ final readonly class SchemaFromClassCreator
     }
 
     /**
+     * @param class-string $className
      * @return list<Type>
      */
     private function getTypesFromPhpProperty(PromotedParameter $parameter, string $className): array
@@ -77,7 +82,7 @@ final readonly class SchemaFromClassCreator
             $attributes = $parameter->getAttributes();
             foreach ($attributes as $attribute) {
                 if ($attribute->getName() === Types::class) {
-                    $types = StringHelpers::getAttributes($attribute);
+                    $types = SH::getAttributes($attribute);
                     assert($types instanceof Types);
                     return $types->types;
                 }
@@ -118,7 +123,7 @@ final readonly class SchemaFromClassCreator
         }
 
         if ($type->isEmptyArray()) {
-            $schema->listElement ??= new NamedSchema($schema->className . '_');
+            $schema->listElement ??= new NamedSchema(SH::classString($schema->className . '_'));
             return;
         }
 
@@ -127,7 +132,7 @@ final readonly class SchemaFromClassCreator
             return;
         }
 
-        $schema->listElement ??= new NamedSchema($schema->className . '_');
+        $schema->listElement ??= new NamedSchema(SH::classString($schema->className . '_'));
         $this->addType($type->unpackOnce(), $schema->listElement);
     }
 }

@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use Kanti\JsonToClass\CodeCreator\CodeCreator;
 use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Config\Config;
-use Kanti\JsonToClass\Config\Dto\AppendSchema;
+use Kanti\JsonToClass\Config\Enums\AppendSchema;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Kanti\JsonToClass\Schema\SchemaFromClassCreator;
 use Kanti\JsonToClass\Schema\SchemaFromDataCreator;
@@ -29,6 +29,7 @@ final readonly class ClassCreator
     }
 
     /**
+     * @param class-string $className
      * @param array<mixed>|stdClass $data
      */
     public function createClasses(
@@ -48,7 +49,7 @@ final readonly class ClassCreator
             $schema = $this->schemaMerger->merge($schema, $schemaFromClass);
         }
 
-        $files = $this->codeCreator->createFiles($schema->getFirstNonListChild(), $config);
+        $files = $this->codeCreator->createFiles($schema->getFirstNonListChild());
 
         if ($restartReasons = $this->fileWriter->writeIfNeeded($files)) {
             $message = sprintf('Class %s already exists and cannot be reloaded', implode(', ', $restartReasons));

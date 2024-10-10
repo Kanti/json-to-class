@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Kanti\JsonToClass\Config\Dto;
+namespace Kanti\JsonToClass\Config\Enums;
 
 enum OnExtraProperties
 {

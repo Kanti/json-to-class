@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Config;
 
-use Kanti\JsonToClass\Config\Dto\AppendSchema;
-use Kanti\JsonToClass\Config\Dto\OnExtraProperties;
-use Kanti\JsonToClass\Config\Dto\OnInvalidCharacterProperties;
-use Kanti\JsonToClass\Config\Dto\OnMissingProperties;
-use Kanti\JsonToClass\Config\Dto\RemoveOldClasses;
+use Kanti\JsonToClass\Config\Enums\AppendSchema;
+use Kanti\JsonToClass\Config\Enums\OnExtraProperties;
+use Kanti\JsonToClass\Config\Enums\OnInvalidCharacterProperties;
+use Kanti\JsonToClass\Config\Enums\OnMissingProperties;
+use Kanti\JsonToClass\Config\Enums\RemoveOldClasses;
 
 /**
  * todo this should be an interface (with PHP 8.4 and property hooks it should be possible to refactor this)

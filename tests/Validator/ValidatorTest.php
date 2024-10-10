@@ -68,6 +68,17 @@ class ValidatorTest extends TestCase
         yield 'record with valid Key' => [
             'data' => ['validKey' => 'value'],
         ];
+        yield 'record with reserved Key' => [
+            'data' => ['int' => 'value'],
+        ];
+        yield 'record with number' => [
+            'data' => [42 => 'value'],
+        ];
+        yield 'record with number + StrictConfig' => [
+            'data' => [42 => 'value'],
+            'config' => new StrictConfig(),
+            'invalidMessage' => 'Key is not valid: 42',
+        ];
         yield 'record with numberStartingKey' => [
             'data' => ['0111' => 'value'],
         ];
@@ -80,8 +91,23 @@ class ValidatorTest extends TestCase
             'data' => ['*~+' => 'value'],
             'invalidMessage' => 'Key is not valid: *~+',
         ];
-        yield 'record with reserved Key' => [
-            'data' => ['int' => 'value'],
+        yield 'inList record with numberStartingKey + StrictConfig' => [
+            'data' => [['0111' => 'value']],
+            'config' => new StrictConfig(),
+            'invalidMessage' => 'Key is not valid: 0111 at $[0]',
+        ];
+        yield 'inList record with invalid Key' => [
+            'data' => [['*~+' => 'value']],
+            'invalidMessage' => 'Key is not valid: *~+ at $[0]',
+        ];
+        yield 'inObject record with numberStartingKey + StrictConfig' => [
+            'data' => ['parentKey' => ['0111' => 'value']],
+            'config' => new StrictConfig(),
+            'invalidMessage' => 'Key is not valid: 0111 at $.parentKey',
+        ];
+        yield 'inObject record with invalid Key' => [
+            'data' => ['parentKey' => ['*~+' => 'value']],
+            'invalidMessage' => 'Key is not valid: *~+ at $.parentKey',
         ];
     }
 }

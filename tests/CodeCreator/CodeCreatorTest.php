@@ -23,7 +23,7 @@ class CodeCreatorTest extends TestCase
         $container = new JsonToClassContainer();
         $codeCreator = $container->get(CodeCreator::class);
         $namedSchema = NamedSchema::fromSchema(Data::class, new Schema(basicTypes: ['string' => true]));
-        $this->expectExceptionMessage('Basic types not supported at this level ');
-        $codeCreator->createFiles($namedSchema, new SaneConfig());
+        $this->expectExceptionMessage('Basic types not supported at this level {');
+        $codeCreator->createFiles($namedSchema);
     }
 }

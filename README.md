@@ -78,9 +78,9 @@ time per class: `19.741117693663µs`
 - [ ] generate JSON Schema from data structures (JSON, CSV, DB, etc.)
 
 ## TODOs
+- if type is only `null` or `array{}` or `stdClass{}` then it we remove the property
 - default wenn zu viele Felder kommen: Warning im Logging (PSR Logger / Sentry Logger)
 - decide if we should use reflection or `::from` methods
-- monkey patching of classes (not possible right now :/)
 - maybe add log of schemas of all data transformed (commutative schema log)
 - on warning and error: log with help to change the schema/Classes so the current data is working with the Classes
 - will have a command `vendor/bin/json-to-class add-schema <data>` that will help to add schema to the class (from log message)
@@ -97,3 +97,28 @@ class Person {
 class Person {
 }
 `````
+
+
+Idea: do not generate property content:
+````php
+#[Ignore('content')]
+class Person {
+}
+````
+
+Idea: do not create classes for complex types, just use the type hint
+````php
+#[KeepData('content')]
+class Person {
+    /**
+     * @param {...} $content
+     * @phpstan-type ....
+     */
+    public function __construct(
+        public mixed $content,
+    ) {}
+}
+````
+
+````php
+````

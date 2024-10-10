@@ -6,6 +6,7 @@ namespace Kanti\JsonToClass\Tests\Schema;
 
 use Generator;
 use Kanti\GeneratedTest\Data;
+use Kanti\JsonToClass\Helpers\SH;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Kanti\JsonToClass\Schema\Schema;
 use Kanti\JsonToClass\Schema\SchemaMerger;
@@ -20,7 +21,7 @@ class SchemaMergerTest extends TestCase
     {
         $schemaMerger = new SchemaMerger();
         $this->expectExceptionMessage('Class names must be the same Kanti\A !== Kanti\B');
-        $schemaMerger->merge(NamedSchema::fromSchema('Kanti\A', new Schema()), NamedSchema::fromSchema('Kanti\B', new Schema()));
+        $schemaMerger->merge(NamedSchema::fromSchema(SH::classString('Kanti\A'), new Schema()), NamedSchema::fromSchema(SH::classString('Kanti\B'), new Schema()));
     }
 
     #[Test]

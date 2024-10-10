@@ -7,10 +7,11 @@ namespace Kanti\JsonToClass\Converter;
 use InvalidArgumentException;
 use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Config\Config;
-use Kanti\JsonToClass\Config\Dto\OnInvalidCharacterProperties;
+use Kanti\JsonToClass\Config\Enums\OnInvalidCharacterProperties;
 use Kanti\JsonToClass\Dto\DataTrait;
 use Kanti\JsonToClass\Dto\Parameter;
 use Kanti\JsonToClass\Dto\Type;
+use Kanti\JsonToClass\Helpers\SH;
 use ReflectionClass;
 use ReflectionParameter;
 use stdClass;
@@ -112,8 +113,6 @@ final class ClassMapper
             return $result;
         }
 
-        /** @var class-string $className */
-        $className = $type->name;
-        return $this->map($className, $param, $config, $path);
+        return $this->map(SH::classString($type->name), $param, $config, $path);
     }
 }
