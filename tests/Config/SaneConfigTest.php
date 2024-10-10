@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\Config;
 
-use Kanti\JsonToClass\Config\Dto\OnExtraProperties;
+use Kanti\JsonToClass\Config\Enums\OnExtraProperties;
 use Kanti\JsonToClass\Config\SaneConfig;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;

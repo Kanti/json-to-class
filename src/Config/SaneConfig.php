@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Config;
 
-use Kanti\JsonToClass\Config\Dto\AppendSchema;
-use Kanti\JsonToClass\Config\Dto\OnExtraProperties;
-use Kanti\JsonToClass\Config\Dto\OnInvalidCharacterProperties;
-use Kanti\JsonToClass\Config\Dto\OnMissingProperties;
+use Kanti\JsonToClass\Config\Enums\AppendSchema;
+use Kanti\JsonToClass\Config\Enums\OnExtraProperties;
+use Kanti\JsonToClass\Config\Enums\OnInvalidCharacterProperties;
+use Kanti\JsonToClass\Config\Enums\OnMissingProperties;
 
 final readonly class SaneConfig extends Config
 {

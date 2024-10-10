@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\Schema;
 
 use InvalidArgumentException;
-use Kanti\JsonToClass\Helpers\StringHelpers;
+use Kanti\JsonToClass\Helpers\SH;
 
 final class NamedSchema
 {
     public function __construct(
+        /** @var class-string $className */
         public string $className,
         public bool $canBeMissing = false,
         /** @var array<string, true> */
@@ -20,6 +21,9 @@ final class NamedSchema
     ) {
     }
 
+    /**
+     * @param class-string $className
+     */
     public static function fromSchema(string $className, Schema $schema): NamedSchema
     {
         if (!str_contains($className, '\\')) {
@@ -28,14 +32,14 @@ final class NamedSchema
 
         $properties = $schema->properties === null ? null : [];
         foreach ($schema->properties ?? [] as $property => $propertySchema) {
-            $properties[$property] = self::fromSchema(StringHelpers::getChildClass($className, (string)$property), $propertySchema);
+            $properties[$property] = self::fromSchema(SH::getChildClass($className, (string)$property), $propertySchema);
         }
 
         return new NamedSchema(
             $className,
             $schema->canBeMissing,
             $schema->basicTypes,
-            $schema->listElement ? self::fromSchema($className . '_', $schema->listElement) : null,
+            $schema->listElement ? self::fromSchema(SH::classString($className . '_'), $schema->listElement) : null,
             $properties,
         );
     }

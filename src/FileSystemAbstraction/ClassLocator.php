@@ -18,6 +18,9 @@ final readonly class ClassLocator
     ) {
     }
 
+    /**
+     * @param class-string $className
+     */
     public function getClass(string $className): ?ClassType
     {
         $location = $this->getFileLocation($className);
@@ -34,6 +37,9 @@ final readonly class ClassLocator
         return $object;
     }
 
+    /**
+     * @param class-string $className
+     */
     public function getFileLocation(string $className): string
     {
         $psr4 = $this->classLoader->getPrefixesPsr4();
@@ -68,5 +74,19 @@ final readonly class ClassLocator
         } while (array_pop($namespaceParts));
 
         throw new RuntimeException('Path not found no psr4 path found in composer autoload for ' . $className);
+    }
+
+    /**
+     * @param class-string $className
+     */
+    public function gePhpFileForClass(string $className): ?PhpFile
+    {
+        $location = $this->getFileLocation($className);
+        $content = $this->fileSystem->readContentIfExists($location);
+        if (!$content) {
+            return null;
+        }
+
+        return PhpFile::fromCode($content);
     }
 }

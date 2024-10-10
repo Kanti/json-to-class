@@ -6,10 +6,13 @@ namespace Kanti\JsonToClass\CodeCreator;
 
 use Exception;
 use Kanti\JsonToClass\Attribute\Types;
-use Kanti\JsonToClass\Dto\DataTrait;
+use Kanti\JsonToClass\Dto\DataInterface;
 use Kanti\JsonToClass\Dto\Parameter;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Nette\PhpGenerator\Helpers;
+
+use function Safe\class_implements;
+use function class_exists;
 
 final readonly class DevelopmentCodeCreator
 {
@@ -36,52 +39,49 @@ final readonly class DevelopmentCodeCreator
     }
 
     /**
-     * @return class-string<DataTrait>
+     * @param class-string $className
+     * @return class-string<DataInterface>
      */
     private function createDevelopmentClassIfNotExists(string $className): string
     {
         if (class_exists($className, false)) {
-            throw new Exception(sprintf("Class %s already exists %b", $className, interface_exists($className)));
-        }
-
-        $implementation = $className . '_Implementation';
-
-        if (interface_exists($className, false) && class_exists($implementation, false)) {
-            if (!self::isDevelopmentDto($implementation)) {
-                throw new Exception(sprintf("Class %s already exists but is not a DataTrait %b", $implementation, interface_exists($implementation)));
+            if (self::isDevelopmentDto($className)) {
+                return $className;
             }
 
-            return $implementation;
+            throw new Exception(sprintf("Class %s already exists and is not a DataTrait", $className));
         }
 
         $shortName = Helpers::extractShortName($className);
         $namespace = Helpers::extractNamespace($className);
-        eval(<<<PHP
-namespace {$namespace} {
-    interface {$shortName} {}
-    class_alias(
-        get_class(new class implements {$shortName} {
-            use \Kanti\JsonToClass\Dto\DataTrait;
-        }),
-        {$shortName}_Implementation::class
-    );
-}
-PHP
+        eval(
+            <<<PHP
+            namespace {$namespace} {
+                #[\AllowDynamicProperties]
+                class {$shortName} implements \Kanti\JsonToClass\Dto\DataInterface {
+                    use \Kanti\JsonToClass\Dto\DataTrait;
+                }
+            }
+            PHP
         );
-        if (!class_exists($implementation, false) || !self::isDevelopmentDto($implementation)) {
-            throw new Exception(sprintf("Class %s exists but is not a DataTrait %b", $implementation, interface_exists($implementation)));
+        if (!self::isDevelopmentDto($className)) {
+            throw new Exception(sprintf("Class %s created, but is not a DataTrait", $className));
         }
 
-        return $implementation;
+        return $className;
     }
 
     /**
      * @template T of object
      * @param class-string<T> $className
-     * @phpstan-assert-if-true class-string<DataTrait> $className
+     * @phpstan-assert-if-true class-string<DataInterface> $className
      */
     public static function isDevelopmentDto(string $className): bool
     {
-        return isset(class_uses($className, false)[DataTrait::class]);
+        if (!class_exists($className, false)) {
+            return false;
+        }
+
+        return isset(class_implements($className, false)[DataInterface::class]);
     }
 }

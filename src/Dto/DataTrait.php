@@ -7,7 +7,7 @@ namespace Kanti\JsonToClass\Dto;
 trait DataTrait
 {
     /** @var list<Parameter> */
-    private static array $__classParameters = [];
+    private static array $_classParameters = [];
 
     public function __construct(mixed ...$data)
     {
@@ -21,7 +21,7 @@ trait DataTrait
      */
     public static function getClassParameters(): array
     {
-        return static::$__classParameters;
+        return static::$_classParameters;
     }
 
     /**
@@ -29,6 +29,6 @@ trait DataTrait
      */
     public static function setClassParameters(Parameter ...$parameters): void
     {
-        static::$__classParameters = array_values($parameters);
+        static::$_classParameters = array_values($parameters);
     }
 }

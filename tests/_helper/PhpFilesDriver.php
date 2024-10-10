@@ -9,6 +9,8 @@ use PHPUnit\Framework\Assert;
 use Spatie\Snapshots\Driver;
 use Spatie\Snapshots\Exceptions\CantBeSerialized;
 
+use function microtime;
+use function random_int;
 use function Safe\file_put_contents;
 use function Safe\shell_exec;
 use function Safe\unlink;
@@ -65,8 +67,8 @@ final class PhpFilesDriver implements Driver
             throw new CantBeSerialized('Php code must start with "<?php"');
         }
 
+        $filename = sys_get_temp_dir() . '/test' . md5($value) . '.php';
         try {
-            $filename = sys_get_temp_dir() . '/test' . time() . '.php';
             file_put_contents($filename, $value);
             $output = shell_exec('php -l ' . $filename . ' 2>&1 && rm -f ' . $filename);
             Assert::assertStringContainsString('No syntax errors detected', $output, '?? Invalid php code detected for class: ' . $className . PHP_EOL . $value);

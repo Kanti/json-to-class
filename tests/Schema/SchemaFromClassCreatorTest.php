@@ -7,6 +7,7 @@ namespace Kanti\JsonToClass\Tests\Schema;
 use Generator;
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
+use Kanti\JsonToClass\Helpers\SH;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Kanti\JsonToClass\Schema\SchemaFromClassCreator;
 use Nette\PhpGenerator\ClassType;
@@ -21,7 +22,7 @@ class SchemaFromClassCreatorTest extends TestCase
     {
         $container = new JsonToClassContainer();
         $schemaFromClassCreator = $container->get(SchemaFromClassCreator::class);
-        $this->assertNull($schemaFromClassCreator->fromClasses(self::class . '\NotExistingClass'));
+        $this->assertNull($schemaFromClassCreator->fromClasses(SH::classString(self::class . '\NotExistingClass')));
     }
 
     #[Test]
@@ -31,7 +32,7 @@ class SchemaFromClassCreatorTest extends TestCase
         $container = new JsonToClassContainer();
         $schemaFromClassCreator = $container->get(SchemaFromClassCreator::class);
 
-        $schema = new NamedSchema(Data::class, properties: ['a' => new NamedSchema('Kanti\GeneratedTest\Data\A')]);
+        $schema = new NamedSchema(Data::class, properties: ['a' => new NamedSchema(SH::classString('Kanti\GeneratedTest\Data\A'))]);
         $class = ClassType::fromCode($classCode);
         $this->assertInstanceOf(ClassType::class, $class);
 

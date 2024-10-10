@@ -8,7 +8,7 @@ use Nette\PhpGenerator\Attribute;
 use Nette\PhpGenerator\Helpers;
 use Nette\PhpGenerator\Literal;
 
-final class StringHelpers
+final class SH
 {
     public static function getAttributes(Attribute $attribute): object
     {
@@ -34,6 +34,10 @@ final class StringHelpers
         return $argument;
     }
 
+    /**
+     * @param class-string $className
+     * @return class-string
+     */
     public static function getChildClass(string $className, string $property): string
     {
         $className2 = ucfirst($property);
@@ -41,6 +45,17 @@ final class StringHelpers
             $className2 = '_' . $className2;
         }
 
-        return $className . '\\' . $className2;
+        return self::classString($className . '\\' . $className2);
+    }
+
+    /**
+     * phpstan helper so you can elevate a string to a class-string
+     *
+     * @return class-string
+     */
+    public static function classString(string $name): string
+    {
+        /** @var class-string $name */
+        return $name;
     }
 }

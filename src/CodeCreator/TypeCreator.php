@@ -7,7 +7,6 @@ namespace Kanti\JsonToClass\CodeCreator;
 use Kanti\JsonToClass\Attribute\Types;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Nette\PhpGenerator\Attribute;
-use Nette\PhpGenerator\Helpers;
 use Nette\PhpGenerator\Literal;
 use Nette\PhpGenerator\PhpNamespace;
 
@@ -21,7 +20,7 @@ final class TypeCreator
         }
 
         if ($property->properties !== null) {
-            $namespace->addUse($property->className, Helpers::extractShortName($property->className));
+            $namespace->addUse($property->className);
             $types[] = $property->className;
         }
 
@@ -70,7 +69,7 @@ final class TypeCreator
 
     /**
      * @param string|array<mixed> $value
-     * @phpstan-assert-if-false !array $value
+     * @phpstan-assert-if-false !array<mixed> $value
      * @phpstan-assert-if-true !Literal $value
      */
     private function isListType(string|array|Literal $value): bool

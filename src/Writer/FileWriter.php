@@ -16,7 +16,7 @@ final readonly class FileWriter
     }
 
     /**
-     * @param array<string, string> $classes
+     * @param array<class-string, string> $classes
      * @return list<string>
      */
     public function writeIfNeeded(array $classes): array
@@ -33,7 +33,7 @@ final readonly class FileWriter
 
             $this->fileSystem->writeContent($location, $content);
 
-            if (class_exists($className, false) && !interface_exists($className, false)) {
+            if (class_exists($className, false)) {
                 $needsRestart[] = $className;
             }
         }

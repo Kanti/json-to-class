@@ -34,17 +34,21 @@ class FromSchemaToClassAndBackTest extends TestCase
     #[DataProvider('dataProvider')]
     public function test(Schema $schema, mixed ...$_): void
     {
+        $classLoader = new ClassLoader();
+        $classLoader->addPsr4('Kanti\\', 'fake-src/');
 
-        $container = new JsonToClassContainer();
+        $container = new JsonToClassContainer([
+            ClassLoader::class => $classLoader,
+            FileSystemInterface::class => new FakeFileSystem([]),
+        ]);
         $wrappedSchema = new Schema(properties: ['a' => $schema]);
-        $actualFiles = $container->get(CodeCreator::class)->createFiles(NamedSchema::fromSchema(Data::class, $wrappedSchema), new SaneConfig());
+        $actualFiles = $container->get(CodeCreator::class)
+            ->createFiles(NamedSchema::fromSchema(Data::class, $wrappedSchema));
 
 
         $actual = new PhpFilesDto($actualFiles, $this->dataName(), $this->providedData());
         $this->assertMatchesSnapshot($actual, new PhpFilesDriver());
 
-        $classLoader = new ClassLoader();
-        $classLoader->addPsr4('Kanti\\', 'fake-src/');
 
         $filesWithFilenameIndex = [];
         foreach ($actualFiles as $className => $content) {
@@ -55,13 +59,15 @@ class FromSchemaToClassAndBackTest extends TestCase
         //////////////////////////////////////////////////////////////////
         // test generated code if that could be read back into a schema //
         //////////////////////////////////////////////////////////////////
+        $fakeFileSystem = new FakeFileSystem($filesWithFilenameIndex);
         $container = new JsonToClassContainer([
             ClassLoader::class => $classLoader,
-            FileSystemInterface::class => new FakeFileSystem($filesWithFilenameIndex),
+            FileSystemInterface::class => $fakeFileSystem,
         ]);
         $namedWrappedSchema = NamedSchema::fromSchema(Data::class, $wrappedSchema);
         $actualReadSchema = $container->get(SchemaFromClassCreator::class)->fromClasses(Data::class);
         $this->assertEquals($namedWrappedSchema, $actualReadSchema);
+        $fakeFileSystem->assertFilesWrittenTo([]);
     }
 
     public static function dataProvider(): Generator
