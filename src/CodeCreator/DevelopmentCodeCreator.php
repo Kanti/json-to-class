@@ -4,23 +4,44 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\CodeCreator;
 
+use AllowDynamicProperties;
 use Exception;
 use Kanti\JsonToClass\Attribute\Types;
-use Kanti\JsonToClass\Dto\DataTrait;
-use Kanti\JsonToClass\Dto\Parameter;
+use Kanti\JsonToClass\Dto\DataInterface;
+use Kanti\JsonToClass\Dto\Property;
+use Kanti\JsonToClass\FileSystemAbstraction\ClassLocator;
 use Kanti\JsonToClass\Schema\NamedSchema;
+use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Helpers;
+use Nette\PhpGenerator\PhpNamespace;
+use Psr\Log\LoggerInterface;
 
-final readonly class DevelopmentCodeCreator
+use function array_values;
+use function class_exists;
+use function Safe\class_implements;
+
+final class DevelopmentCodeCreator
 {
-    public function __construct(private TypeCreator $typeCreator)
-    {
+    /** @var array<class-string, list<Property>> */
+    private static array $properties = [];
+
+    public function __construct(
+        private readonly TypeCreator $typeCreator,
+        private readonly ClassLocator $classLocator,
+        private readonly LoggerInterface $logger,
+    ) {
     }
 
     public function createDevelopmentClasses(NamedSchema $schema): void
     {
+        $this->logger->debug('createDevelopmentClasses', ['schema' => $schema->className]);
+
         if ($schema->listElement) {
             $this->createDevelopmentClasses($schema->listElement);
+        }
+
+        if (!$schema->properties) {
+            return;
         }
 
         $parameters = [];
@@ -28,60 +49,95 @@ final readonly class DevelopmentCodeCreator
             $this->createDevelopmentClasses($property);
 
             $types = $this->typeCreator->getAttributeTypes($property, null);
-            $parameters[] = new Parameter($name, (new Types(...$types))->types, $property->canBeMissing);
+            $parameters[] = new Property($name, (new Types(...$types))->types, $property->canBeMissing);
         }
 
-        $classNameImplementation = $this->createDevelopmentClassIfNotExists($schema->className);
-        $classNameImplementation::setClassParameters(...$parameters);
+        $this->setClassProperties($schema->className, ...$parameters);
+
+        $this->createDevelopmentClassIfNotExists($schema->className);
     }
 
     /**
-     * @return class-string<DataTrait>
+     * @param class-string $className
      */
-    private function createDevelopmentClassIfNotExists(string $className): string
+    private function createDevelopmentClassIfNotExists(string $className): void
     {
+        $this->logger->debug('createDevelopmentClassIfNotExists', ['schema' => $className]);
         if (class_exists($className, false)) {
-            throw new Exception(sprintf("Class %s already exists %b", $className, interface_exists($className)));
-        }
-
-        $implementation = $className . '_Implementation';
-
-        if (interface_exists($className, false) && class_exists($implementation, false)) {
-            if (!self::isDevelopmentDto($implementation)) {
-                throw new Exception(sprintf("Class %s already exists but is not a DataTrait %b", $implementation, interface_exists($implementation)));
+            if (self::isDevelopmentDto($className)) {
+                return;
             }
 
-            return $implementation;
+            throw new Exception(sprintf("Class %s already exists and is not a %s", $className, DataInterface::class));
         }
 
         $shortName = Helpers::extractShortName($className);
         $namespace = Helpers::extractNamespace($className);
-        eval(<<<PHP
-namespace {$namespace} {
-    interface {$shortName} {}
-    class_alias(
-        get_class(new class implements {$shortName} {
-            use \Kanti\JsonToClass\Dto\DataTrait;
-        }),
-        {$shortName}_Implementation::class
-    );
-}
-PHP
-        );
-        if (!class_exists($implementation, false) || !self::isDevelopmentDto($implementation)) {
-            throw new Exception(sprintf("Class %s exists but is not a DataTrait %b", $implementation, interface_exists($implementation)));
+
+        $phpClass = $this->classLocator->getClass($className) ?? (new ClassType($shortName, new PhpNamespace($namespace)))->setFinal();
+
+        $phpClass->setReadOnly(false);
+
+        foreach ($phpClass->getProperties() as $property) {
+            $property->setType('mixed');
         }
 
-        return $implementation;
+        $phpClass->addImplement(DataInterface::class);
+        $hasAllowDynamicProperties = false;
+        foreach ($phpClass->getAttributes() as $attribute) {
+            if ($attribute->getName() === AllowDynamicProperties::class) {
+                $hasAllowDynamicProperties = true;
+                break;
+            }
+        }
+
+        if (!$hasAllowDynamicProperties) {
+            $phpClass->addAttribute(AllowDynamicProperties::class);
+        }
+
+        $eval = "namespace " . $namespace . ";\n" . $phpClass;
+        $this->runEval($eval);
+
+        if (self::isDevelopmentDto($className)) {
+            return;
+        }
+
+        throw new Exception(sprintf("Class %s created, but is not a DataTrait", $className));
     }
 
     /**
      * @template T of object
      * @param class-string<T> $className
-     * @phpstan-assert-if-true class-string<DataTrait> $className
+     * @phpstan-assert-if-true class-string<DataInterface> $className
      */
     public static function isDevelopmentDto(string $className): bool
     {
-        return isset(class_uses($className, false)[DataTrait::class]);
+        if (!class_exists($className, false)) {
+            return false;
+        }
+
+        return isset(class_implements($className, false)[DataInterface::class]);
+    }
+
+    /**
+     * @param class-string $className
+     */
+    private function setClassProperties(string $className, Property ...$properties): void
+    {
+        self::$properties[$className] = array_values($properties);
+    }
+
+    /**
+     * @param class-string $className
+     * @return list<Property>
+     */
+    public static function getClassProperties(string $className): array
+    {
+        return self::$properties[$className] ?? [];
+    }
+
+    private function runEval(string $phpCode): void
+    {
+        eval($phpCode);
     }
 }

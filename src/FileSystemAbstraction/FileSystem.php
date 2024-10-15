@@ -8,12 +8,6 @@ use RuntimeException;
 
 final readonly class FileSystem implements FileSystemInterface
 {
-    public function requireFile(string $filename): void
-    {
-        $filename = $this->realpathIfPossible($filename);
-        require_once $filename;
-    }
-
     public function writeContent(string $filename, string $content): void
     {
         $filename = $this->realpathIfPossible($filename);

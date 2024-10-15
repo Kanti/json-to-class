@@ -27,11 +27,6 @@ class FileSystemTest extends TestCase
             $fileSystem->writeContent($fileName, $content);
             $this->assertEquals($content, file_get_contents($fileName), 'File should exist and have content');
 
-            # test requireFile
-            $this->assertFalse(function_exists($functionName), 'Function should not exist');
-            $fileSystem->requireFile($fileName);
-            $this->assertTrue(function_exists($functionName), 'Function should exist');
-
             $actual = $fileSystem->readContent($fileName);
             $this->assertEquals($content, $actual, 'File should exist and have content');
 

@@ -6,7 +6,7 @@ namespace Kanti\JsonToClass\Schema;
 
 use InvalidArgumentException;
 use Kanti\JsonToClass\Config\Config;
-use Kanti\JsonToClass\Config\Dto\OnInvalidCharacterProperties;
+use Kanti\JsonToClass\Config\Enums\OnInvalidCharacterProperties;
 use Nette\PhpGenerator\Helpers;
 use stdClass;
 
@@ -33,7 +33,6 @@ final class SchemaFromDataCreator
         }
 
         return match ($config->onInvalidCharacterProperties) {
-            OnInvalidCharacterProperties::REPLACE_INVALID_CHARACTERS_WITH_UNDERSCORE => throw new InvalidArgumentException('Not implemented yet'),
             OnInvalidCharacterProperties::TRY_PREFIX_WITH_UNDERSCORE => Helpers::isIdentifier('_' . $key) ? '_' . $key : throw new InvalidArgumentException('key ' . $key . ' is not a valid property name (even with _ prefix)'),
             OnInvalidCharacterProperties::THROW_EXCEPTION => throw new InvalidArgumentException('key ' . $key . ' is not a valid property name'),
         };

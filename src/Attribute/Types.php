@@ -10,12 +10,10 @@ use Kanti\JsonToClass\Dto\Type;
 /**
  * usage:
  *
- * public function __construct(
  *   #[Types(Property::class, [Property1::class], [], 'string', 'float', 'int', 'bool', 'null')]
- *   public Property|array|string|float|int|bool|null $property = null,
- * ) {}
+ *   public Property|array|string|float|int|bool|null $property = null;
  */
-#[Attribute(Attribute::TARGET_PARAMETER)]
+#[Attribute(Attribute::TARGET_PROPERTY)]
 final readonly class Types
 {
     /**

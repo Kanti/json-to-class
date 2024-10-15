@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method Kanti\\\\JsonToClass\\\\CodeCreator\\\\DevelopmentCodeCreator\\:\\:createDevelopmentClassIfNotExists\\(\\) has invalid return type Kanti\\\\JsonToClass\\\\Dto\\\\DataTrait\\.$#"
-			count: 1
-			path: src/CodeCreator/DevelopmentCodeCreator.php
-
-		-
 			message: "#^Parameter \\#1 \\.\\.\\.\\$types of class Kanti\\\\JsonToClass\\\\Attribute\\\\Types constructor expects list\\<list\\<list\\<string\\>\\|string\\>\\|string\\>\\|string, list\\<mixed\\>\\|string given\\.$#"
 			count: 1
 			path: src/CodeCreator/DevelopmentCodeCreator.php
@@ -36,6 +31,11 @@ parameters:
 			path: src/Config/Config.php
 
 		-
+			message: "#^Class Kanti\\\\JsonToClass\\\\Config\\\\Config has an uninitialized readonly property \\$shouldCreateClasses\\. Assign it in the constructor\\.$#"
+			count: 1
+			path: src/Config/Config.php
+
+		-
 			message: "#^Method Kanti\\\\JsonToClass\\\\Container\\\\JsonToClassContainer\\:\\:get\\(\\) should return T of object but returns object\\.$#"
 			count: 1
 			path: src/Container/JsonToClassContainer.php
@@ -46,19 +46,39 @@ parameters:
 			path: src/Converter/Converter.php
 
 		-
-			message: "#^Method Kanti\\\\JsonToClass\\\\Helpers\\\\StringHelpers\\:\\:unpackLiterals\\(\\) should return list\\<list\\<string\\>\\|string\\>\\|string but returns list\\<list\\<list\\<string\\>\\|string\\>\\|string\\>\\.$#"
+			message: "#^Method Kanti\\\\JsonToClass\\\\Helpers\\\\SH\\:\\:unpackLiterals\\(\\) should return list\\<list\\<string\\>\\|string\\>\\|string but returns list\\<list\\<list\\<string\\>\\|string\\>\\|string\\>\\.$#"
 			count: 1
-			path: src/Helpers/StringHelpers.php
+			path: src/Helpers/SH.php
 
 		-
-			message: "#^Parameter \\#1 \\$argument of static method Kanti\\\\JsonToClass\\\\Helpers\\\\StringHelpers\\:\\:unpackLiterals\\(\\) expects list\\<list\\<Nette\\\\PhpGenerator\\\\Literal\\|string\\>\\|Nette\\\\PhpGenerator\\\\Literal\\|string\\>\\|Nette\\\\PhpGenerator\\\\Literal\\|string, array given\\.$#"
+			message: "#^Parameter \\#1 \\$argument of static method Kanti\\\\JsonToClass\\\\Helpers\\\\SH\\:\\:unpackLiterals\\(\\) expects list\\<list\\<Nette\\\\PhpGenerator\\\\Literal\\|string\\>\\|Nette\\\\PhpGenerator\\\\Literal\\|string\\>\\|Nette\\\\PhpGenerator\\\\Literal\\|string, array given\\.$#"
 			count: 1
-			path: src/Helpers/StringHelpers.php
+			path: src/Helpers/SH.php
 
 		-
-			message: "#^Call to method PHPUnit\\\\Framework\\\\Assert\\:\\:assertInstanceOf\\(\\) with 'Kanti\\\\\\\\JsonToClass\\\\\\\\Schema\\\\\\\\SchemaMerger' and Kanti\\\\JsonToClass\\\\Schema\\\\SchemaMerger will always evaluate to true\\.$#"
+			message: "#^If condition is always false\\.$#"
+			count: 2
+			path: src/Schema/SchemaSimplification.php
+
+		-
+			message: "#^Cannot access property \\$className on Kanti\\\\JsonToClass\\\\Schema\\\\NamedSchema\\|null\\.$#"
 			count: 1
-			path: tests/Container/JsonToClassContainerTest.php
+			path: tests/CodeCreator/DevelopmentCodeCreatorTest.php
+
+		-
+			message: "#^Offset 'fields' might not exist on array\\<string, Kanti\\\\JsonToClass\\\\Schema\\\\NamedSchema\\>\\|null\\.$#"
+			count: 1
+			path: tests/CodeCreator/DevelopmentCodeCreatorTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$array of function array_keys expects array, array\\<string, Kanti\\\\JsonToClass\\\\Schema\\\\Schema\\>\\|null given\\.$#"
+			count: 1
+			path: tests/CodeCreator/DevelopmentCodeCreatorTest.php
+
+		-
+			message: "#^Instanceof between Kanti\\\\JsonToClass\\\\CodeCreator\\\\DocBlockUpdater and Kanti\\\\JsonToClass\\\\CodeCreator\\\\DocBlockUpdater will always evaluate to true\\.$#"
+			count: 1
+			path: tests/CodeCreator/DocBlockUpdaterTest.php
 
 		-
 			message: "#^Class Kanti\\\\JsonToClass\\\\Tests\\\\Container\\\\SchemaMerger2000000000 not found\\.$#"

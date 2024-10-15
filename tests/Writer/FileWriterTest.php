@@ -4,24 +4,32 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\Writer;
 
+use ArrayObject;
 use Composer\Autoload\ClassLoader;
 use Generator;
+use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\FileSystemAbstraction\ClassLocator;
 use Kanti\JsonToClass\FileSystemAbstraction\FileSystemInterface;
+use Kanti\JsonToClass\Helpers\SH;
 use Kanti\JsonToClass\Tests\_helper\FakeFileSystem;
 use Kanti\JsonToClass\Writer\FileWriter;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
+use function array_keys;
+
 #[UsesClass(JsonToClassContainer::class)]
 #[UsesClass(ClassLoader::class)]
+#[CoversClass(SH::class)]
 #[CoversClass(FileWriter::class)]
 #[CoversClass(ClassLocator::class)]
+#[CoversClass(DevelopmentCodeCreator::class)]
 class FileWriterTest extends TestCase
 {
     #[Test]
@@ -31,19 +39,21 @@ class FileWriterTest extends TestCase
         $classLoader = new ClassLoader();
         $classLoader->addPsr4('Kanti\\', 'fake-src/');
 
+        $fakeFileSystem = new FakeFileSystem([]);
         $container = new JsonToClassContainer([
             ClassLoader::class => $classLoader,
-            FileSystemInterface::class => new FakeFileSystem([], []),
+            FileSystemInterface::class => $fakeFileSystem,
         ]);
 
         $fileWriter = $container->get(FileWriter::class);
 
         $this->expectExceptionMessage('Path not found no psr4 path found in composer autoload for NotKanti\Test');
-        $fileWriter->writeIfNeeded(['NotKanti\Test' => FakeFileSystem::CONTENT]);
+        $fileWriter->writeIfNeeded([SH::classString('NotKanti\Test') => FakeFileSystem::CONTENT]);
+        $fakeFileSystem->assertFilesWrittenTo([]);
     }
 
     /**
-     * @param array<string, string> $classes
+     * @param array<class-string, string> $classes
      * @param array<string, string|true> $alreadyWrittenFiles
      * @param array<string, string|true> $fileLocationsWrittenTo
      * @param list<string> $needsRestart
@@ -56,17 +66,24 @@ class FileWriterTest extends TestCase
         array $fileLocationsWrittenTo,
         array $needsRestart,
     ): void {
+        $triedLoadingClasses = FileWriterTest::triedLoadingClasses();
+
         $classLoader = new ClassLoader();
         $classLoader->addPsr4('Kanti\\', 'fake-src/');
 
+        $fakeFileSystem = new FakeFileSystem($alreadyWrittenFiles);
         $container = new JsonToClassContainer([
             ClassLoader::class => $classLoader,
-            FileSystemInterface::class => new FakeFileSystem($alreadyWrittenFiles, $fileLocationsWrittenTo),
+            FileSystemInterface::class => $fakeFileSystem,
         ]);
 
         $fileWriter = $container->get(FileWriter::class);
 
-        $this->assertEquals($needsRestart, $fileWriter->writeIfNeeded($classes), 'are changes done or not');
+        $this->assertEquals($needsRestart, $fileWriter->writeIfNeeded($classes), 'are changes done and class was loaded already');
+        $fakeFileSystem->assertFilesWrittenTo($fileLocationsWrittenTo);
+        foreach (array_keys($classes) as $class) {
+            $this->assertArrayNotHasKey($class, $triedLoadingClasses, 'class should not be loaded after writing');
+        }
     }
 
     #[Test]
@@ -77,27 +94,46 @@ class FileWriterTest extends TestCase
         $classLoader->addPsr4('Kanti\\', 'fake-src/');
         $classLoader->addPsr4('Kanti\\', 'fake-src2/');
 
+        $fakeFileSystem = new FakeFileSystem();
         $container = new JsonToClassContainer([
             ClassLoader::class => $classLoader,
-            FileSystemInterface::class => new FakeFileSystem(),
+            FileSystemInterface::class => $fakeFileSystem,
         ]);
 
         $fileWriter = $container->get(FileWriter::class);
 
         $this->expectExceptionMessage('Multiple possible paths found');
-        $fileWriter->writeIfNeeded(['Kanti\Test' => FakeFileSystem::CONTENT]);
+        $fileWriter->writeIfNeeded([SH::classString('Kanti\Test') => FakeFileSystem::CONTENT]);
+        $fakeFileSystem->assertFilesWrittenTo([]);
     }
 
     #[Test]
     public function classLoaderFindRealFileLocation(): void
     {
         // use real class loader to find the real file location
+        $fakeFileSystem = new FakeFileSystem([__FILE__ => true]);
         $container = new JsonToClassContainer([
-            FileSystemInterface::class => new FakeFileSystem([__FILE__ => true], [__FILE__ => true]),
+            FileSystemInterface::class => $fakeFileSystem,
         ]);
 
         $actual = $container->get(FileWriter::class)->writeIfNeeded([self::class => FakeFileSystem::CONTENT]);
         $this->assertEquals([], $actual, 'no restart needed nothing written');
+        $fakeFileSystem->assertFilesWrittenTo([]);
+    }
+
+    #[Test]
+    #[RunInSeparateProcess]
+    public function testNoClassLoading(): void
+    {
+        // use real class loader to find the real file location
+        $fakeFileSystem = new FakeFileSystem([__FILE__ => true]);
+        $container = new JsonToClassContainer([
+            FileSystemInterface::class => $fakeFileSystem,
+        ]);
+
+        $actual = $container->get(FileWriter::class)->writeIfNeeded([self::class => FakeFileSystem::CONTENT]);
+        $this->assertEquals([], $actual, 'no restart needed nothing written');
+        $fakeFileSystem->assertFilesWrittenTo([]);
     }
 
     public static function writeIfNeededDataProvider(): Generator
@@ -115,12 +151,13 @@ class FileWriterTest extends TestCase
             'needsRestart' => [],
         ];
         yield 'write one new subdirectory' => [
-            'classes' => ['Kanti\Test\L\L\Sub' => FakeFileSystem::CONTENT],
+            'classes' => ['Kanti\Test__\Sub' => FakeFileSystem::CONTENT, 'Kanti\Test__\Sub2' => FakeFileSystem::CONTENT],
             'alreadyWrittenFiles' => ['fake-src/Test.php' => true],
-            'fileLocationsWrittenTo' => ['fake-src/Test/L/L/Sub.php' => true],
+            'fileLocationsWrittenTo' => ['fake-src/Test__/Sub.php' => true, 'fake-src/Test__/Sub2.php' => true],
             'needsRestart' => [],
         ];
         $fileNameCurrentClass = 'fake-src/' . str_replace('Kanti/', '', str_replace('\\', '/', self::class)) . '.php';
+        $fileNameFileWriterClass = 'fake-src/' . str_replace('Kanti/', '', str_replace('\\', '/', FileWriter::class)) . '.php';
         yield 'no overwrite needed so no restart needed even if the class was already loaded' => [
             'classes' => [self::class => FakeFileSystem::CONTENT],
             'alreadyWrittenFiles' => [$fileNameCurrentClass => true],
@@ -128,10 +165,23 @@ class FileWriterTest extends TestCase
             'needsRestart' => [],
         ];
         yield 'overwrite needed so restart needed because the class was already loaded' => [
-            'classes' => [self::class => FakeFileSystem::CONTENT],
+            'classes' => [self::class => FakeFileSystem::CONTENT, FileWriter::class => FakeFileSystem::CONTENT],
             'alreadyWrittenFiles' => [],
-            'fileLocationsWrittenTo' => [$fileNameCurrentClass => true],
-            'needsRestart' => [self::class],
+            'fileLocationsWrittenTo' => [$fileNameCurrentClass => true, $fileNameFileWriterClass => true],
+            'needsRestart' => [self::class, FileWriter::class],
         ];
+    }
+
+    /**
+     * @return ArrayObject<int|string, mixed>
+     */
+    public static function triedLoadingClasses(): ArrayObject
+    {
+        /** @var ArrayObject<int|string, mixed> $called */
+        $called = new ArrayObject();
+        spl_autoload_register(static function (string $class) use (&$called): void {
+            $called[$class] = true;
+        });
+        return $called;
     }
 }

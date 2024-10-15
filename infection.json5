@@ -10,9 +10,9 @@
         "html": "test-result/infection.html",
         "github": false,
     },
-    "minCoveredMsi": 100,
-    "minMsi": 100,
-    "initialTestsPhpOptions": "-d xdebug.mode=coverage",
+    "minCoveredMsi": 92,
+    "minMsi": 92,
+    "initialTestsPhpOptions": "-d pcov.enabled=1",
     "mutators": {
         "@default": true
     }

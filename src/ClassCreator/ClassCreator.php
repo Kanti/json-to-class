@@ -5,16 +5,21 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\ClassCreator;
 
 use InvalidArgumentException;
+use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\CodeCreator\CodeCreator;
 use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Config\Config;
-use Kanti\JsonToClass\Config\Dto\AppendSchema;
+use Kanti\JsonToClass\Config\Enums\AppendSchema;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Kanti\JsonToClass\Schema\SchemaFromClassCreator;
 use Kanti\JsonToClass\Schema\SchemaFromDataCreator;
 use Kanti\JsonToClass\Schema\SchemaMerger;
+use Kanti\JsonToClass\Schema\SchemaSimplification;
 use Kanti\JsonToClass\Writer\FileWriter;
 use stdClass;
+
+use function json_encode;
+use function PHPUnit\Framework\assertEquals;
 
 final readonly class ClassCreator
 {
@@ -23,12 +28,14 @@ final readonly class ClassCreator
         private SchemaFromDataCreator $schemaFromDataCreator,
         private DevelopmentCodeCreator $developmentCodeCreator,
         private SchemaMerger $schemaMerger,
+        private SchemaSimplification $schemaSimplification,
         private CodeCreator $codeCreator,
         private FileWriter $fileWriter,
     ) {
     }
 
     /**
+     * @param class-string $className
      * @param array<mixed>|stdClass $data
      */
     public function createClasses(
@@ -48,7 +55,12 @@ final readonly class ClassCreator
             $schema = $this->schemaMerger->merge($schema, $schemaFromClass);
         }
 
-        $files = $this->codeCreator->createFiles($schema->getFirstNonListChild(), $config);
+        $schema = $this->schemaSimplification->simplify($schema);
+        if (!$schema) {
+            throw new InvalidArgumentException('Schema is empty for data: ' . json_encode($data));
+        }
+
+        $files = $this->codeCreator->createFiles($schema->getFirstNonListChild());
 
         if ($restartReasons = $this->fileWriter->writeIfNeeded($files)) {
             $message = sprintf('Class %s already exists and cannot be reloaded', implode(', ', $restartReasons));

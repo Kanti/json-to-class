@@ -4,21 +4,30 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Converter;
 
+use AllowDynamicProperties;
 use InvalidArgumentException;
 use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Config\Config;
-use Kanti\JsonToClass\Config\Dto\OnInvalidCharacterProperties;
+use Kanti\JsonToClass\Config\Enums\OnInvalidCharacterProperties;
 use Kanti\JsonToClass\Dto\DataTrait;
-use Kanti\JsonToClass\Dto\Parameter;
+use Kanti\JsonToClass\Dto\Property;
 use Kanti\JsonToClass\Dto\Type;
+use Kanti\JsonToClass\Helpers\SH;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use ReflectionParameter;
+use ReflectionProperty;
 use stdClass;
 
-use function Safe\class_uses;
+use function assert;
 
-final class ClassMapper
+final readonly class ClassMapper
 {
+    public function __construct(
+        private LoggerInterface $logger,
+    ) {
+    }
+
     /**
      * @template T of object
      * @param class-string<T> $className
@@ -54,38 +63,30 @@ final class ClassMapper
 
         $reflectionClass = new ReflectionClass($className);
         $constructor = $reflectionClass->getConstructor();
-        if (!$constructor) {
-            throw new InvalidArgumentException(sprintf('Class %s does not have a constructor, but it is required %s', $className, $path));
+        if ($constructor) {
+            $this->logger->warning('Class ' . $className . ' has a constructor. This is not supported, it will not be called');
         }
 
-        /** @var list<ReflectionParameter|Parameter> $constructorParameters */
-        $constructorParameters = $constructor->getParameters();
-
+        /** @var list<ReflectionProperty|Property> $classProperties */
+        $classProperties = $reflectionClass->getProperties();
         if (DevelopmentCodeCreator::isDevelopmentDto($className)) {
-            $constructorParameters = $className::getClassParameters();
+            $classProperties = DevelopmentCodeCreator::getClassProperties($className);
         }
 
-        $args = [];
-        foreach ($constructorParameters as $parameter) {
-            $possibleTypes = PossibleConvertTargets::fromParameter($parameter);
-            $dataKey = $parameter->getName();
-            $parameterName = $dataKey;
-            if (str_starts_with($parameterName, '_') && $config->onInvalidCharacterProperties === OnInvalidCharacterProperties::TRY_PREFIX_WITH_UNDERSCORE) {
-                $dataKey = substr($parameterName, 1);
+        $properties = $this->convertProperties($classProperties, $config, $data, $className, $path);
+
+        $instance = $reflectionClass->newInstanceWithoutConstructor();
+        $allowsDynamicProperties = (bool)$reflectionClass->getAttributes(AllowDynamicProperties::class);
+        foreach ($properties as $key => $value) {
+            if ($allowsDynamicProperties) {
+                $instance->{$key} = $value;
+                continue;
             }
 
-            if (!array_key_exists($dataKey, $data)) {
-                if ($parameter->isDefaultValueAvailable()) {
-                    continue;
-                }
-
-                throw new InvalidArgumentException(sprintf('Parameter %s->%s is missing in data %s', $className, $parameterName, $path));
-            }
-
-            $args[$parameterName] = $this->convertType($possibleTypes, $data[$dataKey] ?? null, $config, $path . '.' . $dataKey);
+            $reflectionClass->getProperty($key)->setValue($instance, $value);
         }
 
-        return new $className(...$args);
+        return $instance;
     }
 
     private function convertType(PossibleConvertTargets $possibleTypes, mixed $param, Config $config, string $path): mixed
@@ -112,8 +113,39 @@ final class ClassMapper
             return $result;
         }
 
-        /** @var class-string $className */
-        $className = $type->name;
-        return $this->map($className, $param, $config, $path);
+        return $this->map(SH::classString($type->name), $param, $config, $path);
+    }
+
+    /**
+     * @param list<Property|ReflectionProperty> $properties
+     * @param array<mixed>|stdClass $data
+     * @return array<string, mixed>
+     */
+    private function convertProperties(array $properties, Config $config, array|stdClass $data, string $className, string $path): array
+    {
+        $array = (array)$data;
+
+        $args = [];
+        foreach ($properties as $property) {
+            $possibleTypes = PossibleConvertTargets::fromParameter($property);
+            $dataKey = $property->getName();
+            $parameterName = $dataKey;
+            if (str_starts_with($parameterName, '_') && $config->onInvalidCharacterProperties === OnInvalidCharacterProperties::TRY_PREFIX_WITH_UNDERSCORE) {
+                $dataKey = substr($parameterName, 1);
+            }
+
+            if (!array_key_exists($dataKey, $array)) {
+                if ($property->hasDefaultValue()) {
+                    $args[$parameterName] = $property->getDefaultValue();
+                    continue;
+                }
+
+                throw new InvalidArgumentException(sprintf('Parameter %s->%s is missing in data %s', $className, $parameterName, $path));
+            }
+
+            $args[$parameterName] = $this->convertType($possibleTypes, $array[$dataKey] ?? null, $config, $path . '.' . $dataKey);
+        }
+
+        return $args;
     }
 }

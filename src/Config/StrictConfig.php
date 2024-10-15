@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Config;
 
-use Kanti\JsonToClass\Config\Dto\AppendSchema;
-use Kanti\JsonToClass\Config\Dto\OnExtraProperties;
-use Kanti\JsonToClass\Config\Dto\OnInvalidCharacterProperties;
-use Kanti\JsonToClass\Config\Dto\OnMissingProperties;
+use Kanti\JsonToClass\Config\Enums\AppendSchema;
+use Kanti\JsonToClass\Config\Enums\OnExtraProperties;
+use Kanti\JsonToClass\Config\Enums\OnInvalidCharacterProperties;
+use Kanti\JsonToClass\Config\Enums\OnMissingProperties;
+use Kanti\JsonToClass\Config\Enums\ShouldCreateClasses;
 
 final readonly class StrictConfig extends Config
 {
@@ -16,6 +17,7 @@ final readonly class StrictConfig extends Config
         public OnMissingProperties $onMissingProperties = OnMissingProperties::THROW_EXCEPTION,
         public OnInvalidCharacterProperties $onInvalidCharacterProperties = OnInvalidCharacterProperties::THROW_EXCEPTION,
         public AppendSchema $appendSchema = AppendSchema::OVERRIDE,
+        public ShouldCreateClasses $shouldCreateClasses = ShouldCreateClasses::TRY_TO_DETECT,
     ) {
     }
 }

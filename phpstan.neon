@@ -7,3 +7,6 @@ parameters:
   reportUnmatchedIgnoredErrors: false
   scanFiles:
     - tests/_helper/Data.php
+  ignoreErrors:
+    - '#Call to function assert\(\) with true will always evaluate to true\.#'
+    - '#Call to method PHPUnit\\Framework\\Assert::.* will always evaluate to true\.#'

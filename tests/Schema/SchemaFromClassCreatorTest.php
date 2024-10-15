@@ -7,6 +7,7 @@ namespace Kanti\JsonToClass\Tests\Schema;
 use Generator;
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
+use Kanti\JsonToClass\Helpers\SH;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Kanti\JsonToClass\Schema\SchemaFromClassCreator;
 use Nette\PhpGenerator\ClassType;
@@ -21,7 +22,7 @@ class SchemaFromClassCreatorTest extends TestCase
     {
         $container = new JsonToClassContainer();
         $schemaFromClassCreator = $container->get(SchemaFromClassCreator::class);
-        $this->assertNull($schemaFromClassCreator->fromClasses(self::class . '\NotExistingClass'));
+        $this->assertNull($schemaFromClassCreator->fromClasses(SH::classString(self::class . '\NotExistingClass')));
     }
 
     #[Test]
@@ -31,7 +32,7 @@ class SchemaFromClassCreatorTest extends TestCase
         $container = new JsonToClassContainer();
         $schemaFromClassCreator = $container->get(SchemaFromClassCreator::class);
 
-        $schema = new NamedSchema(Data::class, properties: ['a' => new NamedSchema('Kanti\GeneratedTest\Data\A')]);
+        $schema = new NamedSchema(Data::class, properties: ['a' => new NamedSchema(SH::classString('Kanti\GeneratedTest\Data\A'))]);
         $class = ClassType::fromCode($classCode);
         $this->assertInstanceOf(ClassType::class, $class);
 
@@ -46,9 +47,7 @@ class SchemaFromClassCreatorTest extends TestCase
 <?php
 namespace Kanti\GeneratedTest;
 class Data {
-  public function __construct(
-    public A&B $a,
-  ) {}
+    public A&B $a;
 }
 PHP
 ,
@@ -59,26 +58,11 @@ PHP
 <?php
 namespace Kanti\GeneratedTest;
 class DataNot {
-  public function __construct(
-    public B $a,
-  ) {}
+    public B $a;
 }
 PHP
 ,
             'Class name mismatch Kanti\GeneratedTest\Data\A !== Kanti\GeneratedTest\B this must be a BUG please report it',
         ];
-        yield 'parameter is not a promoted property' => [
-            <<<'PHP'
-<?php
-namespace Kanti\GeneratedTest;
-class Data {
-  public function __construct(
-    B $b,
-  ) {}
-}
-PHP
-            ,
-            'Parameter is not a PromotedParameter Kanti\GeneratedTest\Data->b',
-            ];
     }
 }

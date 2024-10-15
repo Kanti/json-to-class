@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\Tests\Attribute;
 
 use Kanti\JsonToClass\Attribute\RootClass;
+use Kanti\JsonToClass\Helpers\SH;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -13,7 +14,7 @@ class RootClassTest extends TestCase
     #[Test]
     public function construct(): void
     {
-        $rootClass = new RootClass('name');
-        $this->assertSame('name', $rootClass->className);
+        $rootClass = new RootClass(RootClassTest::class);
+        $this->assertSame(RootClassTest::class, $rootClass->className);
     }
 }

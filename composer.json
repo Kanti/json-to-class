@@ -11,19 +11,21 @@
   "require": {
     "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
     "nette/php-generator": "^4.1.6",
+    "psr/log": "^3.0",
     "thecodingmachine/safe": "^2.5"
   },
   "require-dev": {
-    "infection/infection": "^0.29.6",
+    "infection/infection": "^0.29.7",
     "phpstan/phpstan-phpunit": "^1.4",
-    "phpunit/phpunit": "^11.3.6",
+    "phpunit/phpunit": "^11.4.1",
     "pluswerk/grumphp-config": "^7.1",
     "spatie/phpunit-snapshot-assertions": "^5.1.6",
     "symfony/var-dumper": "^7.1.5"
   },
   "autoload": {
     "psr-4": {
-      "Kanti\\JsonToClass\\": "src/"
+      "Kanti\\JsonToClass\\": "src/",
+      "Kanti\\RealTest\\": "real-tests/"
     }
   },
   "autoload-dev": {
@@ -49,7 +51,7 @@
     "lint": "grumphp run --ansi",
     "phpcs": "phpcs --standard=PSR12",
     "phpstan": "phpstan -c phpstan.neon",
-    "test": "XDEBUG_MODE=coverage phpunit --color=always",
-    "test:update": "XDEBUG_MODE=coverage phpunit --color=always -d --update-snapshots"
+    "test": "php -d pcov.enabled=1 vendor/bin/phpunit --color=always --testdox --testdox-summary",
+    "test:update": "php -d pcov.enabled=1 vendor/bin/phpunit --color=always -d --update-snapshots"
   }
 }
