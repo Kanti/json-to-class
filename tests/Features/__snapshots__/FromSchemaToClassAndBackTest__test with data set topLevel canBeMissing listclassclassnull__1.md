@@ -1,4 +1,4 @@
-# Tested "topLevel canBeMissing list<class>"
+# Tested "topLevel canBeMissing list<class>|class|null"
 ````json
 {
     "schema": {
@@ -21,12 +21,13 @@
                 }
             }
         },
-        "properties": null
+        "properties": []
     },
-    "expectedPhpType": "array|null",
-    "expectedDocBlockType": "list<Data_>|null",
+    "expectedPhpType": "Kanti\\GeneratedTest\\Data|array|null",
+    "expectedDocBlockType": "list<Data_>|Data|null",
     "expectedAttribute": {},
     "expectedUses": {
+        "Data": "Kanti\\GeneratedTest\\Data",
         "Data_": "Kanti\\GeneratedTest\\Data_"
     }
 }
@@ -39,6 +40,7 @@ declare(strict_types=1);
 
 namespace Kanti\GeneratedTest;
 
+use Kanti\GeneratedTest\Data\A;
 use Kanti\GeneratedTest\Data\A_;
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Attribute\Types;
@@ -46,14 +48,25 @@ use Kanti\JsonToClass\Attribute\Types;
 #[RootClass]
 final readonly class Data
 {
-    /**
-     * @param list<A_>|null $a
-     */
-    public function __construct(
-        #[Types([A_::class], 'null')]
-        public array|null $a = null,
-    ) {
-    }
+    /** @var list<A_>|A|null */
+    #[Types([A_::class], A::class, 'null')]
+    public A|array|null $a;
+}
+````
+##### Kanti\GeneratedTest\Data\A:
+````php
+<?php
+
+declare(strict_types=1);
+
+namespace Kanti\GeneratedTest\Data;
+
+use Kanti\GeneratedTest\Data;
+use Kanti\JsonToClass\Attribute\RootClass;
+
+#[RootClass(Data::class)]
+final readonly class A
+{
 }
 ````
 ##### Kanti\GeneratedTest\Data\A_:
@@ -70,9 +83,6 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass(Data::class)]
 final readonly class A_
 {
-    public function __construct(
-        public int $int,
-    ) {
-    }
+    public int $int;
 }
 ````

@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\CodeCreator;
 
+use Composer\Autoload\ClassLoader;
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\CodeCreator\TypeCreator;
+use Kanti\JsonToClass\Container\JsonToClassContainer;
+use Kanti\JsonToClass\FileSystemAbstraction\FileSystemInterface;
 use Kanti\JsonToClass\Helpers\SH;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Kanti\JsonToClass\Schema\Schema;
+use Kanti\JsonToClass\Tests\_helper\FakeFileSystem;
 use Kanti\JsonToClass\Tests\Writer\FileWriterTest;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\Attributes\Test;
@@ -25,14 +29,14 @@ class DevelopmentCodeCreatorTest extends TestCase
 {
     #[Test]
     #[RunInSeparateProcess]
-    #[TestDox('Class Data already exists and is not a DataTrait')]
+    #[TestDox('Class Data already exists and is not a Kanti\JsonToClass\Dto\DataInterface')]
     public function exception1(): void
     {
-        $developmentCodeCreator = new DevelopmentCodeCreator(new TypeCreator());
+        $developmentCodeCreator = $this->getDevelopmentCodeCreator();
         class_alias(self::class, Data::class);
-        $namedSchema = NamedSchema::fromSchema(Data::class, new Schema());
+        $namedSchema = NamedSchema::fromSchema(Data::class, new Schema(properties: ['a' => new Schema(basicTypes: ['int' => true])]));
 
-        $this->expectExceptionMessage('Class ' . Data::class . ' already exists and is not a DataTrait');
+        $this->expectExceptionMessage('Class ' . Data::class . ' already exists and is not a Kanti\JsonToClass\Dto\DataInterface');
         $developmentCodeCreator->createDevelopmentClasses($namedSchema);
     }
 
@@ -61,7 +65,8 @@ class DevelopmentCodeCreatorTest extends TestCase
             ],
         );
         $namedSchema = NamedSchema::fromSchema(Data::class, $schema);
-        $developmentCodeCreator = new DevelopmentCodeCreator(new TypeCreator());
+
+        $developmentCodeCreator = $this->getDevelopmentCodeCreator();
         $this->assertFalse(class_exists($namedSchema->className, false), sprintf('Class %s should not exist', $namedSchema->className));
 
         $developmentCodeCreator->createDevelopmentClasses($namedSchema);
@@ -70,10 +75,22 @@ class DevelopmentCodeCreatorTest extends TestCase
         $this->assertTrue(DevelopmentCodeCreator::isDevelopmentDto($namedSchema->className), 'Class should be a DataTrait');
         $this->assertTrue(DevelopmentCodeCreator::isDevelopmentDto($namedSchema->listElement->className), 'Class should be a DataTrait');
         $this->assertTrue(DevelopmentCodeCreator::isDevelopmentDto($namedSchema->properties['fields']->className), 'Class should be a DataTrait');
-        $this->assertEquals(array_keys($schema->properties), array_column($namedSchema->className::getClassParameters(), 'name'), 'Class parameters should match');
+        $this->assertEquals(array_keys($schema->properties), array_column(DevelopmentCodeCreator::getClassProperties($namedSchema->className), 'name'), 'Class parameters should match');
 
         // can be called again:
         $developmentCodeCreator->createDevelopmentClasses($namedSchema);
         $this->assertArrayNotHasKey($namedSchema->className, $triedLoadingClasses, 'Class should not have been autoloaded');
+    }
+
+    protected function getDevelopmentCodeCreator(): DevelopmentCodeCreator
+    {
+        $classLoader = new ClassLoader();
+        $classLoader->addPsr4('Kanti\\', 'fake-src/');
+
+        $container = new JsonToClassContainer([
+            ClassLoader::class => $classLoader,
+            FileSystemInterface::class => new FakeFileSystem([]),
+        ]);
+        return $container->get(DevelopmentCodeCreator::class);
     }
 }

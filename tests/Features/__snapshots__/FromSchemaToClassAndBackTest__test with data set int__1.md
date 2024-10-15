@@ -25,9 +25,6 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass]
 final readonly class Data
 {
-    public function __construct(
-        public int $a,
-    ) {
-    }
+    public int $a;
 }
 ````

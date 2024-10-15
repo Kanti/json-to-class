@@ -6,15 +6,15 @@ namespace Kanti\JsonToClass\CodeCreator;
 
 use Exception;
 use Kanti\JsonToClass\Attribute\RootClass;
-use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Helpers;
 use Nette\PhpGenerator\Literal;
-use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\Printer;
+use Nette\PhpGenerator\Property;
+use Psr\Log\LoggerInterface;
 
 use function array_filter;
 use function get_debug_type;
@@ -27,6 +27,7 @@ final readonly class PhpFileUpdater
         private Printer $printer,
         private TypeCreator $typeCreator,
         private DocBlockUpdater $docblockUpdater,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -45,11 +46,11 @@ final readonly class PhpFileUpdater
         $this->addRootClassAttribute($schema, $namespace, $class, $rootClassName);
         //  add constructor if not exists
         //  make constructor public if not public
-        $constructor = $this->addConstructor($class);
+        $this->removeConstructor($class);
         //  add or remove properties/parameters/promotedParameters if not exists
         //  update types for properties/parameters/promotedParameters
         //  update types in Types Attribute
-        $this->addParameters($schema, $constructor, $namespace);
+        $this->addProperties($schema, $class, $namespace);
 
         return $this->printer->printFile($file);
     }
@@ -94,47 +95,42 @@ final readonly class PhpFileUpdater
         $class->addAttribute(RootClass::class, [new Literal(Helpers::extractShortName($rootClassName) . '::class')]);
     }
 
-    private function addConstructor(ClassType $class): Method
-    {
-        if ($class->hasMethod('__construct')) {
-            return $class->getMethod('__construct')->setPublic();
-        }
-
-        return $class->addMethod('__construct')->setPublic();
-    }
-
-    private function addParameters(NamedSchema $schema, Method $constructor, PhpNamespace $namespace): void
+    private function addProperties(NamedSchema $schema, ClassType $class, PhpNamespace $namespace): void
     {
         $properties = $this->sortProperties($schema->properties ?? []);
-        foreach ($properties as $name => $property) {
-            $phpType = $this->typeCreator->getPhpType($property, $namespace);
-            $docBlockType = $this->typeCreator->getDocBlockType($property, $namespace);
-            $attribute = $this->typeCreator->getAttribute($property, $namespace);
+        foreach ($properties as $name => $propertyConfig) {
+            $phpType = $this->typeCreator->getPhpType($propertyConfig, $namespace);
+            $docBlockType = $this->typeCreator->getDocBlockType($propertyConfig, $namespace);
+            $attribute = $this->typeCreator->getAttribute($propertyConfig, $namespace);
 
-            if ($constructor->hasParameter($name)) {
-                $parameter = $constructor->getParameter($name);
+            if ($class->hasProperty($name)) {
+                $property = $class->getProperty($name);
             } else {
-                $parameter = $constructor->addPromotedParameter($name);
+                $property = $class->addProperty($name);
             }
 
-            $parameter
+            $property
                 ->setType($phpType)
                 ->setAttributes(array_filter([$attribute]));
 
-            if ($property->canBeMissing) {
-                $parameter->setDefaultValue(null);
+            if ($propertyConfig->canBeMissing) {
+                $property->setNullable();
+
+                if (!$class->isReadOnly() && !$property->isReadOnly()) {
+                    $property->setValue(null);
+                }
             }
 
-            $this->addDocblock($constructor, $name, $phpType, $docBlockType);
+            $this->updateDocBlock($property, $phpType, $docBlockType);
         }
 
-        foreach ($constructor->getParameters() as $parameter) {
-            if (isset($properties[$parameter->getName()])) {
+        foreach ($class->getProperties() as $property) {
+            if (isset($properties[$property->getName()])) {
                 continue;
             }
 
-            $constructor->removeParameter($parameter->getName());
-            $this->addDocblock($constructor, $parameter->getName(), null, null);
+            $this->logger->warning('Removed unnecessary property ' . $property->getName() . ' from ' . $class->getName(), ['properties' => $property->getName(), 'class' => $class->getName()]);
+            $class->removeProperty($property->getName());
         }
     }
 
@@ -149,16 +145,20 @@ final readonly class PhpFileUpdater
         return $properties;
     }
 
-    private function addDocblock(Method $constructor, string $name, ?string $phpType, ?string $docBlockType): void
+    private function removeConstructor(ClassType $class): void
     {
-        $comment2 = $this->docblockUpdater->updateDocblock(
-            $constructor->getComment() ?? '',
-            $name,
-            $phpType,
-            $docBlockType,
-        );
-        if ($comment2) {
-            $constructor->setComment($comment2);
+        if (!$class->hasMethod('__construct')) {
+            return;
         }
+
+        $class->removeMethod('__construct');
+        $this->logger->warning('Removed constructor from ' . $class->getName());
+    }
+
+    private function updateDocBlock(Property $property, string $phpType, ?string $docBlockType): void
+    {
+        $comment = $property->getComment();
+        $newComment = $this->docblockUpdater->updateVarBlock($comment, $phpType, $docBlockType);
+        $property->setComment($newComment);
     }
 }

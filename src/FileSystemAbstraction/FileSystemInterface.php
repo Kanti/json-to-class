@@ -6,8 +6,6 @@ namespace Kanti\JsonToClass\FileSystemAbstraction;
 
 interface FileSystemInterface
 {
-    public function requireFile(string $filename): void;
-
     public function readContent(string $filename): string;
 
     public function readContentIfExists(string $filename): ?string;

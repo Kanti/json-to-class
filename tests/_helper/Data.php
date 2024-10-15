@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Kanti\GeneratedTest;
 
+use Exception;
+
 /**
  * this class has a different namespace, so it can not be found through the autoloader
  * infection manipulates the code and sometimes triggers writes to the file system in the wrong places
@@ -12,3 +14,5 @@ namespace Kanti\GeneratedTest;
 final readonly class Data
 {
 }
+
+throw new Exception('This file is not supposed to be loaded');

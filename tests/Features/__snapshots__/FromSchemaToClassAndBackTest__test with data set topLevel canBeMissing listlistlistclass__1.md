@@ -56,14 +56,9 @@ use Kanti\JsonToClass\Attribute\Types;
 #[RootClass]
 final readonly class Data
 {
-    /**
-     * @param list<list<list<A___>>>|null $a
-     */
-    public function __construct(
-        #[Types([[[A___::class]]], 'null')]
-        public array|null $a = null,
-    ) {
-    }
+    /** @var list<list<list<A___>>>|null */
+    #[Types([[[A___::class]]], 'null')]
+    public array|null $a;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A___:
@@ -80,9 +75,6 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass(Data::class)]
 final readonly class A___
 {
-    public function __construct(
-        public int $int,
-    ) {
-    }
+    public int $int;
 }
 ````

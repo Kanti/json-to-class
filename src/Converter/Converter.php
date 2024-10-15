@@ -11,6 +11,7 @@ use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\Validator\Validator;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use stdClass;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 
@@ -27,6 +28,7 @@ final readonly class Converter
         private Validator $validator,
         private ClassCreator $classCreator,
         private ClassMapper $classMapper,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -40,17 +42,31 @@ final readonly class Converter
      * @template T of object
      * @param class-string<T> $className
      *
-     * @return T|list<T>
+     * @return list<T>
      */
-    public function jsonDecode(string $className, string $json, Config $config = new SaneConfig()): array|object
+    public function jsonDecodeList(string $className, string $json, Config $config = new SaneConfig()): array
     {
+        $this->logger->debug('jsonDecode', ['className' => $className, 'json' => $json]);
         $data = json_decode($json, associative: false, flags: JSON_THROW_ON_ERROR);
-        if (!is_array($data) && !$data instanceof stdClass) {
-            throw new InvalidArgumentException('Invalid JSON given: "' . get_debug_type($data) . '" allowed: array or object');
+        if (!is_array($data)) {
+            throw new InvalidArgumentException('Invalid JSON given: "' . get_debug_type($data) . '" allowed: array');
         }
 
-        if (is_array($data)) {
-            return $this->convertList($className, $data, $config);
+        return $this->convertList($className, $data, $config);
+    }
+
+    /**
+     * @template T of object
+     * @param class-string<T> $className
+     *
+     * @return T
+     */
+    public function jsonDecode(string $className, string $json, Config $config = new SaneConfig()): object
+    {
+        $this->logger->debug('jsonDecode', ['className' => $className, 'json' => $json]);
+        $data = json_decode($json, associative: false, flags: JSON_THROW_ON_ERROR);
+        if (!$data instanceof stdClass) {
+            throw new InvalidArgumentException('Invalid JSON given: "' . get_debug_type($data) . '" allowed: object');
         }
 
         return $this->convert($className, $data, $config);
@@ -66,6 +82,7 @@ final readonly class Converter
      */
     public function convert(string $className, array|stdClass $data, Config $config = new SaneConfig()): object
     {
+        $this->logger->debug('convert', ['className' => $className, 'data' => $data]);
         if (!str_contains($className, '\\')) {
             throw new InvalidArgumentException('Class name must contain namespace');
         }
@@ -76,7 +93,9 @@ final readonly class Converter
 
         $this->validator->validateData($data, $config);
 
-        if ($config->shouldCreateClasses()) {
+        $shouldCreateClasses = $config->shouldCreateClasses();
+        $this->logger->debug('shouldCreateClasses', ['shouldCreateClasses' => $shouldCreateClasses]);
+        if ($shouldCreateClasses) {
             $this->classCreator->createClasses($className, $data, $config);
         }
 
@@ -94,6 +113,7 @@ final readonly class Converter
      */
     public function convertList(string $className, array $data, Config $config = new SaneConfig()): array
     {
+        $this->logger->debug('convertList', ['className' => $className, 'data' => $data]);
         if (!str_contains($className, '\\')) {
             throw new InvalidArgumentException('Class name must contain namespace');
         }
@@ -104,7 +124,9 @@ final readonly class Converter
 
         $this->validator->validateData($data, $config);
 
-        if ($config->shouldCreateClasses()) {
+        $shouldCreateClasses = $config->shouldCreateClasses();
+        $this->logger->debug('shouldCreateClasses', ['shouldCreateClasses' => $shouldCreateClasses]);
+        if ($shouldCreateClasses) {
             $this->classCreator->createClasses($className, $data, $config);
         }
 

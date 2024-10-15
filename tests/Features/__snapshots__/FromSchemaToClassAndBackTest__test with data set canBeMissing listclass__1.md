@@ -1,4 +1,4 @@
-# Tested "list<class>"
+# Tested "canBeMissing list<class>"
 ````json
 {
     "schema": {
@@ -44,14 +44,9 @@ use Kanti\JsonToClass\Attribute\Types;
 #[RootClass]
 final readonly class Data
 {
-    /**
-     * @param list<A_> $a
-     */
-    public function __construct(
-        #[Types([A_::class])]
-        public array $a,
-    ) {
-    }
+    /** @var list<A_> */
+    #[Types([A_::class])]
+    public array $a;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A_:
@@ -68,9 +63,6 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass(Data::class)]
 final readonly class A_
 {
-    public function __construct(
-        public int $int,
-    ) {
-    }
+    public int $int;
 }
 ````

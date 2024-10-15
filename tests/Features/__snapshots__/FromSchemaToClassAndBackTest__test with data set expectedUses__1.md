@@ -1,4 +1,4 @@
-# Tested "canBeMissing list<class>|class"
+# Tested "expectedUses"
 ````json
 {
     "schema": {
@@ -19,7 +19,23 @@
                 }
             }
         },
-        "properties": []
+        "properties": {
+            "classSchema": {
+                "canBeMissing": false,
+                "basicTypes": [],
+                "listElement": null,
+                "properties": {
+                    "int": {
+                        "canBeMissing": false,
+                        "basicTypes": {
+                            "int": true
+                        },
+                        "listElement": null,
+                        "properties": null
+                    }
+                }
+            }
+        }
     },
     "expectedPhpType": "Kanti\\GeneratedTest\\Data|array",
     "expectedDocBlockType": "list<Data_>|Data",
@@ -46,14 +62,9 @@ use Kanti\JsonToClass\Attribute\Types;
 #[RootClass]
 final readonly class Data
 {
-    /**
-     * @param list<A_>|A $a
-     */
-    public function __construct(
-        #[Types([A_::class], A::class)]
-        public A|array $a,
-    ) {
-    }
+    /** @var list<A_>|A */
+    #[Types([A_::class], A::class)]
+    public A|array $a;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A:
@@ -65,14 +76,13 @@ declare(strict_types=1);
 namespace Kanti\GeneratedTest\Data;
 
 use Kanti\GeneratedTest\Data;
+use Kanti\GeneratedTest\Data\A\ClassSchema;
 use Kanti\JsonToClass\Attribute\RootClass;
 
 #[RootClass(Data::class)]
 final readonly class A
 {
-    public function __construct()
-    {
-    }
+    public ClassSchema $classSchema;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A_:
@@ -89,9 +99,23 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass(Data::class)]
 final readonly class A_
 {
-    public function __construct(
-        public int $int,
-    ) {
-    }
+    public int $int;
+}
+````
+##### Kanti\GeneratedTest\Data\A\ClassSchema:
+````php
+<?php
+
+declare(strict_types=1);
+
+namespace Kanti\GeneratedTest\Data\A;
+
+use Kanti\GeneratedTest\Data;
+use Kanti\JsonToClass\Attribute\RootClass;
+
+#[RootClass(Data::class)]
+final readonly class ClassSchema
+{
+    public int $int;
 }
 ````

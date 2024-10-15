@@ -1,4 +1,4 @@
-# Tested "list<list<list<class>>>"
+# Tested "canBeMissing list<list<list<class>>>"
 ````json
 {
     "schema": {
@@ -54,14 +54,9 @@ use Kanti\JsonToClass\Attribute\Types;
 #[RootClass]
 final readonly class Data
 {
-    /**
-     * @param list<list<list<A___>>> $a
-     */
-    public function __construct(
-        #[Types([[[A___::class]]])]
-        public array $a,
-    ) {
-    }
+    /** @var list<list<list<A___>>> */
+    #[Types([[[A___::class]]])]
+    public array $a;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A___:
@@ -78,9 +73,6 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass(Data::class)]
 final readonly class A___
 {
-    public function __construct(
-        public int $int,
-    ) {
-    }
+    public int $int;
 }
 ````

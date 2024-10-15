@@ -32,11 +32,6 @@ final class FakeFileSystem implements FileSystemInterface
         $this->fileState = $a;
     }
 
-    public function requireFile(string $filename): void
-    {
-        // noop
-    }
-
     public function writeContent(string $filename, string $content): void
     {
         $filename = realpath($filename) ?: $filename;

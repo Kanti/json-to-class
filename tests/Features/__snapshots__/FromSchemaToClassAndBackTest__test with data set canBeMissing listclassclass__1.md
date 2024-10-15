@@ -1,4 +1,4 @@
-# Tested "list<class>|class"
+# Tested "canBeMissing list<class>|class"
 ````json
 {
     "schema": {
@@ -19,16 +19,7 @@
                 }
             }
         },
-        "properties": {
-            "empty": {
-                "canBeMissing": true,
-                "basicTypes": {
-                    "null": true
-                },
-                "listElement": null,
-                "properties": null
-            }
-        }
+        "properties": []
     },
     "expectedPhpType": "Kanti\\GeneratedTest\\Data|array",
     "expectedDocBlockType": "list<Data_>|Data",
@@ -55,14 +46,9 @@ use Kanti\JsonToClass\Attribute\Types;
 #[RootClass]
 final readonly class Data
 {
-    /**
-     * @param list<A_>|A $a
-     */
-    public function __construct(
-        #[Types([A_::class], A::class)]
-        public A|array $a,
-    ) {
-    }
+    /** @var list<A_>|A */
+    #[Types([A_::class], A::class)]
+    public A|array $a;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A:
@@ -79,10 +65,6 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass(Data::class)]
 final readonly class A
 {
-    public function __construct(
-        public null $empty = null,
-    ) {
-    }
 }
 ````
 ##### Kanti\GeneratedTest\Data\A_:
@@ -99,9 +81,6 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass(Data::class)]
 final readonly class A_
 {
-    public function __construct(
-        public int $int,
-    ) {
-    }
+    public int $int;
 }
 ````

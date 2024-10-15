@@ -47,9 +47,7 @@ class SchemaFromClassCreatorTest extends TestCase
 <?php
 namespace Kanti\GeneratedTest;
 class Data {
-  public function __construct(
-    public A&B $a,
-  ) {}
+    public A&B $a;
 }
 PHP
 ,
@@ -60,26 +58,11 @@ PHP
 <?php
 namespace Kanti\GeneratedTest;
 class DataNot {
-  public function __construct(
-    public B $a,
-  ) {}
+    public B $a;
 }
 PHP
 ,
             'Class name mismatch Kanti\GeneratedTest\Data\A !== Kanti\GeneratedTest\B this must be a BUG please report it',
         ];
-        yield 'parameter is not a promoted property' => [
-            <<<'PHP'
-<?php
-namespace Kanti\GeneratedTest;
-class Data {
-  public function __construct(
-    B $b,
-  ) {}
-}
-PHP
-            ,
-            'Parameter is not a PromotedParameter Kanti\GeneratedTest\Data->b',
-            ];
     }
 }

@@ -69,18 +69,13 @@ use Kanti\JsonToClass\Attribute\Types;
 #[RootClass]
 final readonly class Data
 {
-    /**
-     * @param list<string> $expand
-     */
-    public function __construct(
-        #[Types(['string'])]
-        public array $expand,
-        public Fields $fields,
-        public string $id,
-        public string $self,
-        public ?string $key = null,
-    ) {
-    }
+    /** @var list<string> */
+    #[Types(['string'])]
+    public array $expand;
+    public Fields $fields;
+    public string $id;
+    public string $self;
+    public ?string $key;
 }
 
 EOF;
@@ -103,18 +98,13 @@ use Kanti\JsonToClass\Attribute\Types;
 #[RootClass(Data::class)]
 final readonly class Data_
 {
-    /**
-     * @param list<string> $expand
-     */
-    public function __construct(
-        #[Types(['string'])]
-        public array $expand,
-        public Fields $fields,
-        public string $id,
-        public string $self,
-        public ?string $key = null,
-    ) {
-    }
+    /** @var list<string> */
+    #[Types(['string'])]
+    public array $expand;
+    public Fields $fields;
+    public string $id;
+    public string $self;
+    public ?string $key;
 }
 
 EOF;
@@ -160,22 +150,16 @@ use Kanti\GeneratedTest\Data\SubClass\Fields;
 #[\CustomAttribute]
 class SubClass
 {
-    /**
-     * @param Fields $fields
-     * @param string $expand
-     * @param string $id this is not a UUid
-     * @param string $self
-     * @param string $thisShouldNotBeThereAnymore
-     * @param string $thisWillNotBeTouched
-     */
-    public function __construct(
-        public Fields $fields,
-        public string $id,
-        public string $expand,
-        public string $self,
-        public string $thisShouldNotBeThereAnymore,
-    ) {
-    }
+    /** @var Fields */
+    public Fields $fields;
+    /** @var string this is not a UUid */
+    public string $id;
+    /** @var string */
+    public string $expand;
+    /** @var string */
+    public string $self;
+    /** @var string */
+    public string $thisShouldNotBeThereAnymore;
 
     public function getSpecialField(): int {
         return $this->fields->specialField;
@@ -200,20 +184,16 @@ use Kanti\JsonToClass\Attribute\Types;
 #[RootClass(Data::class)]
 class SubClass
 {
-    /**
-     * @param list<string> $expand
-     * @param string $id this is not a UUid
-     * @param string $thisWillNotBeTouched
-     */
-    public function __construct(
-        public Fields $fields,
-        public string $id,
-        #[Types(['string'])]
-        public array $expand,
-        public string $self,
-        public ?string $key = null,
-    ) {
-    }
+    public Fields $fields;
+
+    /** @var string this is not a UUid */
+    public string $id;
+
+    /** @var list<string> */
+    #[Types(['string'])]
+    public array $expand;
+    public string $self;
+    public ?string $key = null;
 
     public function getSpecialField(): int
     {

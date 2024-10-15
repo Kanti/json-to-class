@@ -6,11 +6,11 @@ namespace Kanti\JsonToClass\Converter;
 
 use InvalidArgumentException;
 use Kanti\JsonToClass\Attribute\Types;
-use Kanti\JsonToClass\Dto\Parameter;
+use Kanti\JsonToClass\Dto\Property;
 use Kanti\JsonToClass\Dto\Type;
 use ReflectionIntersectionType;
 use ReflectionNamedType;
-use ReflectionParameter;
+use ReflectionProperty;
 use ReflectionUnionType;
 use Stringable;
 
@@ -46,20 +46,20 @@ final readonly class PossibleConvertTargets implements Stringable
         return null;
     }
 
-    public static function fromParameter(ReflectionParameter|Parameter $parameter): self
+    public static function fromParameter(ReflectionProperty|Property $property): self
     {
-        if ($parameter instanceof Parameter) {
-            return new self($parameter->types);
+        if ($property instanceof Property) {
+            return new self($property->types);
         }
 
-        $attribute = $parameter->getAttributes(Types::class)[0] ?? null;
+        $attribute = $property->getAttributes(Types::class)[0] ?? null;
         if ($attribute) {
             return new self($attribute->newInstance()->types);
         }
 
         // if no attribute is set, it is never a list
 
-        $type = $parameter->getType();
+        $type = $property->getType();
         if (!$type) {
             throw new InvalidArgumentException("Type cannot be null");
         }

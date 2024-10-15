@@ -1,28 +1,22 @@
-# Tested "topLevel canBeMissing Data"
+# Tested "starting with a number"
 ````json
-{
-    "schema": {
-        "canBeMissing": true,
-        "basicTypes": {
-            "null": true
-        },
+[
+    {
+        "canBeMissing": false,
+        "basicTypes": [],
         "listElement": null,
         "properties": {
-            "int": {
+            "_48x48": {
                 "canBeMissing": false,
                 "basicTypes": {
-                    "int": true
+                    "string": true
                 },
                 "listElement": null,
                 "properties": null
             }
         }
-    },
-    "expectedPhpType": "Kanti\\GeneratedTest\\Data|null",
-    "expectedUses": {
-        "Data": "Kanti\\GeneratedTest\\Data"
     }
-}
+]
 ````
 ##### Kanti\GeneratedTest\Data:
 ````php
@@ -38,10 +32,7 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass]
 final readonly class Data
 {
-    public function __construct(
-        public A|null $a = null,
-    ) {
-    }
+    public A $a;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A:
@@ -58,9 +49,6 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass(Data::class)]
 final readonly class A
 {
-    public function __construct(
-        public int $int,
-    ) {
-    }
+    public string $_48x48;
 }
 ````

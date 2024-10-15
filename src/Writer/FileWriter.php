@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Writer;
 
+use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\FileSystemAbstraction\ClassLocator;
 use Kanti\JsonToClass\FileSystemAbstraction\FileSystemInterface;
 
@@ -32,6 +33,10 @@ final readonly class FileWriter
             }
 
             $this->fileSystem->writeContent($location, $content);
+
+            if (DevelopmentCodeCreator::isDevelopmentDto($className)) {
+                continue;
+            }
 
             if (class_exists($className, false)) {
                 $needsRestart[] = $className;

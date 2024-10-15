@@ -1,11 +1,11 @@
-# Tested "string|int diffrent sorting"
+# Tested "string|int"
 ````json
 {
     "schema": {
         "canBeMissing": false,
         "basicTypes": {
-            "int": true,
-            "string": true
+            "string": true,
+            "int": true
         },
         "listElement": null,
         "properties": null
@@ -26,9 +26,6 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass]
 final readonly class Data
 {
-    public function __construct(
-        public string|int $a,
-    ) {
-    }
+    public string|int $a;
 }
 ````

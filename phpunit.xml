@@ -28,6 +28,10 @@
 
          colors="true"
 >
+    <php>
+        <env name="JSON_TO_CLASS_CREATE" value="create" force="true" />
+    </php>
+
     <testsuites>
         <testsuite name="default">
             <directory>tests/</directory>

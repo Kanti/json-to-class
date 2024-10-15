@@ -1,20 +1,11 @@
-# Tested "Data"
+# Tested "stdClass{}"
 ````json
 {
     "schema": {
         "canBeMissing": false,
         "basicTypes": [],
         "listElement": null,
-        "properties": {
-            "int": {
-                "canBeMissing": false,
-                "basicTypes": {
-                    "int": true
-                },
-                "listElement": null,
-                "properties": null
-            }
-        }
+        "properties": []
     },
     "expectedPhpType": "Kanti\\GeneratedTest\\Data",
     "expectedUses": {
@@ -36,10 +27,7 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass]
 final readonly class Data
 {
-    public function __construct(
-        public A $a,
-    ) {
-    }
+    public A $a;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A:
@@ -56,9 +44,5 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass(Data::class)]
 final readonly class A
 {
-    public function __construct(
-        public int $int,
-    ) {
-    }
 }
 ````

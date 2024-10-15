@@ -84,7 +84,7 @@ class TypeCreatorTest extends TestCase
             ],
         ];
         yield 'list<class>|class' => [
-            'schema' => new Schema(listElement: $classSchema, properties: ['empty' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
+            'schema' => new Schema(listElement: $classSchema, properties: ['empty' => new Schema(canBeMissing: true, basicTypes: ['string' => true])]),
             'expectedPhpType' => 'Kanti\GeneratedTest\Data|array',
             'expectedDocBlockType' => 'list<Data_>|Data',
             'expectedAttribute' => new Attribute(Types::class, [

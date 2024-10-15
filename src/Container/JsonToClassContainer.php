@@ -8,9 +8,11 @@ use Closure;
 use Composer\Autoload\ClassLoader;
 use Kanti\JsonToClass\FileSystemAbstraction\FileSystem;
 use Kanti\JsonToClass\FileSystemAbstraction\FileSystemInterface;
+use Kanti\JsonToClass\Logger\StdErrLogger;
 use Nette\PhpGenerator\Printer;
 use Nette\PhpGenerator\PsrPrinter;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
 
 use function is_string;
@@ -33,6 +35,7 @@ final class JsonToClassContainer implements ContainerInterface
     public function __construct(array $overwriteFactories = [])
     {
         $this->factories = [
+            LoggerInterface::class => fn(): object => new StdErrLogger(),
             ClassLoader::class => $this->getClassLoader(...),
             FileSystemInterface::class => fn(): object => new FileSystem(),
             Printer::class => fn(): object => new PsrPrinter(),

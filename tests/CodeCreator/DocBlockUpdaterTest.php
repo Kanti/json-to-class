@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\CodeCreator;
 
+use InvalidArgumentException;
 use Generator;
 use Kanti\JsonToClass\CodeCreator\DocBlockUpdater;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
@@ -14,228 +15,73 @@ use PHPUnit\Framework\TestCase;
 
 use function assert;
 
+use const PHP_EOL;
+
 class DocBlockUpdaterTest extends TestCase
 {
     #[Test]
-    #[TestDox('If $docBlockType is set, $phpType must also be set')]
-    public function exception1(): void
+    #[DataProvider('dataProvider')]
+    public function updateVarBlock(?string $input, ?string $phpType, ?string $docBlockType, ?string $expected, mixed ...$_): void
     {
         $container = new JsonToClassContainer();
         $updater = $container->get(DocBlockUpdater::class);
+        assert($updater instanceof DocBlockUpdater);
 
-        $this->expectExceptionMessage('If $docBlockType is set, $phpType must also be set');
-        $updater->updateDocblock('', 'name', null, 'array');
-    }
+        $phpType ??= $docBlockType ?? throw new InvalidArgumentException('phpType or docBlockType must be set');
 
-    #[Test]
-    #[DataProvider('updateDocblockDataProvider')]
-    public function updateDocblock(string $input, string $name, ?string $phpType = null, ?string $docBlockType = null, ?string $expected = null): void
-    {
-        $container = new JsonToClassContainer();
-        $updater = $container->get(DocBlockUpdater::class);
-        $phpType ??= $docBlockType;
-
-        $actual = $updater->updateDocblock($input, $name, $phpType, $docBlockType);
+        $actual = $updater->updateVarBlock($input, $phpType, $docBlockType);
         $this->assertEquals($expected, $actual);
     }
 
-    public static function updateDocblockDataProvider(): Generator
+    public static function dataProvider(): Generator
     {
-        yield '!paramExists !documentationShouldExist !paramIsDocumented !paramHasComment' => [
-            'input' => '',
-            'name' => 'name',
-            'phpType' => null,
-            'docBlockType' => null,
-            'expected' => null,
-        ];
-        yield 'paramExists !documentationShouldExist !paramIsDocumented !paramHasComment' => [
-            'input' => '',
-            'name' => 'name',
+        yield 'nothing' => [
+            'input' => null,
             'phpType' => 'string',
             'docBlockType' => null,
             'expected' => null,
         ];
-        yield 'paramExists documentationShouldExist !paramIsDocumented !paramHasComment' => [
-            'input' => '',
-            'name' => 'name',
+        yield 'docBlockType set' => [
+            'input' => null,
             'phpType' => 'string',
             'docBlockType' => 'string',
-            'expected' => '@param string $name',
+            'expected' => '@var string',
         ];
-
-
-        yield '!paramExists !documentationShouldExist paramIsDocumented !paramHasComment' => [
-            'input' => '@param string $name',
-            'name' => 'name',
-            'phpType' => null,
-            'docBlockType' => null,
-            'expected' => '',
-        ];
-        yield 'paramExists !documentationShouldExist paramIsDocumented !paramHasComment' => [
-            'input' => '@param string $name',
-            'name' => 'name',
-            'phpType' => 'string',
-            'docBlockType' => null,
-            'expected' => '',
-        ];
-        yield 'paramExists documentationShouldExist paramIsDocumented !paramHasComment' => [
-            'input' => '@param string $name ', // space at the end is not comment
-            'name' => 'name',
+        yield 'comment present' => [
+            'input' => '@var mixed comment',
             'phpType' => 'string',
             'docBlockType' => 'string',
-            'expected' => '@param string $name ',
+            'expected' => '@var string comment',
         ];
-
-        yield '!paramExists !documentationShouldExist paramIsDocumented paramHasComment' => [
-            'input' => '@param string $name this is a comment',
-            'name' => 'name',
-            'phpType' => null,
-            'docBlockType' => null,
-            'expected' => '',
-        ];
-        yield 'paramExists !documentationShouldExist paramIsDocumented paramHasComment' => [
-            'input' => '@param string $name this is a comment',
-            'name' => 'name',
+        yield 'comment present but should not have docblock' => [
+            'input' => '@var mixed comment',
             'phpType' => 'string',
             'docBlockType' => null,
-            'expected' => '@param string $name this is a comment',
+            'expected' => '@var string comment',
         ];
-        yield 'paramExists documentationShouldExist paramIsDocumented paramHasComment' => [
-            'input' => '@param string $name this is a comment',
-            'name' => 'name',
-            'phpType' => 'string',
-            'docBlockType' => 'string',
-            'expected' => '@param string $name this is a comment',
-        ];
-
-
-        yield 'empty' => [
-            'input' => '',
-            'name' => 'name',
-            'docBlockType' => 'string',
-            'expected' => '@param string $name',
-        ];
-        yield 'missing' => [
-            'input' => '@param Name2 $name2',
-            'name' => 'name',
-            'docBlockType' => 'string',
-            'expected' => <<<'EOF'
-                              @param Name2 $name2
-                              @param string $name
-                              EOF
-            ,
-        ];
-        yield 'has param with same type' => [
-            'input' => '@param string $name',
-            'name' => 'name',
-            'docBlockType' => 'string',
-            'expected' => '@param string $name',
-        ];
-        yield 'has param wrong same type' => [
-            'input' => <<<'EOF'
-                           @param null $name
-                           @param null $name2
-                           EOF
-            ,
-            'name' => 'name',
-            'docBlockType' => 'string',
-            'expected' => <<<'EOF'
-                              @param string $name
-                              @param null $name2
-                              EOF
-            ,
-        ];
-        yield 'has docBlockType but should not' => [
-            'input' => '@param string $name',
-            'name' => 'name',
+        yield 'comment without @var' => [
+            'input' => 'comment',
             'phpType' => 'string',
             'docBlockType' => null,
-            'expected' => '',
+            'expected' => '@var string comment',
         ];
-        yield 'has phpType but should not' => [
-            'input' => '@param string $name',
-            'name' => 'name',
-            'phpType' => null,
-            'docBlockType' => null,
-            'expected' => '',
-        ];
-        yield 'has param with same type + comment' => [
-            'input' => '@param string $name this is a comment',
-            'name' => 'name',
-            'docBlockType' => 'string',
-            'expected' => '@param string $name this is a comment',
-        ];
-        yield 'has param wrong same type + comment' => [
-            'input' => '@param null $name this is a comment',
-            'name' => 'name',
-            'docBlockType' => 'string',
-            'expected' => '@param string $name this is a comment',
-        ];
-        yield 'has docBlockType but should not + comment' => [
-            'input' => <<<'EOF'
-                           @param Name2 $name2
-                           @param WrongType $name this is a comment
-                           EOF
-            ,
-            'name' => 'name',
+        yield 'multiline comment without @var' => [
+            'input' => 'comment' . PHP_EOL . 'Help',
             'phpType' => 'string',
             'docBlockType' => null,
-            'expected' => <<<'EOF'
-                              @param Name2 $name2
-                              @param string $name this is a comment
-                              EOF
-            ,
+            'expected' => '@var string comment' . PHP_EOL . 'Help',
         ];
-        yield 'has phpType but should not + comment' => [
-            'input' => '@param string $name this is a comment',
-            'name' => 'name',
-            'phpType' => null,
+        yield '@var between comments' => [
+            'input' => 'comment' . PHP_EOL . '@var mixed comment' . PHP_EOL . 'Help',
+            'phpType' => 'string',
             'docBlockType' => null,
-            'expected' => '',
+            'expected' => 'comment' . PHP_EOL . '@var string comment' . PHP_EOL . 'Help',
         ];
-        yield 'should not change other params' => [
-            'input' => '@param string $x this is a comment',
-            'name' => 'name',
-            'phpType' => null,
+        yield '@var string this is not a UUid' => [
+            'input' => '@var string this is not a UUid',
+            'phpType' => 'string',
             'docBlockType' => null,
-            'expected' => null,
-        ];
-        yield 'should not change other params but remove the correct one' => [
-            'input' => <<<'EOF'
-                           @param string $x this is a comment
-                           @param string $name this is a comment
-                           EOF
-            ,
-            'name' => 'name',
-            'phpType' => null,
-            'docBlockType' => null,
-            'expected' => '@param string $x this is a comment',
-        ];
-        yield 'should not change other params but remove the correct one diffrent Sorting' => [
-            'input' => <<<'EOF'
-                           @param string $name this is a comment
-                           @param string $x this is a comment
-                           EOF
-            ,
-            'name' => 'name',
-            'phpType' => null,
-            'docBlockType' => null,
-            'expected' => '@param string $x this is a comment',
-        ];
-        yield 'should not change other params but remove the correct one before and after' => [
-            'input' => <<<'EOF'
-@param string $name2
-@param string $name
-@param string $x this is a comment
-EOF
-            ,
-            'name' => 'name',
-            'phpType' => null,
-            'docBlockType' => null,
-            'expected' => <<<'EOF'
-@param string $name2
-@param string $x this is a comment
-EOF,
+            'expected' => '@var string this is not a UUid',
         ];
     }
 }

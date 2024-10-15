@@ -2,21 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Kanti\JsonToClass\Tests\CodeCreator;
+namespace Kanti\JsonToClass\Tests\Features;
 
 use Composer\Autoload\ClassLoader;
 use Generator;
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\CodeCreator\CodeCreator;
-use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\FileSystemAbstraction\FileSystemInterface;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Kanti\JsonToClass\Schema\Schema;
 use Kanti\JsonToClass\Schema\SchemaFromClassCreator;
+use Kanti\JsonToClass\Schema\SchemaSimplification;
 use Kanti\JsonToClass\Tests\_helper\FakeFileSystem;
 use Kanti\JsonToClass\Tests\_helper\PhpFilesDriver;
 use Kanti\JsonToClass\Tests\_helper\PhpFilesDto;
+use Kanti\JsonToClass\Tests\CodeCreator\TypeCreatorTest;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\DataProviderExternal;
 use PHPUnit\Framework\Attributes\Test;
@@ -42,8 +43,13 @@ class FromSchemaToClassAndBackTest extends TestCase
             FileSystemInterface::class => new FakeFileSystem([]),
         ]);
         $wrappedSchema = new Schema(properties: ['a' => $schema]);
-        $actualFiles = $container->get(CodeCreator::class)
-            ->createFiles(NamedSchema::fromSchema(Data::class, $wrappedSchema));
+        $namedSchema = NamedSchema::fromSchema(Data::class, $wrappedSchema);
+        $namedSchema = $container->get(SchemaSimplification::class)->simplify($namedSchema);
+        if (!$namedSchema) {
+            $this->markTestSkipped('Schema is empty after simplification');
+        }
+
+        $actualFiles = $container->get(CodeCreator::class)->createFiles($namedSchema);
 
 
         $actual = new PhpFilesDto($actualFiles, $this->dataName(), $this->providedData());

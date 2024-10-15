@@ -31,13 +31,8 @@ use Kanti\JsonToClass\Attribute\Types;
 #[RootClass]
 final readonly class Data
 {
-    /**
-     * @param array{} $a
-     */
-    public function __construct(
-        #[Types([])]
-        public array $a,
-    ) {
-    }
+    /** @var array{} */
+    #[Types([])]
+    public array $a;
 }
 ````

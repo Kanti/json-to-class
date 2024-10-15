@@ -73,6 +73,11 @@ class SchemaMergerTest extends TestCase
             new Schema(properties: ['y' => new Schema()]),
             new Schema(properties: ['x' => new Schema(canBeMissing: true), 'y' => new Schema(canBeMissing: true)]),
         ];
+        yield 'a2 and b2' => [
+            new Schema(properties: ['x' => new Schema(), 'z' => new Schema()]),
+            new Schema(properties: ['y' => new Schema(), 'j' => new Schema()]),
+            new Schema(properties: ['x' => new Schema(canBeMissing: true), 'z' => new Schema(canBeMissing: true), 'y' => new Schema(canBeMissing: true), 'j' => new Schema(canBeMissing: true)]),
+        ];
         yield 'a and b with same key but different types' => [
             new Schema(properties: ['x' => new Schema(basicTypes: ['string' => true])]),
             new Schema(properties: ['x' => new Schema(basicTypes: ['int' => true])]),

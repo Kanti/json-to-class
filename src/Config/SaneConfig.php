@@ -8,6 +8,7 @@ use Kanti\JsonToClass\Config\Enums\AppendSchema;
 use Kanti\JsonToClass\Config\Enums\OnExtraProperties;
 use Kanti\JsonToClass\Config\Enums\OnInvalidCharacterProperties;
 use Kanti\JsonToClass\Config\Enums\OnMissingProperties;
+use Kanti\JsonToClass\Config\Enums\ShouldCreateClasses;
 
 final readonly class SaneConfig extends Config
 {
@@ -16,6 +17,7 @@ final readonly class SaneConfig extends Config
         public OnMissingProperties $onMissingProperties = OnMissingProperties::THROW_EXCEPTION,
         public OnInvalidCharacterProperties $onInvalidCharacterProperties = OnInvalidCharacterProperties::TRY_PREFIX_WITH_UNDERSCORE,
         public AppendSchema $appendSchema = AppendSchema::APPEND,
+        public ShouldCreateClasses $shouldCreateClasses = ShouldCreateClasses::TRY_TO_DETECT,
     ) {
     }
 }

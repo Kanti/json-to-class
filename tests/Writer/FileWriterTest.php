@@ -7,6 +7,7 @@ namespace Kanti\JsonToClass\Tests\Writer;
 use ArrayObject;
 use Composer\Autoload\ClassLoader;
 use Generator;
+use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\FileSystemAbstraction\ClassLocator;
 use Kanti\JsonToClass\FileSystemAbstraction\FileSystemInterface;
@@ -28,6 +29,7 @@ use function array_keys;
 #[CoversClass(SH::class)]
 #[CoversClass(FileWriter::class)]
 #[CoversClass(ClassLocator::class)]
+#[CoversClass(DevelopmentCodeCreator::class)]
 class FileWriterTest extends TestCase
 {
     #[Test]

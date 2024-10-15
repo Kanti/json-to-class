@@ -1,13 +1,20 @@
-# Tested "stdClass{}"
+# Tested "array{}|stdClass{}"
 ````json
 {
     "schema": {
         "canBeMissing": false,
         "basicTypes": [],
-        "listElement": null,
+        "listElement": {
+            "canBeMissing": false,
+            "basicTypes": [],
+            "listElement": null,
+            "properties": null
+        },
         "properties": []
     },
-    "expectedPhpType": "Kanti\\GeneratedTest\\Data",
+    "expectedPhpType": "Kanti\\GeneratedTest\\Data|array",
+    "expectedDocBlockType": "array{}|Data",
+    "expectedAttribute": {},
     "expectedUses": {
         "Data": "Kanti\\GeneratedTest\\Data"
     }
@@ -23,14 +30,14 @@ namespace Kanti\GeneratedTest;
 
 use Kanti\GeneratedTest\Data\A;
 use Kanti\JsonToClass\Attribute\RootClass;
+use Kanti\JsonToClass\Attribute\Types;
 
 #[RootClass]
 final readonly class Data
 {
-    public function __construct(
-        public A $a,
-    ) {
-    }
+    /** @var array{}|A */
+    #[Types([], A::class)]
+    public A|array $a;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A:
@@ -47,8 +54,5 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass(Data::class)]
 final readonly class A
 {
-    public function __construct()
-    {
-    }
 }
 ````

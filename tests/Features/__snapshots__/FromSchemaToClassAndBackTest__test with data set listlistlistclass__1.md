@@ -1,16 +1,12 @@
-# Tested "topLevel canBeMissing list<list<list<class>>|string>"
+# Tested "list<list<list<class>>>"
 ````json
 {
     "schema": {
-        "canBeMissing": true,
-        "basicTypes": {
-            "null": true
-        },
+        "canBeMissing": false,
+        "basicTypes": [],
         "listElement": {
             "canBeMissing": false,
-            "basicTypes": {
-                "string": true
-            },
+            "basicTypes": [],
             "listElement": {
                 "canBeMissing": false,
                 "basicTypes": [],
@@ -35,8 +31,8 @@
         },
         "properties": null
     },
-    "expectedPhpType": "array|null",
-    "expectedDocBlockType": "list<list<list<Data___>>|string>|null",
+    "expectedPhpType": "array",
+    "expectedDocBlockType": "list<list<list<Data___>>>",
     "expectedAttribute": {},
     "expectedUses": {
         "Data___": "Kanti\\GeneratedTest\\Data___"
@@ -58,14 +54,9 @@ use Kanti\JsonToClass\Attribute\Types;
 #[RootClass]
 final readonly class Data
 {
-    /**
-     * @param list<list<list<A___>>|string>|null $a
-     */
-    public function __construct(
-        #[Types([[[A___::class]]], ['string'], 'null')]
-        public array|null $a = null,
-    ) {
-    }
+    /** @var list<list<list<A___>>> */
+    #[Types([[[A___::class]]])]
+    public array $a;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A___:
@@ -82,9 +73,6 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass(Data::class)]
 final readonly class A___
 {
-    public function __construct(
-        public int $int,
-    ) {
-    }
+    public int $int;
 }
 ````

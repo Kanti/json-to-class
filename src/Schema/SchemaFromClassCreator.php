@@ -11,6 +11,7 @@ use Kanti\JsonToClass\FileSystemAbstraction\ClassLocator;
 use Kanti\JsonToClass\Helpers\SH;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PromotedParameter;
+use Nette\PhpGenerator\Property;
 
 final readonly class SchemaFromClassCreator
 {
@@ -38,16 +39,22 @@ final readonly class SchemaFromClassCreator
     {
         $schema->properties ??= [];
 
-        foreach ($this->getPromotedParameters($class, $schema->className) as $parameter) {
-            $propertyName = $parameter->getName();
-            $types = $this->getTypesFromPhpProperty($parameter, $schema->className);
+        foreach ($class->getProperties() as $property) {
+            $propertyName = $property->getName();
+            $types = $this->getTypesFromPhpProperty($property, $schema->className);
             $childClassName = SH::getChildClass($schema->className, $propertyName);
             foreach ($types as $type) {
                 $schema->properties[$propertyName] ??= new NamedSchema($childClassName);
 
                 $this->addType($type, $schema->properties[$propertyName]);
 
-                if ($parameter->hasDefaultValue()) {
+                if ($property->isInitialized()) {
+                    $schema->properties[$propertyName]->canBeMissing = true;
+                }
+
+                $readonly = $property->isReadOnly() || $class->isReadOnly();
+                $canBeNull = $property->isNullable() || $property->getType(true)?->allows('null');
+                if ($readonly && $canBeNull) {
                     $schema->properties[$propertyName]->canBeMissing = true;
                 }
             }
@@ -56,27 +63,9 @@ final readonly class SchemaFromClassCreator
 
     /**
      * @param class-string $className
-     * @return list<PromotedParameter>
-     */
-    private function getPromotedParameters(ClassType $class, string $className): array
-    {
-        $result = [];
-        foreach ($class->getMethod('__construct')->getParameters() as $parameter) {
-            if (!$parameter instanceof PromotedParameter) {
-                throw new Exception('Parameter is not a PromotedParameter ' . $className . '->' . $parameter->getName());
-            }
-
-            $result[] = $parameter;
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param class-string $className
      * @return list<Type>
      */
-    private function getTypesFromPhpProperty(PromotedParameter $parameter, string $className): array
+    private function getTypesFromPhpProperty(Property $parameter, string $className): array
     {
         try {
             $attributes = $parameter->getAttributes();

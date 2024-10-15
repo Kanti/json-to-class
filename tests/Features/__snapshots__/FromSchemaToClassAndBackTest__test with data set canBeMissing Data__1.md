@@ -38,10 +38,7 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass]
 final readonly class Data
 {
-    public function __construct(
-        public A|null $a = null,
-    ) {
-    }
+    public A|null $a;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A:
@@ -58,9 +55,6 @@ use Kanti\JsonToClass\Attribute\RootClass;
 #[RootClass(Data::class)]
 final readonly class A
 {
-    public function __construct(
-        public int $int,
-    ) {
-    }
+    public int $int;
 }
 ````
