@@ -1,4 +1,9 @@
-# json to class
+![Static Badge](https://img.shields.io/badge/phpstan-level:_max-blue?style=flat&logo=php)
+[![codecov](https://codecov.io/gh/Kanti/json-to-class/graph/badge.svg?token=RN6OGgDK19)](https://codecov.io/gh/Kanti/json-to-class)
+![Packagist Downloads](https://img.shields.io/packagist/dm/kanti/json-to-class)
+![Packagist Version](https://img.shields.io/packagist/v/kanti/json-to-class)
+
+# json to class (generates PHP)
 
 automatically generated PHP Classes from JSON or other data(database Rows, CSV, etc.)
 
@@ -61,6 +66,7 @@ time per class: `19.741117693663µs`
 ## TODOs
 - if type is only `null` or `array{}` or `stdClass{}` then it we remove the property
 - default wenn zu viele Felder kommen: Warning im Logging (PSR Logger / Sentry Logger)
+- add Styker: https://infection.github.io/guide/mutation-badge.html#How-to-set-it-up
 - add PSR Event system to make it possible to add custom logic `BeforeClassMapped`/`AfterClassMapped`, `BeforeClassWritten`/`AfterClassWritten` etc.
 - decide if we should use reflection or `::from` methods
 - maybe add log of schemas of all data transformed (commutative schema log)
@@ -100,7 +106,4 @@ class Person {
         public mixed $content,
     ) {}
 }
-````
-
-````php
 ````
