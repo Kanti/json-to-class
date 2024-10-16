@@ -6,17 +6,18 @@ namespace Kanti\JsonToClass\Schema;
 
 use Exception;
 use Kanti\JsonToClass\Attribute\Types;
+use Kanti\JsonToClass\Cache\RuntimeCache;
 use Kanti\JsonToClass\Dto\Type;
 use Kanti\JsonToClass\FileSystemAbstraction\ClassLocator;
 use Kanti\JsonToClass\Helpers\SH;
 use Nette\PhpGenerator\ClassType;
-use Nette\PhpGenerator\PromotedParameter;
 use Nette\PhpGenerator\Property;
 
 final readonly class SchemaFromClassCreator
 {
     public function __construct(
         private ClassLocator $classLocator,
+        private RuntimeCache $cache,
     ) {
     }
 
@@ -25,6 +26,11 @@ final readonly class SchemaFromClassCreator
      */
     public function fromClasses(string $className): ?NamedSchema
     {
+        $schema = $this->cache->getClassSchema($className);
+        if ($schema) {
+            return $schema;
+        }
+
         $class = $this->classLocator->getClass($className);
         if (!$class) {
             return null;

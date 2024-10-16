@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\ClassCreator;
 
 use InvalidArgumentException;
-use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\CodeCreator\CodeCreator;
 use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Config\Config;
@@ -18,9 +17,6 @@ use Kanti\JsonToClass\Schema\SchemaSimplification;
 use Kanti\JsonToClass\Writer\FileWriter;
 use stdClass;
 
-use function json_encode;
-use function PHPUnit\Framework\assertEquals;
-
 final readonly class ClassCreator
 {
     public function __construct(
@@ -28,7 +24,7 @@ final readonly class ClassCreator
         private SchemaFromDataCreator $schemaFromDataCreator,
         private DevelopmentCodeCreator $developmentCodeCreator,
         private SchemaMerger $schemaMerger,
-        private SchemaSimplification $schemaSimplification,
+        //private SchemaSimplification $schemaSimplification,
         private CodeCreator $codeCreator,
         private FileWriter $fileWriter,
     ) {
@@ -44,7 +40,7 @@ final readonly class ClassCreator
         Config $config,
     ): void {
         if (!str_contains($className, '\\')) {
-            throw new InvalidArgumentException('Class name must contain namespace');
+            throw new InvalidArgumentException(sprintf('$className must have a namespace ("%s" dose not include \\)', $className));
         }
 
         $schema = $this->schemaFromDataCreator->fromData($data, $config);
@@ -53,12 +49,18 @@ final readonly class ClassCreator
         if ($config->appendSchema === AppendSchema::APPEND) {
             $schemaFromClass = $this->schemaFromClassCreator->fromClasses($className);
             $schema = $this->schemaMerger->merge($schema, $schemaFromClass);
+
+            /** @noinspection TypeUnsafeComparisonInspection */
+            if ($schemaFromClass == $schema) {
+                // we do not need to update the files on disk
+                return;
+            }
         }
 
-        $schema = $this->schemaSimplification->simplify($schema);
-        if (!$schema) {
-            throw new InvalidArgumentException('Schema is empty for data: ' . json_encode($data));
-        }
+//        $schema = $this->schemaSimplification->simplify($schema);
+//        if (!$schema) {
+//            throw new InvalidArgumentException(sprintf("Schema is empty for data: %s", json_encode($data)));
+//        }
 
         $files = $this->codeCreator->createFiles($schema->getFirstNonListChild());
 

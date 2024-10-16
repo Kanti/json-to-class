@@ -80,6 +80,7 @@ time per class: `19.741117693663µs`
 ## TODOs
 - if type is only `null` or `array{}` or `stdClass{}` then it we remove the property
 - default wenn zu viele Felder kommen: Warning im Logging (PSR Logger / Sentry Logger)
+- add PSR Event system to make it possible to add custom logic `BeforeClassMapped`/`AfterClassMapped`, `BeforeClassWritten`/`AfterClassWritten` etc.
 - decide if we should use reflection or `::from` methods
 - maybe add log of schemas of all data transformed (commutative schema log)
 - on warning and error: log with help to change the schema/Classes so the current data is working with the Classes

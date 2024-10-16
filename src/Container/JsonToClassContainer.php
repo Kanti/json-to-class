@@ -19,6 +19,8 @@ use function is_string;
 
 final class JsonToClassContainer implements ContainerInterface
 {
+    public static ?JsonToClassContainer $instance = null;
+
     /**
      * @var array<string, Closure|object>
      */
