@@ -663,16 +663,16 @@
         },
         {
             "name": "amphp/parallel",
-            "version": "v2.2.9",
+            "version": "v2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/amphp/parallel.git",
-                "reference": "73d293f1fc4df1bebc3c4fce1432e82dd7032238"
+                "reference": "9777db1460d1535bc2a843840684fb1205225b87"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/amphp/parallel/zipball/73d293f1fc4df1bebc3c4fce1432e82dd7032238",
-                "reference": "73d293f1fc4df1bebc3c4fce1432e82dd7032238",
+                "url": "https://api.github.com/repos/amphp/parallel/zipball/9777db1460d1535bc2a843840684fb1205225b87",
+                "reference": "9777db1460d1535bc2a843840684fb1205225b87",
                 "shasum": ""
             },
             "require": {
@@ -735,7 +735,7 @@
             ],
             "support": {
                 "issues": "https://github.com/amphp/parallel/issues",
-                "source": "https://github.com/amphp/parallel/tree/v2.2.9"
+                "source": "https://github.com/amphp/parallel/tree/v2.3.0"
             },
             "funding": [
                 {
@@ -743,7 +743,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-03-24T18:27:44+00:00"
+            "time": "2024-09-14T19:16:14+00:00"
         },
         {
             "name": "amphp/parser",
@@ -1253,16 +1253,16 @@
         },
         {
             "name": "andersundsehr/rector-p",
-            "version": "1.2.0",
+            "version": "1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/andersundsehr/rector-p.git",
-                "reference": "acce57e785e917566d60692acc68c82ba2de46e5"
+                "reference": "b074c1342bf88b37939ee51722230c5a1ebebdbd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/andersundsehr/rector-p/zipball/acce57e785e917566d60692acc68c82ba2de46e5",
-                "reference": "acce57e785e917566d60692acc68c82ba2de46e5",
+                "url": "https://api.github.com/repos/andersundsehr/rector-p/zipball/b074c1342bf88b37939ee51722230c5a1ebebdbd",
+                "reference": "b074c1342bf88b37939ee51722230c5a1ebebdbd",
                 "shasum": ""
             },
             "require": {
@@ -1296,9 +1296,9 @@
             "description": "rector run file by file (like git add -p)",
             "support": {
                 "issues": "https://github.com/andersundsehr/rector-p/issues",
-                "source": "https://github.com/andersundsehr/rector-p/tree/1.2.0"
+                "source": "https://github.com/andersundsehr/rector-p/tree/1.3.0"
             },
-            "time": "2024-09-19T08:19:27+00:00"
+            "time": "2024-10-15T11:08:33+00:00"
         },
         {
             "name": "colinodell/json5",
@@ -5272,16 +5272,16 @@
         },
         {
             "name": "rector/rector",
-            "version": "1.2.6",
+            "version": "1.2.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rectorphp/rector.git",
-                "reference": "6ca85da28159dbd3bb36211c5104b7bc91278e99"
+                "reference": "5b33bdd871895276e2c18e5410a4a57df9233ee0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rectorphp/rector/zipball/6ca85da28159dbd3bb36211c5104b7bc91278e99",
-                "reference": "6ca85da28159dbd3bb36211c5104b7bc91278e99",
+                "url": "https://api.github.com/repos/rectorphp/rector/zipball/5b33bdd871895276e2c18e5410a4a57df9233ee0",
+                "reference": "5b33bdd871895276e2c18e5410a4a57df9233ee0",
                 "shasum": ""
             },
             "require": {
@@ -5319,7 +5319,7 @@
             ],
             "support": {
                 "issues": "https://github.com/rectorphp/rector/issues",
-                "source": "https://github.com/rectorphp/rector/tree/1.2.6"
+                "source": "https://github.com/rectorphp/rector/tree/1.2.7"
             },
             "funding": [
                 {
@@ -5327,7 +5327,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-10-03T08:56:44+00:00"
+            "time": "2024-10-12T11:12:46+00:00"
         },
         {
             "name": "revolt/event-loop",

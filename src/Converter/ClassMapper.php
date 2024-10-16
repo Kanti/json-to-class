@@ -6,6 +6,7 @@ namespace Kanti\JsonToClass\Converter;
 
 use AllowDynamicProperties;
 use InvalidArgumentException;
+use Kanti\JsonToClass\Cache\RuntimeCache;
 use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Config\Enums\OnInvalidCharacterProperties;
@@ -25,6 +26,7 @@ final readonly class ClassMapper
 {
     public function __construct(
         private LoggerInterface $logger,
+        private RuntimeCache $cache,
     ) {
     }
 
@@ -70,7 +72,7 @@ final readonly class ClassMapper
         /** @var list<ReflectionProperty|Property> $classProperties */
         $classProperties = $reflectionClass->getProperties();
         if (DevelopmentCodeCreator::isDevelopmentDto($className)) {
-            $classProperties = DevelopmentCodeCreator::getClassProperties($className);
+            $classProperties = $this->cache->getClassProperties($className);
         }
 
         $properties = $this->convertProperties($classProperties, $config, $data, $className, $path);
@@ -78,7 +80,7 @@ final readonly class ClassMapper
         $instance = $reflectionClass->newInstanceWithoutConstructor();
         $allowsDynamicProperties = (bool)$reflectionClass->getAttributes(AllowDynamicProperties::class);
         foreach ($properties as $key => $value) {
-            if ($allowsDynamicProperties) {
+            if ($allowsDynamicProperties && !$reflectionClass->hasProperty($key)) {
                 $instance->{$key} = $value;
                 continue;
             }
@@ -135,7 +137,7 @@ final readonly class ClassMapper
             }
 
             if (!array_key_exists($dataKey, $array)) {
-                if ($property->hasDefaultValue()) {
+                if ($property->hasDefaultValue() || $property->isReadOnly()) {
                     $args[$parameterName] = $property->getDefaultValue();
                     continue;
                 }

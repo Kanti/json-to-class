@@ -34,8 +34,8 @@ final readonly class Converter
 
     public static function getInstance(?ContainerInterface $container = null): self
     {
-        $container ??= new JsonToClassContainer();
-        return $container->get(self::class);
+        static $staticContainer = new JsonToClassContainer();
+        return ($container ?? $staticContainer)->get(self::class);
     }
 
     /**

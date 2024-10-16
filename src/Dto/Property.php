@@ -26,6 +26,11 @@ final readonly class Property
         return $this->isOptional;
     }
 
+    public function isReadOnly(): bool
+    {
+        return false;
+    }
+
     public function getDefaultValue(): mixed
     {
         return null;

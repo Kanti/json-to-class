@@ -6,6 +6,7 @@ namespace Kanti\JsonToClass\Tests\CodeCreator;
 
 use Composer\Autoload\ClassLoader;
 use Kanti\GeneratedTest\Data;
+use Kanti\JsonToClass\Cache\RuntimeCache;
 use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\CodeCreator\TypeCreator;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
@@ -19,9 +20,11 @@ use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 use function array_column;
 use function array_keys;
+use function assert;
 use function class_exists;
 use function Safe\class_alias;
 
@@ -75,7 +78,11 @@ class DevelopmentCodeCreatorTest extends TestCase
         $this->assertTrue(DevelopmentCodeCreator::isDevelopmentDto($namedSchema->className), 'Class should be a DataTrait');
         $this->assertTrue(DevelopmentCodeCreator::isDevelopmentDto($namedSchema->listElement->className), 'Class should be a DataTrait');
         $this->assertTrue(DevelopmentCodeCreator::isDevelopmentDto($namedSchema->properties['fields']->className), 'Class should be a DataTrait');
-        $this->assertEquals(array_keys($schema->properties), array_column(DevelopmentCodeCreator::getClassProperties($namedSchema->className), 'name'), 'Class parameters should match');
+
+        $cache = (new ReflectionClass($developmentCodeCreator))->getProperty('cache')->getValue($developmentCodeCreator);
+        assert($cache instanceof RuntimeCache);
+        $classProperties = $cache->getClassProperties($namedSchema->className);
+        $this->assertEquals(array_keys($schema->properties), array_column($classProperties, 'name'), 'Class parameters should match');
 
         // can be called again:
         $developmentCodeCreator->createDevelopmentClasses($namedSchema);

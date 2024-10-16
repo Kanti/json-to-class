@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Rector\CodeQuality\Rector\Equal\UseIdenticalOverEqualWithSameTypeRector;
 use PLUS\GrumPHPConfig\RectorSettings;
 use Rector\Config\RectorConfig;
 use Rector\Caching\ValueObject\Storage\FileCacheStorage;
@@ -32,6 +33,10 @@ return static function (RectorConfig $rectorConfig): void {
             ...RectorSettings::skip(),
             ...RectorSettings::skipTypo3(),
 
+            UseIdenticalOverEqualWithSameTypeRector::class => [
+                // this is a breaking change: == with objects is not the same as ===
+                __DIR__ . '/src/ClassCreator/ClassCreator.php',
+            ],
             /**
              * rector should not touch these files
              */

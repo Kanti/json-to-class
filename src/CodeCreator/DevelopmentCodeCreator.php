@@ -7,6 +7,7 @@ namespace Kanti\JsonToClass\CodeCreator;
 use AllowDynamicProperties;
 use Exception;
 use Kanti\JsonToClass\Attribute\Types;
+use Kanti\JsonToClass\Cache\RuntimeCache;
 use Kanti\JsonToClass\Dto\DataInterface;
 use Kanti\JsonToClass\Dto\Property;
 use Kanti\JsonToClass\FileSystemAbstraction\ClassLocator;
@@ -16,19 +17,16 @@ use Nette\PhpGenerator\Helpers;
 use Nette\PhpGenerator\PhpNamespace;
 use Psr\Log\LoggerInterface;
 
-use function array_values;
 use function class_exists;
 use function Safe\class_implements;
 
-final class DevelopmentCodeCreator
+final readonly class DevelopmentCodeCreator
 {
-    /** @var array<class-string, list<Property>> */
-    private static array $properties = [];
-
     public function __construct(
-        private readonly TypeCreator $typeCreator,
-        private readonly ClassLocator $classLocator,
-        private readonly LoggerInterface $logger,
+        private TypeCreator $typeCreator,
+        private ClassLocator $classLocator,
+        private LoggerInterface $logger,
+        private RuntimeCache $cache,
     ) {
     }
 
@@ -52,7 +50,8 @@ final class DevelopmentCodeCreator
             $parameters[] = new Property($name, (new Types(...$types))->types, $property->canBeMissing);
         }
 
-        $this->setClassProperties($schema->className, ...$parameters);
+        $this->cache->setClassProperties($schema->className, ...$parameters);
+        $this->cache->setClassSchema($schema->className, $schema);
 
         $this->createDevelopmentClassIfNotExists($schema->className);
     }
@@ -120,22 +119,8 @@ final class DevelopmentCodeCreator
     }
 
     /**
-     * @param class-string $className
+     * so the eval code does not have write access to the current scope
      */
-    private function setClassProperties(string $className, Property ...$properties): void
-    {
-        self::$properties[$className] = array_values($properties);
-    }
-
-    /**
-     * @param class-string $className
-     * @return list<Property>
-     */
-    public static function getClassProperties(string $className): array
-    {
-        return self::$properties[$className] ?? [];
-    }
-
     private function runEval(string $phpCode): void
     {
         eval($phpCode);
