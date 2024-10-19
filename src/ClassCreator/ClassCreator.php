@@ -53,7 +53,7 @@ final readonly class ClassCreator
             /** @noinspection TypeUnsafeComparisonInspection */
             if ($schemaFromClass == $schema) {
                 // we do not need to update the files on disk
-                return;
+//                return; // if the schema is right, it does not mean the files are right ( maybe the MuteUninitializedPropertyError is missing )
             }
         }
 

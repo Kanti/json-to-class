@@ -42,10 +42,13 @@ use Kanti\GeneratedTest\Data\A;
 use Kanti\GeneratedTest\Data\A_;
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Attribute\Types;
+use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 
 #[RootClass]
 final readonly class Data
 {
+    use MuteUninitializedPropertyError;
+
     /** @var list<A_>|A */
     #[Types([A_::class], A::class)]
     public A|array $a;
@@ -61,10 +64,12 @@ namespace Kanti\GeneratedTest\Data;
 
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Attribute\RootClass;
+use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 
 #[RootClass(Data::class)]
 final readonly class A
 {
+    use MuteUninitializedPropertyError;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A_:
@@ -77,10 +82,13 @@ namespace Kanti\GeneratedTest\Data;
 
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Attribute\RootClass;
+use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 
 #[RootClass(Data::class)]
 final readonly class A_
 {
+    use MuteUninitializedPropertyError;
+
     public int $int;
 }
 ````

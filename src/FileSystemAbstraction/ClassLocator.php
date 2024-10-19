@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\FileSystemAbstraction;
 
 use Composer\Autoload\ClassLoader;
+use Kanti\JsonToClass\CodeCreator\PhpFileUpdater;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Helpers;
 use Nette\PhpGenerator\PhpFile;
@@ -23,18 +24,26 @@ final readonly class ClassLocator
      */
     public function getClass(string $className): ?ClassType
     {
+        $class = $this->getClassFile($className)?->getClasses()[$className] ?? null;
+        if ($class && !$class instanceof ClassType) {
+            throw new RuntimeException('Class ' . $className . ' not found it is a ' . $class::class);
+        }
+
+        return $class;
+    }
+
+    /**
+     * @param class-string $className
+     */
+    public function getClassFile(string $className): ?PhpFile
+    {
         $location = $this->getFileLocation($className);
         $content = $this->fileSystem->readContentIfExists($location);
         if (!$content) {
             return null;
         }
 
-        $object = PhpFile::fromCode($content)->getClasses()[$className] ?? throw new RuntimeException('Class ' . $className . ' not found in file ' . $location);
-        if (!$object instanceof ClassType) {
-            throw new RuntimeException('Class ' . $className . ' not found it is a ' . $object::class);
-        }
-
-        return $object;
+        return PhpFile::fromCode($content);
     }
 
     /**

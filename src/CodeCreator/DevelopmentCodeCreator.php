@@ -6,19 +6,22 @@ namespace Kanti\JsonToClass\CodeCreator;
 
 use AllowDynamicProperties;
 use Exception;
+use http\Exception\RuntimeException;
 use Kanti\JsonToClass\Attribute\Types;
 use Kanti\JsonToClass\Cache\RuntimeCache;
 use Kanti\JsonToClass\Dto\DataInterface;
+use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 use Kanti\JsonToClass\Dto\Property;
 use Kanti\JsonToClass\FileSystemAbstraction\ClassLocator;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Helpers;
-use Nette\PhpGenerator\PhpNamespace;
+use Nette\PhpGenerator\PhpFile;
 use Psr\Log\LoggerInterface;
 
 use function class_exists;
 use function Safe\class_implements;
+use function sprintf;
 
 final readonly class DevelopmentCodeCreator
 {
@@ -70,12 +73,17 @@ final readonly class DevelopmentCodeCreator
             throw new Exception(sprintf("Class %s already exists and is not a %s", $className, DataInterface::class));
         }
 
-        $shortName = Helpers::extractShortName($className);
-        $namespace = Helpers::extractNamespace($className);
 
-        $phpClass = $this->classLocator->getClass($className) ?? (new ClassType($shortName, new PhpNamespace($namespace)))->setFinal();
+        $phpFile = $this->classLocator->getClassFile($className) ?? (new PhpFile())->setStrictTypes();
+        $phpClass = $phpFile->getClasses()[$className] ?? $phpFile->addClass($className)->setFinal();
+        if (!$phpClass instanceof ClassType) {
+            throw new RuntimeException('Class ' . $className . ' not found it is a ' . $phpClass::class);
+        }
 
         $phpClass->setReadOnly(false);
+        if (!$phpClass->hasTrait(MuteUninitializedPropertyError::class)) {
+            $phpClass->addTrait(MuteUninitializedPropertyError::class);
+        }
 
         foreach ($phpClass->getProperties() as $property) {
             $property->setType('mixed');
@@ -94,8 +102,9 @@ final readonly class DevelopmentCodeCreator
             $phpClass->addAttribute(AllowDynamicProperties::class);
         }
 
-        $eval = "namespace " . $namespace . ";\n" . $phpClass;
-        $this->runEval($eval);
+        $namespace = Helpers::extractNamespace($className);
+        $phpNamespace = $phpFile->getNamespaces()[$namespace] ?? throw new Exception(sprintf('Namespace %s not found', $namespace));
+        $this->runEval($phpNamespace->__toString());
 
         if (self::isDevelopmentDto($className)) {
             return;

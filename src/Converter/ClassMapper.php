@@ -10,17 +10,18 @@ use Kanti\JsonToClass\Cache\RuntimeCache;
 use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Config\Enums\OnInvalidCharacterProperties;
-use Kanti\JsonToClass\Dto\DataTrait;
+use Kanti\JsonToClass\Dto\KeepDefaultValue;
+use Kanti\JsonToClass\Dto\MakeUninitialized;
 use Kanti\JsonToClass\Dto\Property;
 use Kanti\JsonToClass\Dto\Type;
 use Kanti\JsonToClass\Helpers\SH;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
-use ReflectionParameter;
 use ReflectionProperty;
 use stdClass;
 
 use function assert;
+use function is_array;
 
 final readonly class ClassMapper
 {
@@ -38,27 +39,14 @@ final readonly class ClassMapper
      *
      * @return T
      */
-    public function map(string $className, array|stdClass $data, Config $config, string $path = ''): object
+    public function map(string $className, array|stdClass $data, Config $config, string $path = '$'): object
     {
-        if (interface_exists($className, false) && class_exists($className . '_Implementation', false)) {
-            $initialClassName = $className;
-            $className .= '_Implementation';
-
-            if (!is_a($className, $initialClassName, true)) {
-                throw new InvalidArgumentException(sprintf('Class %s does not implement %s %s', $className, $initialClassName, $path));
-            }
-
-            if (!DevelopmentCodeCreator::isDevelopmentDto($className)) {
-                throw new InvalidArgumentException(sprintf('Class %s must implement %s %s', $className, DataTrait::class, $path));
-            }
-        }
-
         if (!class_exists($className)) {
             throw new InvalidArgumentException(sprintf('Class %s does not exist %s', $className, $path));
         }
 
         if (is_array($data) && array_is_list($data)) {
-            throw new InvalidArgumentException(sprintf('Data must be an associative array %s', $path));
+            throw new InvalidArgumentException(sprintf('Data must be an associative array or stdclass, list is not allowed %s', $path));
         }
 
         $data = (array)$data;
@@ -75,11 +63,21 @@ final readonly class ClassMapper
             $classProperties = $this->cache->getClassProperties($className);
         }
 
-        $properties = $this->convertProperties($classProperties, $config, $data, $className, $path);
+        $properties = $this->convertProperties($classProperties, $config, $data, $path);
 
         $instance = $reflectionClass->newInstanceWithoutConstructor();
         $allowsDynamicProperties = (bool)$reflectionClass->getAttributes(AllowDynamicProperties::class);
         foreach ($properties as $key => $value) {
+            if ($value instanceof KeepDefaultValue) {
+                // do nothing
+                continue;
+            }
+
+            if ($value instanceof MakeUninitialized) {
+                $this->unsetFromObject($instance, $key);
+                continue;
+            }
+
             if ($allowsDynamicProperties && !$reflectionClass->hasProperty($key)) {
                 $instance->{$key} = $value;
                 continue;
@@ -91,13 +89,50 @@ final readonly class ClassMapper
         return $instance;
     }
 
+    /**
+     * @param list<Property|ReflectionProperty> $properties
+     * @param array<mixed>|stdClass $data
+     * @return array<string, mixed>
+     */
+    private function convertProperties(array $properties, Config $config, array|stdClass $data, string $path): array
+    {
+        $array = (array)$data;
+
+        $args = [];
+        foreach ($properties as $property) {
+            $possibleTypes = PossibleConvertTargets::fromParameter($property);
+            $dataKey = $property->getName();
+            $parameterName = $dataKey;
+            if (str_starts_with($parameterName, '_') && $config->onInvalidCharacterProperties === OnInvalidCharacterProperties::TRY_PREFIX_WITH_UNDERSCORE) {
+                $dataKey = substr($parameterName, 1);
+            }
+
+            if (!array_key_exists($dataKey, $array)) {
+                if ($property->hasDefaultValue()) {
+                    $args[$parameterName] = KeepDefaultValue::KeepDefaultValue;
+                    continue;
+                }
+
+                // TODO Config
+                $args[$parameterName] = MakeUninitialized::MakeUninitialized;
+                continue;
+            }
+
+            $args[$parameterName] = $this->convertType($possibleTypes, $array[$dataKey] ?? null, $config, $path . '.' . $dataKey);
+        }
+
+        return $args;
+    }
+
     private function convertType(PossibleConvertTargets $possibleTypes, mixed $param, Config $config, string $path): mixed
     {
         $sourceType = Type::fromData($param);
 
         $type = $possibleTypes->getMatch($sourceType);
         if (!$type) {
-            throw new TypesDoNotMatchException($possibleTypes, $sourceType, $path);
+            return MakeUninitialized::MakeUninitialized;
+            // TODO CONFIG
+//            throw new TypesDoNotMatchException($possibleTypes, $sourceType, $path);
         }
 
         if ($type->isBasicType()) {
@@ -119,35 +154,14 @@ final readonly class ClassMapper
     }
 
     /**
-     * @param list<Property|ReflectionProperty> $properties
-     * @param array<mixed>|stdClass $data
-     * @return array<string, mixed>
+     * this function can be used to unset private, protected or readonly properties from an object
      */
-    private function convertProperties(array $properties, Config $config, array|stdClass $data, string $className, string $path): array
+    private function unsetFromObject(object $object, string ...$names): void
     {
-        $array = (array)$data;
-
-        $args = [];
-        foreach ($properties as $property) {
-            $possibleTypes = PossibleConvertTargets::fromParameter($property);
-            $dataKey = $property->getName();
-            $parameterName = $dataKey;
-            if (str_starts_with($parameterName, '_') && $config->onInvalidCharacterProperties === OnInvalidCharacterProperties::TRY_PREFIX_WITH_UNDERSCORE) {
-                $dataKey = substr($parameterName, 1);
+        (function () use ($names): void {
+            foreach ($names as $name) {
+                unset($this->{$name});
             }
-
-            if (!array_key_exists($dataKey, $array)) {
-                if ($property->hasDefaultValue() || $property->isReadOnly()) {
-                    $args[$parameterName] = $property->getDefaultValue();
-                    continue;
-                }
-
-                throw new InvalidArgumentException(sprintf('Parameter %s->%s is missing in data %s', $className, $parameterName, $path));
-            }
-
-            $args[$parameterName] = $this->convertType($possibleTypes, $array[$dataKey] ?? null, $config, $path . '.' . $dataKey);
-        }
-
-        return $args;
+        })->call($object);
     }
 }

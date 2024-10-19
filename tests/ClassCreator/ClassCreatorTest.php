@@ -46,17 +46,17 @@ class ClassCreatorTest extends TestCase
         return $container->get(ClassCreator::class);
     }
 
-    #[Test]
-    #[TestDox('Schema is empty for data: %s')]
-    public function exception2(): void
-    {
-        $this->markTestSkipped('Until we have the Simplification in th ClassCreator');
+//    #[Test]
+//    #[TestDox('Schema is empty for data: %s')]
+//    public function exception2(): void
+//    {
+//        $this->markTestSkipped('Until we have the Simplification in th ClassCreator');
 
 //        $classCreator = $this->getClassCreator();
 
 //        $this->expectExceptionMessage('Schema is empty for data: {"null":null}');
 //        $classCreator->createClasses(Data::class, ['null' => null], new SaneConfig());
-    }
+//    }
 
     #[Test]
     #[RunInSeparateProcess]

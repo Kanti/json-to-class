@@ -20,10 +20,10 @@ final class Validator
      */
     public function validateData(null|bool|int|float|string|array|stdClass $data, Config $config): void
     {
-        $this->validateDataInternal($data, $config, '$');
+        $this->validateDataInternal($data, $config);
     }
 
-    private function validateDataInternal(mixed $data, Config $config, string $path): void
+    private function validateDataInternal(mixed $data, Config $config, string $path = '$'): void
     {
         if (is_null($data)) {
             return;

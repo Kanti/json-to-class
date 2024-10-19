@@ -32,10 +32,13 @@ namespace Kanti\GeneratedTest;
 
 use Kanti\GeneratedTest\Data\A;
 use Kanti\JsonToClass\Attribute\RootClass;
+use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 
 #[RootClass]
 final readonly class Data
 {
+    use MuteUninitializedPropertyError;
+
     public A $a;
 }
 ````
@@ -49,10 +52,13 @@ namespace Kanti\GeneratedTest\Data;
 
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Attribute\RootClass;
+use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 
 #[RootClass(Data::class)]
 final readonly class A
 {
+    use MuteUninitializedPropertyError;
+
     public int $int;
 }
 ````

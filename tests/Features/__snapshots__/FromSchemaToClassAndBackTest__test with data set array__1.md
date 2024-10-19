@@ -27,10 +27,13 @@ namespace Kanti\GeneratedTest;
 
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Attribute\Types;
+use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 
 #[RootClass]
 final readonly class Data
 {
+    use MuteUninitializedPropertyError;
+
     /** @var array{} */
     #[Types([])]
     public array $a;
