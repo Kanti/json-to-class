@@ -54,20 +54,24 @@ class FromDataToCodeToDataTest extends TestCase
 
     public static function dataProvider(): Generator
     {
-//        yield 'null' => [json_encode(['a' => null])]; throws: Schema is empty for data: {"a":null}
+        yield 'null' => [json_encode(['a' => null])]; # throws: Schema is empty for data: {"a":null}
         yield 'bool' => [json_encode(['a' => true])];
         yield 'int' => [json_encode(['a' => 1])];
         yield 'float' => [json_encode(['a' => 1.0])];
         yield 'string' => [json_encode(['a' => 'string'])];
-//        yield 'null[]' => [json_encode(['a' => [null]])]; throws: Schema is empty for data: {"a":[null]}
+        yield 'null[]' => [json_encode(['a' => [null]])]; # throws: Schema is empty for data: {"a":[null]}
         yield 'bool[]' => [json_encode(['a' => [false]])];
         yield 'int[]' => [json_encode(['a' => [1]])];
         yield 'float[]' => [json_encode(['a' => [1.0]])];
         yield 'string[]' => [json_encode(['a' => ['string']])];
-//        yield 'null[][]' => [json_encode(['a' => [[null]]])]; throws: Schema is empty for data: {"a":[[null]]}
+        yield 'null[][]' => [json_encode(['a' => [[null]]])]; # throws: Schema is empty for data: {"a":[[null]]}
         yield 'bool[][]' => [json_encode(['a' => [[false]]])];
         yield 'int[][]' => [json_encode(['a' => [[1]]])];
         yield 'float[][]' => [json_encode(['a' => [[1.0]]])];
         yield 'string[][]' => [json_encode(['a' => [['string']]])];
+        yield 'B and C can be undefined and missing from json_encode again' => [json_encode(['a' => [
+            ['B' => 1],
+            ['C' => 2],
+        ]])];
     }
 }

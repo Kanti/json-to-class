@@ -9,15 +9,37 @@ use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\Converter\ClassMapper;
+use Kanti\JsonToClass\Helpers\SH;
 use Kanti\JsonToClass\Tests\Converter\__fixture__\Children;
 use Kanti\JsonToClass\Tests\Converter\__fixture__\Dto;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
 class ClassMapperTest extends TestCase
 {
+    #[Test]
+    #[TestDox('Class MissingClass does not exist $')]
+    public function exception1(): void
+    {
+        $classMapper = $this->getClassMapper();
+
+        $this->expectExceptionMessage('Class MissingClass does not exist $');
+        $classMapper->map(SH::classString('MissingClass'), [1, 2, 3], new SaneConfig());
+    }
+
+    #[Test]
+    #[TestDox('Data must be an associative array or stdclass, list is not allowed $')]
+    public function exception2(): void
+    {
+        $classMapper = $this->getClassMapper();
+
+        $this->expectExceptionMessage('Data must be an associative array or stdclass, list is not allowed $');
+        $classMapper->map(Children::class, [1, 2, 3], new SaneConfig());
+    }
+
     /**
      * @template T of object
      * @param class-string<T> $className
@@ -28,8 +50,7 @@ class ClassMapperTest extends TestCase
     #[DataProvider('dataProvider')]
     public function map(string $className, array|stdClass $data, object $expected, Config $config = new SaneConfig()): void
     {
-        $container = new JsonToClassContainer();
-        $classMapper = $container->get(ClassMapper::class);
+        $classMapper = $this->getClassMapper();
         $actual = $classMapper->map($className, $data, $config);
         $this->assertEquals($expected, $actual);
     }
@@ -114,5 +135,11 @@ class ClassMapperTest extends TestCase
                 childrenMixedDeep: [[Children::from(name: 'B', age: 2)], Children::from(name: 'C', age: 3)],
             ),
         ];
+    }
+
+    protected function getClassMapper(): ClassMapper
+    {
+        $container = new JsonToClassContainer();
+        return $container->get(ClassMapper::class);
     }
 }

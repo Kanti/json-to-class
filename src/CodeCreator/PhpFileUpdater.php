@@ -6,6 +6,7 @@ namespace Kanti\JsonToClass\CodeCreator;
 
 use Exception;
 use Kanti\JsonToClass\Attribute\RootClass;
+use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Helpers;
@@ -44,6 +45,8 @@ final readonly class PhpFileUpdater
         $class = $this->addClass($schema, $namespace);
         //  add RootClass Attribute if not exists
         $this->addRootClassAttribute($schema, $namespace, $class, $rootClassName);
+        //  add MuteUninitializedPropertyError Trait if not exists
+        $this->addMuteUninitializedPropertyErrorTrait($namespace, $class);
         //  add constructor if not exists
         //  make constructor public if not public
         $this->removeConstructor($class);
@@ -160,5 +163,15 @@ final readonly class PhpFileUpdater
         $comment = $property->getComment();
         $newComment = $this->docblockUpdater->updateVarBlock($comment, $phpType, $docBlockType);
         $property->setComment($newComment);
+    }
+
+    private function addMuteUninitializedPropertyErrorTrait(PhpNamespace $namespace, ClassType $class): void
+    {
+        if ($class->hasTrait(MuteUninitializedPropertyError::class)) {
+            return;
+        }
+
+        $namespace->addUse(MuteUninitializedPropertyError::class);
+        $class->addTrait(MuteUninitializedPropertyError::class);
     }
 }

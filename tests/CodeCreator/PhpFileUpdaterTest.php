@@ -8,6 +8,7 @@ use Generator;
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\CodeCreator\PhpFileUpdater;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
+use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 use Kanti\JsonToClass\Helpers\SH;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Kanti\JsonToClass\Schema\Schema;
@@ -65,10 +66,13 @@ namespace Kanti\GeneratedTest;
 use Kanti\GeneratedTest\Data\Fields;
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Attribute\Types;
+use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 
 #[RootClass]
 final readonly class Data
 {
+    use MuteUninitializedPropertyError;
+
     /** @var list<string> */
     #[Types(['string'])]
     public array $expand;
@@ -94,10 +98,13 @@ namespace Kanti\GeneratedTest;
 use Kanti\GeneratedTest\Data_\Fields;
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Attribute\Types;
+use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 
 #[RootClass(Data::class)]
 final readonly class Data_
 {
+    use MuteUninitializedPropertyError;
+
     /** @var list<string> */
     #[Types(['string'])]
     public array $expand;
@@ -130,8 +137,7 @@ final readonly class Data_ {
 
 }
 
-EOF
-,
+EOF,
             'expected' => $result,
             'className' => Data::class . '_',
         ];
@@ -146,10 +152,13 @@ declare(strict_types=1);
 namespace Kanti\GeneratedTest\Data;
 
 use Kanti\GeneratedTest\Data\SubClass\Fields;
+use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 
 #[\CustomAttribute]
 class SubClass
 {
+    use MuteUninitializedPropertyError;
+
     /** @var Fields */
     public Fields $fields;
     /** @var string this is not a UUid */
@@ -166,8 +175,7 @@ class SubClass
     }
 }
 
-EOF
-,
+EOF,
             'expected' => <<<'EOF'
 <?php
 
@@ -179,11 +187,14 @@ use Kanti\GeneratedTest\Data;
 use Kanti\GeneratedTest\Data\SubClass\Fields;
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Attribute\Types;
+use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 
 #[\CustomAttribute]
 #[RootClass(Data::class)]
 class SubClass
 {
+    use MuteUninitializedPropertyError;
+
     public Fields $fields;
 
     /** @var string this is not a UUid */
@@ -201,8 +212,7 @@ class SubClass
     }
 }
 
-EOF
-,
+EOF,
         ];
     }
 }

@@ -44,10 +44,10 @@ class FromSchemaToClassAndBackTest extends TestCase
         ]);
         $wrappedSchema = new Schema(properties: ['a' => $schema]);
         $namedSchema = NamedSchema::fromSchema(Data::class, $wrappedSchema);
-        $namedSchema = $container->get(SchemaSimplification::class)->simplify($namedSchema);
-        if (!$namedSchema) {
-            $this->markTestSkipped('Schema is empty after simplification');
-        }
+//        $namedSchema = $container->get(SchemaSimplification::class)->simplify($namedSchema);
+//        if (!$namedSchema) {
+//            $this->markTestSkipped('Schema is empty after simplification');
+//        }
 
         $actualFiles = $container->get(CodeCreator::class)->createFiles($namedSchema);
 
