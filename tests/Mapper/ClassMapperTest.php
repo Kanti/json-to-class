@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Kanti\JsonToClass\Tests\Converter;
+namespace Kanti\JsonToClass\Tests\Mapper;
 
 use Generator;
 use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
-use Kanti\JsonToClass\Converter\ClassMapper;
 use Kanti\JsonToClass\Helpers\SH;
+use Kanti\JsonToClass\Mapper\ClassMapper;
 use Kanti\JsonToClass\Tests\Converter\__fixture__\Children;
 use Kanti\JsonToClass\Tests\Converter\__fixture__\Dto;
 use PHPUnit\Framework\Attributes\DataProvider;

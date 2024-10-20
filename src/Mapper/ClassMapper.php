@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Kanti\JsonToClass\Converter;
+namespace Kanti\JsonToClass\Mapper;
 
 use AllowDynamicProperties;
 use InvalidArgumentException;
@@ -10,6 +10,7 @@ use Kanti\JsonToClass\Cache\RuntimeCache;
 use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Config\Enums\OnInvalidCharacterProperties;
+use Kanti\JsonToClass\Converter\PossibleConvertTargets;
 use Kanti\JsonToClass\Dto\KeepDefaultValue;
 use Kanti\JsonToClass\Dto\MakeUninitialized;
 use Kanti\JsonToClass\Dto\Property;

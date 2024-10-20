@@ -9,6 +9,7 @@ use Kanti\JsonToClass\ClassCreator\ClassCreator;
 use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
+use Kanti\JsonToClass\Mapper\ClassMapper;
 use Kanti\JsonToClass\Validator\Validator;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
