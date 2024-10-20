@@ -50,7 +50,8 @@ final readonly class DevelopmentCodeCreator
             $this->createDevelopmentClasses($property);
 
             $types = $this->typeCreator->getAttributeTypes($property, null);
-            $parameters[] = new Property($name, (new Types(...$types))->types, $property->canBeMissing);
+            $dataKey = $name; // TODO use dataKey instead
+            $parameters[] = new Property($name, $dataKey, (new Types(...$types))->types, $property->canBeMissing);
         }
 
         $this->cache->setClassProperties($schema->className, ...$parameters);

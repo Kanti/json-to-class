@@ -11,6 +11,7 @@ use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\Helpers\SH;
 use Kanti\JsonToClass\Mapper\ClassMapper;
 use Kanti\JsonToClass\Tests\Converter\__fixture__\Children;
+use Kanti\JsonToClass\Tests\Converter\__fixture__\DiffrentKeys;
 use Kanti\JsonToClass\Tests\Converter\__fixture__\Dto;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -64,6 +65,14 @@ class ClassMapperTest extends TestCase
                 'age' => 1,
             ],
             'expected' => Children::from(name: 'A', age: 1),
+        ];
+        yield [
+            'className' => DiffrentKeys::class,
+            'data' => [
+                'name✨' => 'A🌏',
+                'age✨' => 1337,
+            ],
+            'expected' => DiffrentKeys::from(name: 'A🌏', age: 1337),
         ];
         yield [
             'className' => Children::class,

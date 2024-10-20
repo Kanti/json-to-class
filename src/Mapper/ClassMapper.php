@@ -6,6 +6,7 @@ namespace Kanti\JsonToClass\Mapper;
 
 use AllowDynamicProperties;
 use InvalidArgumentException;
+use Kanti\JsonToClass\Attribute\Key;
 use Kanti\JsonToClass\Cache\RuntimeCache;
 use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Config\Config;
@@ -21,6 +22,7 @@ use ReflectionClass;
 use ReflectionProperty;
 use stdClass;
 
+use function array_map;
 use function assert;
 use function is_array;
 
@@ -64,6 +66,8 @@ final readonly class ClassMapper
             $classProperties = $this->cache->getClassProperties($className);
         }
 
+        $classProperties = array_map(MappingProperty::from(...), $classProperties);
+
         $properties = $this->convertProperties($classProperties, $config, $data, $path);
 
         $instance = $reflectionClass->newInstanceWithoutConstructor();
@@ -91,7 +95,7 @@ final readonly class ClassMapper
     }
 
     /**
-     * @param list<Property|ReflectionProperty> $properties
+     * @param list<MappingProperty> $properties
      * @param array<mixed>|stdClass $data
      * @return array<string, mixed>
      */
@@ -101,25 +105,22 @@ final readonly class ClassMapper
 
         $args = [];
         foreach ($properties as $property) {
-            $possibleTypes = PossibleConvertTargets::fromParameter($property);
-            $dataKey = $property->getName();
-            $parameterName = $dataKey;
-            if (str_starts_with($parameterName, '_') && $config->onInvalidCharacterProperties === OnInvalidCharacterProperties::TRY_PREFIX_WITH_UNDERSCORE) {
-                $dataKey = substr($parameterName, 1);
-            }
+            $propertyName = $property->getName();
+            $dataKey = $property->getDataKey();
 
             if (!array_key_exists($dataKey, $array)) {
                 if ($property->hasDefaultValue()) {
-                    $args[$parameterName] = KeepDefaultValue::KeepDefaultValue;
+                    $args[$propertyName] = KeepDefaultValue::KeepDefaultValue;
                     continue;
                 }
 
                 // TODO Config
-                $args[$parameterName] = MakeUninitialized::MakeUninitialized;
+                $args[$propertyName] = MakeUninitialized::MakeUninitialized;
                 continue;
             }
 
-            $args[$parameterName] = $this->convertType($possibleTypes, $array[$dataKey] ?? null, $config, $path . '.' . $dataKey);
+            $possibleTypes = $property->getPossibleTypes();
+            $args[$propertyName] = $this->convertType($possibleTypes, $array[$dataKey] ?? null, $config, $path . '.' . $dataKey);
         }
 
         return $args;

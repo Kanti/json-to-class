@@ -13,6 +13,7 @@ final readonly class Property
      */
     public function __construct(
         public string $name,
+        public string $dataKey,
         public array $types,
         public bool $isOptional,
     ) {
@@ -46,5 +47,10 @@ final readonly class Property
                 return false;
             }
         };
+    }
+
+    public function getDataKey(): string
+    {
+        return $this->dataKey;
     }
 }
