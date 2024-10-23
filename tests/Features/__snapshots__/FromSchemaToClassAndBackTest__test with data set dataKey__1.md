@@ -1,24 +1,10 @@
-# Tested "expectedUses"
+# Tested "dataKey"
 ````json
 {
     "schema": {
         "canBeMissing": false,
         "basicTypes": [],
-        "listElement": {
-            "canBeMissing": false,
-            "basicTypes": [],
-            "listElement": null,
-            "dataKeys": {
-                "int": {
-                    "canBeMissing": false,
-                    "basicTypes": {
-                        "int": true
-                    },
-                    "listElement": null,
-                    "dataKeys": null
-                }
-            }
-        },
+        "listElement": null,
         "dataKeys": {
             "classSchema": {
                 "canBeMissing": false,
@@ -37,19 +23,16 @@
             }
         }
     },
-    "expectedPhpType": "Kanti\\GeneratedTest\\Data|array",
-    "expectedDocBlockType": "list<Data_>|Data",
-    "expectedUses": {
-        "Data": "Kanti\\GeneratedTest\\Data",
-        "Data_": "Kanti\\GeneratedTest\\Data_"
-    },
+    "expectedPhpType": "Kanti\\GeneratedTest\\Data",
     "expectedAttributes": [
         {}
     ],
+    "dataKey": "class-Schema",
+    "expectedUses": {
+        "Data": "Kanti\\GeneratedTest\\Data"
+    },
     "expectedUsesAttributes": {
-        "Types": "Kanti\\JsonToClass\\Attribute\\Types",
-        "Data": "Kanti\\GeneratedTest\\Data",
-        "Data_": "Kanti\\GeneratedTest\\Data_"
+        "Key": "Kanti\\JsonToClass\\Attribute\\Key"
     }
 }
 ````
@@ -62,17 +45,15 @@ declare(strict_types=1);
 namespace Kanti\GeneratedTest;
 
 use Kanti\GeneratedTest\Data\A;
-use Kanti\GeneratedTest\Data\A_;
+use Kanti\JsonToClass\Attribute\Key;
 use Kanti\JsonToClass\Attribute\RootClass;
-use Kanti\JsonToClass\Attribute\Types;
 use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 
 #[RootClass]
 final readonly class Data extends AbstractJsonReadonlyClass
 {
-    /** @var list<A_>|A */
-    #[Types([A_::class], A::class)]
-    public A|array $a;
+    #[Key('class-Schema')]
+    public A $a;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A:
@@ -92,24 +73,6 @@ use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 final readonly class A extends AbstractJsonReadonlyClass
 {
     public ClassSchema $classSchema;
-}
-````
-##### Kanti\GeneratedTest\Data\A_:
-````php
-<?php
-
-declare(strict_types=1);
-
-namespace Kanti\GeneratedTest\Data;
-
-use Kanti\GeneratedTest\Data;
-use Kanti\JsonToClass\Attribute\RootClass;
-use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
-
-#[RootClass(Data::class)]
-final readonly class A_ extends AbstractJsonReadonlyClass
-{
-    public int $int;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A\ClassSchema:

@@ -8,14 +8,20 @@
             "canBeMissing": false,
             "basicTypes": [],
             "listElement": null,
-            "properties": null
+            "dataKeys": null
         },
-        "properties": []
+        "dataKeys": []
     },
     "expectedPhpType": "Kanti\\GeneratedTest\\Data|array",
     "expectedDocBlockType": "array{}|Data",
-    "expectedAttribute": {},
     "expectedUses": {
+        "Data": "Kanti\\GeneratedTest\\Data"
+    },
+    "expectedAttributes": [
+        {}
+    ],
+    "expectedUsesAttributes": {
+        "Types": "Kanti\\JsonToClass\\Attribute\\Types",
         "Data": "Kanti\\GeneratedTest\\Data"
     }
 }
@@ -31,13 +37,11 @@ namespace Kanti\GeneratedTest;
 use Kanti\GeneratedTest\Data\A;
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Attribute\Types;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
+use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 
 #[RootClass]
-final readonly class Data
+final readonly class Data extends AbstractJsonReadonlyClass
 {
-    use MuteUninitializedPropertyError;
-
     /** @var array{}|A */
     #[Types([], A::class)]
     public A|array $a;
@@ -53,11 +57,10 @@ namespace Kanti\GeneratedTest\Data;
 
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Attribute\RootClass;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
+use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 
 #[RootClass(Data::class)]
-final readonly class A
+final readonly class A extends AbstractJsonReadonlyClass
 {
-    use MuteUninitializedPropertyError;
 }
 ````

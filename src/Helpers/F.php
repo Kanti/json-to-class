@@ -4,16 +4,43 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Helpers;
 
-use Nette\PhpGenerator\Attribute;
+use Exception;
+use Nette\PhpGenerator\ClassLike;
+use Nette\PhpGenerator\Closure;
+use Nette\PhpGenerator\Constant;
+use Nette\PhpGenerator\EnumCase;
+use Nette\PhpGenerator\GlobalFunction;
 use Nette\PhpGenerator\Helpers;
 use Nette\PhpGenerator\Literal;
+use Nette\PhpGenerator\Method;
+use Nette\PhpGenerator\Parameter;
+use Nette\PhpGenerator\Property;
 
-final class SH
+use function array_filter;
+use function array_values;
+
+enum F
 {
-    public static function getAttributes(Attribute $attribute): object
-    {
-        $className = $attribute->getName();
-        return new $className(...self::unpackLiterals($attribute->getArguments()));
+    /**
+     * @template T of object
+     * @param class-string<T> $classString
+     * @return T|null
+     */
+    public static function getAttribute(
+        string $classString,
+        ClassLike|Closure|Constant|EnumCase|GlobalFunction|Method|Parameter|Property $attributeAware,
+    ): ?object {
+        $attributes = array_values(array_filter($attributeAware->getAttributes(), fn($attribute): bool => $attribute->getName() === $classString));
+
+        if (!$attributes) {
+            return null;
+        }
+
+        if (count($attributes) > 1) {
+            throw new Exception(sprintf('Multiple attributes found %s', $classString));
+        }
+
+        return new $classString(...self::unpackLiterals(array_values($attributes[0]->getArguments())));
     }
 
     /**

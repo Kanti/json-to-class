@@ -22,7 +22,7 @@ final readonly class PossibleConvertTargets implements Stringable
     public function __construct(
         public array $types,
     ) {
-        array_map(fn(Type $type): int => 0, $this->types);
+        array_map(fn(Type $type): int => 0, $this->types); // check types
     }
 
     public function getMatch(Type $type): ?Type
@@ -105,12 +105,16 @@ final readonly class PossibleConvertTargets implements Stringable
                 continue;
             }
 
+            if ($type->isEmptyArray()) {
+                continue;
+            }
+
             $types[] = $type->unpackOnce();
         }
 
-        if (!$types) {
-            throw new InvalidArgumentException('Max possible depth reached');
-        }
+//        if (!$types) {
+//            throw new InvalidArgumentException('Max possible depth reached');
+//        }
 
         return new self($types);
     }

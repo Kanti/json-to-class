@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\Mapper;
 
 use AllowDynamicProperties;
+use Exception;
 use InvalidArgumentException;
 use Kanti\JsonToClass\Attribute\Key;
 use Kanti\JsonToClass\Cache\RuntimeCache;
@@ -16,7 +17,7 @@ use Kanti\JsonToClass\Dto\KeepDefaultValue;
 use Kanti\JsonToClass\Dto\MakeUninitialized;
 use Kanti\JsonToClass\Dto\Property;
 use Kanti\JsonToClass\Dto\Type;
-use Kanti\JsonToClass\Helpers\SH;
+use Kanti\JsonToClass\Helpers\F;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use ReflectionProperty;
@@ -146,13 +147,17 @@ final readonly class ClassMapper
         if ($type->isArray()) {
             $result = [];
             foreach ((array)$param as $key => $value) {
-                $result[$key] = $this->convertType($possibleTypes->unpackOnce(), $value, $config, $path . '.' . $key);
+                try {
+                    $result[$key] = $this->convertType($possibleTypes->unpackOnce(), $value, $config, $path . '.' . $key);
+                } catch (Exception $e) {
+                    throw new Exception('Error at ' . $path . '.' . $key . ': ' . $e->getMessage(), 0, $e);
+                }
             }
 
             return $result;
         }
 
-        return $this->map(SH::classString($type->name), $param, $config, $path);
+        return $this->map(F::classString($type->name), $param, $config, $path);
     }
 
     /**

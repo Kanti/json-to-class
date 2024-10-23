@@ -10,6 +10,7 @@ use Kanti\JsonToClass\Config\Enums\OnInvalidCharacterProperties;
 use Kanti\JsonToClass\Config\Enums\OnMissingProperties;
 use Kanti\JsonToClass\Config\Enums\RemoveOldClasses;
 use Kanti\JsonToClass\Config\Enums\ShouldCreateClasses;
+use Kanti\JsonToClass\Config\Enums\ShouldCreateDevelopmentClasses;
 
 /**
  * todo this should be an interface (with PHP 8.4 and property hooks it should be possible to refactor this)
@@ -28,6 +29,8 @@ abstract readonly class Config
     public RemoveOldClasses $removeOldClasses;
 
     public ShouldCreateClasses $shouldCreateClasses;
+
+    public ShouldCreateDevelopmentClasses $shouldCreateDevelopmentClasses;
 
     public function shouldCreateClasses(): bool
     {

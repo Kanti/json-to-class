@@ -5,7 +5,7 @@
         "canBeMissing": false,
         "basicTypes": [],
         "listElement": null,
-        "properties": []
+        "dataKeys": []
     },
     "expectedPhpType": "Kanti\\GeneratedTest\\Data",
     "expectedUses": {
@@ -23,13 +23,11 @@ namespace Kanti\GeneratedTest;
 
 use Kanti\GeneratedTest\Data\A;
 use Kanti\JsonToClass\Attribute\RootClass;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
+use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 
 #[RootClass]
-final readonly class Data
+final readonly class Data extends AbstractJsonReadonlyClass
 {
-    use MuteUninitializedPropertyError;
-
     public A $a;
 }
 ````
@@ -43,11 +41,10 @@ namespace Kanti\GeneratedTest\Data;
 
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Attribute\RootClass;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
+use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 
 #[RootClass(Data::class)]
-final readonly class A
+final readonly class A extends AbstractJsonReadonlyClass
 {
-    use MuteUninitializedPropertyError;
 }
 ````

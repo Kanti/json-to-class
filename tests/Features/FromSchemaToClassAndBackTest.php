@@ -14,6 +14,7 @@ use Kanti\JsonToClass\Schema\NamedSchema;
 use Kanti\JsonToClass\Schema\Schema;
 use Kanti\JsonToClass\Schema\SchemaFromClassCreator;
 use Kanti\JsonToClass\Schema\SchemaSimplification;
+use Kanti\JsonToClass\Schema\SchemaToNamedSchemaConverter;
 use Kanti\JsonToClass\Tests\_helper\FakeFileSystem;
 use Kanti\JsonToClass\Tests\_helper\PhpFilesDriver;
 use Kanti\JsonToClass\Tests\_helper\PhpFilesDto;
@@ -33,7 +34,7 @@ class FromSchemaToClassAndBackTest extends TestCase
     #[TestDox('CodeCreator->createFiles and SchemaFromClassCreator->fromClasses')]
     #[DataProviderExternal(TypeCreatorTest::class, 'dataProvider')]
     #[DataProvider('dataProvider')]
-    public function test(Schema $schema, mixed ...$_): void
+    public function test(Schema $schema, ?string $dataKey = null, mixed ...$_): void
     {
         $classLoader = new ClassLoader();
         $classLoader->addPsr4('Kanti\\', 'fake-src/');
@@ -42,8 +43,10 @@ class FromSchemaToClassAndBackTest extends TestCase
             ClassLoader::class => $classLoader,
             FileSystemInterface::class => new FakeFileSystem([]),
         ]);
-        $wrappedSchema = new Schema(properties: ['a' => $schema]);
-        $namedSchema = NamedSchema::fromSchema(Data::class, $wrappedSchema);
+        $wrappedSchema = new Schema(dataKeys: ['a' => $schema]);
+        $namedSchema = $container->get(SchemaToNamedSchemaConverter::class)->convert(Data::class, $wrappedSchema, null);
+        $namedSchema->properties['a']->dataKey = $dataKey ?? 'a';
+        $namedWrappedSchema = clone $namedSchema;
 //        $namedSchema = $container->get(SchemaSimplification::class)->simplify($namedSchema);
 //        if (!$namedSchema) {
 //            $this->markTestSkipped('Schema is empty after simplification');
@@ -70,7 +73,6 @@ class FromSchemaToClassAndBackTest extends TestCase
             ClassLoader::class => $classLoader,
             FileSystemInterface::class => $fakeFileSystem,
         ]);
-        $namedWrappedSchema = NamedSchema::fromSchema(Data::class, $wrappedSchema);
         $actualReadSchema = $container->get(SchemaFromClassCreator::class)->fromClasses(Data::class);
         $this->assertEquals($namedWrappedSchema, $actualReadSchema);
         $fakeFileSystem->assertFilesWrittenTo([]);
@@ -79,7 +81,7 @@ class FromSchemaToClassAndBackTest extends TestCase
     public static function dataProvider(): Generator
     {
         yield 'starting with a number' => [
-            new Schema(properties: [
+            new Schema(dataKeys: [
                 '_48x48' => new Schema(basicTypes: ['string' => true]),
             ]),
         ];

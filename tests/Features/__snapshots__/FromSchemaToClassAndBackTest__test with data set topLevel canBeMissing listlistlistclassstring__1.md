@@ -18,27 +18,33 @@
                     "canBeMissing": false,
                     "basicTypes": [],
                     "listElement": null,
-                    "properties": {
+                    "dataKeys": {
                         "int": {
                             "canBeMissing": false,
                             "basicTypes": {
                                 "int": true
                             },
                             "listElement": null,
-                            "properties": null
+                            "dataKeys": null
                         }
                     }
                 },
-                "properties": null
+                "dataKeys": null
             },
-            "properties": null
+            "dataKeys": null
         },
-        "properties": null
+        "dataKeys": null
     },
     "expectedPhpType": "array|null",
     "expectedDocBlockType": "list<list<list<Data___>>|string>|null",
-    "expectedAttribute": {},
     "expectedUses": {
+        "Data___": "Kanti\\GeneratedTest\\Data___"
+    },
+    "expectedAttributes": [
+        {}
+    ],
+    "expectedUsesAttributes": {
+        "Types": "Kanti\\JsonToClass\\Attribute\\Types",
         "Data___": "Kanti\\GeneratedTest\\Data___"
     }
 }
@@ -54,13 +60,11 @@ namespace Kanti\GeneratedTest;
 use Kanti\GeneratedTest\Data\A___;
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Attribute\Types;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
+use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 
 #[RootClass]
-final readonly class Data
+final readonly class Data extends AbstractJsonReadonlyClass
 {
-    use MuteUninitializedPropertyError;
-
     /** @var list<list<list<A___>>|string>|null */
     #[Types([[[A___::class]]], ['string'], 'null')]
     public array|null $a;
@@ -76,13 +80,11 @@ namespace Kanti\GeneratedTest\Data;
 
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Attribute\RootClass;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
+use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 
 #[RootClass(Data::class)]
-final readonly class A___
+final readonly class A___ extends AbstractJsonReadonlyClass
 {
-    use MuteUninitializedPropertyError;
-
     public int $int;
 }
 ````

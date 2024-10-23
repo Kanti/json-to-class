@@ -11,4 +11,6 @@ interface FileSystemInterface
     public function readContentIfExists(string $filename): ?string;
 
     public function writeContent(string $filename, string $content): void;
+
+    public function require(string $location): void;
 }

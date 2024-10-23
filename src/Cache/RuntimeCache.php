@@ -15,6 +15,9 @@ use function array_values;
  */
 final class RuntimeCache
 {
+    /** @var array<class-string, array<string, string>> */
+    private static array $propertyMapping;
+
     /** @var array<class-string, list<Property>> */
     private array $properties = [];
 
@@ -53,5 +56,23 @@ final class RuntimeCache
     public function getClassSchema(string $className): ?NamedSchema
     {
         return $this->schema[$className] ?? null;
+    }
+
+    /**
+     * @param class-string $className
+     * @param array<string, string> $mapping [propertyName => dataKey]
+     */
+    public static function setPropertyMapping(string $className, array $mapping): void
+    {
+        self::$propertyMapping[$className] = $mapping;
+    }
+
+    /**
+     * @param class-string $className
+     * @return array<string, string>
+     */
+    public static function getPropertyMapping(string $className): array
+    {
+        return self::$propertyMapping[$className] ?? [];
     }
 }

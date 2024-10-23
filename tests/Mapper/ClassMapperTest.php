@@ -8,7 +8,7 @@ use Generator;
 use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
-use Kanti\JsonToClass\Helpers\SH;
+use Kanti\JsonToClass\Helpers\F;
 use Kanti\JsonToClass\Mapper\ClassMapper;
 use Kanti\JsonToClass\Tests\Converter\__fixture__\Children;
 use Kanti\JsonToClass\Tests\Converter\__fixture__\DiffrentKeys;
@@ -28,7 +28,7 @@ class ClassMapperTest extends TestCase
         $classMapper = $this->getClassMapper();
 
         $this->expectExceptionMessage('Class MissingClass does not exist $');
-        $classMapper->map(SH::classString('MissingClass'), [1, 2, 3], new SaneConfig());
+        $classMapper->map(F::classString('MissingClass'), [1, 2, 3], new SaneConfig());
     }
 
     #[Test]

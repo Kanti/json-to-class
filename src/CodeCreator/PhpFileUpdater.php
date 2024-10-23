@@ -6,7 +6,8 @@ namespace Kanti\JsonToClass\CodeCreator;
 
 use Exception;
 use Kanti\JsonToClass\Attribute\RootClass;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
+use Kanti\JsonToClass\Dto\AbstractJsonClass;
+use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Helpers;
@@ -17,7 +18,6 @@ use Nette\PhpGenerator\Printer;
 use Nette\PhpGenerator\Property;
 use Psr\Log\LoggerInterface;
 
-use function array_filter;
 use function get_debug_type;
 use function ksort;
 use function uasort;
@@ -45,10 +45,7 @@ final readonly class PhpFileUpdater
         $class = $this->addClass($schema, $namespace);
         //  add RootClass Attribute if not exists
         $this->addRootClassAttribute($schema, $namespace, $class, $rootClassName);
-        //  add MuteUninitializedPropertyError Trait if not exists
-        $this->addMuteUninitializedPropertyErrorTrait($namespace, $class);
-        //  add constructor if not exists
-        //  make constructor public if not public
+        // remove constructor if exists (it is never called in normal usage)
         $this->removeConstructor($class);
         //  add or remove properties/parameters/promotedParameters if not exists
         //  update types for properties/parameters/promotedParameters
@@ -68,11 +65,19 @@ final readonly class PhpFileUpdater
     private function addClass(NamedSchema $schema, PhpNamespace $namespace): ClassType
     {
         $className = Helpers::extractShortName($schema->className);
-        $class = $namespace->getClasses()[$className]
-            ?? $namespace
+        $createNewClass = static function () use ($namespace, $className): ClassType {
+
+            $namespace->addUse(AbstractJsonReadonlyClass::class);
+
+            return $namespace
                 ->addClass($className)
                 ->setFinal()
-                ->setReadOnly();
+                ->setReadOnly()
+                ->setExtends(AbstractJsonReadonlyClass::class);
+        };
+
+        $class = $namespace->getClasses()[$className] ?? $createNewClass();
+
         if (!$class instanceof ClassType) {
             throw new Exception(sprintf('Expected ClassType, got %s for class %s', get_debug_type($class), $schema->className));
         }
@@ -104,7 +109,7 @@ final readonly class PhpFileUpdater
         foreach ($properties as $name => $propertyConfig) {
             $phpType = $this->typeCreator->getPhpType($propertyConfig, $namespace);
             $docBlockType = $this->typeCreator->getDocBlockType($propertyConfig, $namespace);
-            $attribute = $this->typeCreator->getAttribute($propertyConfig, $namespace);
+            $attributes = $this->typeCreator->getAttributes($name, $propertyConfig, $namespace);
 
             if ($class->hasProperty($name)) {
                 $property = $class->getProperty($name);
@@ -114,7 +119,7 @@ final readonly class PhpFileUpdater
 
             $property
                 ->setType($phpType)
-                ->setAttributes(array_filter([$attribute]));
+                ->setAttributes($attributes);
 
             if ($propertyConfig->canBeMissing) {
                 $property->setNullable();
@@ -163,15 +168,5 @@ final readonly class PhpFileUpdater
         $comment = $property->getComment();
         $newComment = $this->docblockUpdater->updateVarBlock($comment, $phpType, $docBlockType);
         $property->setComment($newComment);
-    }
-
-    private function addMuteUninitializedPropertyErrorTrait(PhpNamespace $namespace, ClassType $class): void
-    {
-        if ($class->hasTrait(MuteUninitializedPropertyError::class)) {
-            return;
-        }
-
-        $namespace->addUse(MuteUninitializedPropertyError::class);
-        $class->addTrait(MuteUninitializedPropertyError::class);
     }
 }

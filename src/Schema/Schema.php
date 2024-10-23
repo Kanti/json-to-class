@@ -12,7 +12,7 @@ final class Schema
         public array $basicTypes = [],
         public ?Schema $listElement = null,
         /** @var array<string, Schema>|null */
-        public ?array $properties = null
+        public ?array $dataKeys = null
     ) {
     }
 }

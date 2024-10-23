@@ -8,12 +8,14 @@ use Composer\Autoload\ClassLoader;
 use Generator;
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Config\Enums\ShouldCreateClasses;
+use Kanti\JsonToClass\Config\Enums\ShouldCreateDevelopmentClasses;
 use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\Converter\Converter;
 use Kanti\JsonToClass\FileSystemAbstraction\FileSystemInterface;
 use Kanti\JsonToClass\Tests\_helper\FakeFileSystem;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
@@ -30,26 +32,16 @@ class FromDataToCodeToDataTest extends TestCase
     #[DataProvider('dataProvider')]
     public function test(string $json): void
     {
-        $classLoader = new ClassLoader();
-        $classLoader->addPsr4('Kanti\\', 'fake-src/');
+        $this->sameTestDiffrentConfig($json, new SaneConfig(shouldCreateClasses: ShouldCreateClasses::YES));
+    }
 
-        $container = new JsonToClassContainer([
-            ClassLoader::class => $classLoader,
-            FileSystemInterface::class => new FakeFileSystem([]),
-        ]);
-
-        /** @var Converter $converter */
-        $converter = $container->get(Converter::class);
-        $instance = $converter->jsonDecode(Data::class, $json, new SaneConfig(shouldCreateClasses: ShouldCreateClasses::YES));
-
-        $this->assertInstanceOf(Data::class, $instance);
-        $this->assertEquals($json, json_encode($instance));
-
-        $jsonArray = '[' . $json . ',' . $json . ']';
-        $instances = $converter->jsonDecodeList(Data::class, $jsonArray, new SaneConfig(shouldCreateClasses: ShouldCreateClasses::YES));
-
-        $this->assertContainsOnlyInstancesOf(Data::class, $instances);
-        $this->assertEquals($jsonArray, json_encode($instances));
+    #[Test]
+    #[TestDox('json to class to json (production)')]
+    #[RunInSeparateProcess]
+    #[DataProvider('dataProvider')]
+    public function testProduction(string $json): void
+    {
+        $this->sameTestDiffrentConfig($json, new SaneConfig(shouldCreateClasses: ShouldCreateClasses::YES, shouldCreateDevelopmentClasses: ShouldCreateDevelopmentClasses::NO));
     }
 
     public static function dataProvider(): Generator
@@ -73,5 +65,36 @@ class FromDataToCodeToDataTest extends TestCase
             ['B' => 1],
             ['C' => 2],
         ]])];
+        yield 'impossible Characters in Keys' => [json_encode(['a' => ['a.b' => 1]])];
+    }
+
+    private function sameTestDiffrentConfig(string $json, SaneConfig $config): void
+    {
+        $converter = $this->getConverter();
+        $instance = $converter->jsonDecode(Data::class, $json, $config);
+
+        $this->assertInstanceOf(Data::class, $instance);
+        $this->assertEquals($json, json_encode($instance));
+
+        $jsonArray = '[' . $json . ',' . $json . ']';
+        $instances = $converter->jsonDecodeList(Data::class, $jsonArray, $config);
+
+        $this->assertContainsOnlyInstancesOf(Data::class, $instances);
+        $this->assertEquals($jsonArray, json_encode($instances));
+    }
+
+    private function getConverter(): Converter
+    {
+        $classLoader = new ClassLoader();
+        $classLoader->addPsr4('Kanti\\', 'fake-src/');
+
+        $container = new JsonToClassContainer([
+            ClassLoader::class => $classLoader,
+            FileSystemInterface::class => new FakeFileSystem([]),
+        ]);
+
+        /** @var Converter $converter */
+        $converter = $container->get(Converter::class);
+        return $converter;
     }
 }

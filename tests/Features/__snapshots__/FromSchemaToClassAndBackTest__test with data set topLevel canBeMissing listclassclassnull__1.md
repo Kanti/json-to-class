@@ -10,23 +10,30 @@
             "canBeMissing": false,
             "basicTypes": [],
             "listElement": null,
-            "properties": {
+            "dataKeys": {
                 "int": {
                     "canBeMissing": false,
                     "basicTypes": {
                         "int": true
                     },
                     "listElement": null,
-                    "properties": null
+                    "dataKeys": null
                 }
             }
         },
-        "properties": []
+        "dataKeys": []
     },
     "expectedPhpType": "Kanti\\GeneratedTest\\Data|array|null",
     "expectedDocBlockType": "list<Data_>|Data|null",
-    "expectedAttribute": {},
     "expectedUses": {
+        "Data": "Kanti\\GeneratedTest\\Data",
+        "Data_": "Kanti\\GeneratedTest\\Data_"
+    },
+    "expectedAttributes": [
+        {}
+    ],
+    "expectedUsesAttributes": {
+        "Types": "Kanti\\JsonToClass\\Attribute\\Types",
         "Data": "Kanti\\GeneratedTest\\Data",
         "Data_": "Kanti\\GeneratedTest\\Data_"
     }
@@ -44,13 +51,11 @@ use Kanti\GeneratedTest\Data\A;
 use Kanti\GeneratedTest\Data\A_;
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Attribute\Types;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
+use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 
 #[RootClass]
-final readonly class Data
+final readonly class Data extends AbstractJsonReadonlyClass
 {
-    use MuteUninitializedPropertyError;
-
     /** @var list<A_>|A|null */
     #[Types([A_::class], A::class, 'null')]
     public A|array|null $a;
@@ -66,12 +71,11 @@ namespace Kanti\GeneratedTest\Data;
 
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Attribute\RootClass;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
+use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 
 #[RootClass(Data::class)]
-final readonly class A
+final readonly class A extends AbstractJsonReadonlyClass
 {
-    use MuteUninitializedPropertyError;
 }
 ````
 ##### Kanti\GeneratedTest\Data\A_:
@@ -84,13 +88,11 @@ namespace Kanti\GeneratedTest\Data;
 
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Attribute\RootClass;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
+use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 
 #[RootClass(Data::class)]
-final readonly class A_
+final readonly class A_ extends AbstractJsonReadonlyClass
 {
-    use MuteUninitializedPropertyError;
-
     public int $int;
 }
 ````

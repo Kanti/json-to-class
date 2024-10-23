@@ -6,10 +6,10 @@ namespace Kanti\JsonToClass\Tests\Schema;
 
 use Generator;
 use Kanti\GeneratedTest\Data;
-use Kanti\JsonToClass\Helpers\SH;
-use Kanti\JsonToClass\Schema\NamedSchema;
+use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\Schema\Schema;
 use Kanti\JsonToClass\Schema\SchemaMerger;
+use Kanti\JsonToClass\Schema\SchemaToNamedSchemaConverter;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -17,21 +17,13 @@ use PHPUnit\Framework\TestCase;
 class SchemaMergerTest extends TestCase
 {
     #[Test]
-    public function exception1(): void
-    {
-        $schemaMerger = new SchemaMerger();
-        $this->expectExceptionMessage('Class names must be the same Kanti\A !== Kanti\B');
-        $schemaMerger->merge(NamedSchema::fromSchema(SH::classString('Kanti\A'), new Schema()), NamedSchema::fromSchema(SH::classString('Kanti\B'), new Schema()));
-    }
-
-    #[Test]
     #[DataProvider('dataProvider')]
     public function merge(?Schema $a, ?Schema $b, ?Schema $expected): void
     {
-        $schemaMerger = new SchemaMerger();
-        $a = $a ? NamedSchema::fromSchema(Data::class, $a) : $a;
-        $b = $b ? NamedSchema::fromSchema(Data::class, $b) : $b;
-        $expected = $expected ? NamedSchema::fromSchema(Data::class, $expected) : $expected;
+        [$schemaMerger, $schemaToNamedSchemaConverter] = $this->getSchemaMerger();
+        $a = $a ? $schemaToNamedSchemaConverter->convert(Data::class, $a, null) : $a;
+        $b = $b ? $schemaToNamedSchemaConverter->convert(Data::class, $b, null) : $b;
+        $expected = $expected ? $schemaToNamedSchemaConverter->convert(Data::class, $expected, null) : $expected;
         $actual = $schemaMerger->merge($a, $b);
         $this->assertEquals($expected, $actual);
     }
@@ -59,49 +51,58 @@ class SchemaMergerTest extends TestCase
             new Schema(),
         ];
         yield 'a' => [
-            new Schema(properties: ['x' => new Schema()]),
+            new Schema(dataKeys: ['x' => new Schema()]),
             new Schema(),
-            new Schema(properties: ['x' => new Schema()]),
+            new Schema(dataKeys: ['x' => new Schema()]),
         ];
         yield 'b' => [
             new Schema(),
-            new Schema(properties: ['x' => new Schema()]),
-            new Schema(properties: ['x' => new Schema()]),
+            new Schema(dataKeys: ['x' => new Schema()]),
+            new Schema(dataKeys: ['x' => new Schema()]),
         ];
         yield 'a and b' => [
-            new Schema(properties: ['x' => new Schema()]),
-            new Schema(properties: ['y' => new Schema()]),
-            new Schema(properties: ['x' => new Schema(canBeMissing: true), 'y' => new Schema(canBeMissing: true)]),
+            new Schema(dataKeys: ['x' => new Schema()]),
+            new Schema(dataKeys: ['y' => new Schema()]),
+            new Schema(dataKeys: ['x' => new Schema(canBeMissing: true), 'y' => new Schema(canBeMissing: true)]),
         ];
         yield 'a2 and b2' => [
-            new Schema(properties: ['x' => new Schema(), 'z' => new Schema()]),
-            new Schema(properties: ['y' => new Schema(), 'j' => new Schema()]),
-            new Schema(properties: ['x' => new Schema(canBeMissing: true), 'z' => new Schema(canBeMissing: true), 'y' => new Schema(canBeMissing: true), 'j' => new Schema(canBeMissing: true)]),
+            new Schema(dataKeys: ['x' => new Schema(), 'z' => new Schema()]),
+            new Schema(dataKeys: ['y' => new Schema(), 'j' => new Schema()]),
+            new Schema(dataKeys: ['x' => new Schema(canBeMissing: true), 'z' => new Schema(canBeMissing: true), 'y' => new Schema(canBeMissing: true), 'j' => new Schema(canBeMissing: true)]),
         ];
         yield 'a and b with same key but different types' => [
-            new Schema(properties: ['x' => new Schema(basicTypes: ['string' => true])]),
-            new Schema(properties: ['x' => new Schema(basicTypes: ['int' => true])]),
-            new Schema(properties: ['x' => new Schema(basicTypes: ['string' => true, 'int' => true])]),
+            new Schema(dataKeys: ['x' => new Schema(basicTypes: ['string' => true])]),
+            new Schema(dataKeys: ['x' => new Schema(basicTypes: ['int' => true])]),
+            new Schema(dataKeys: ['x' => new Schema(basicTypes: ['string' => true, 'int' => true])]),
         ];
         yield 'a canBeMissing' => [
-            new Schema(properties: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
-            new Schema(properties: ['x' => new Schema(basicTypes: ['int' => true])]),
-            new Schema(properties: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true, 'int' => true])]),
+            new Schema(dataKeys: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
+            new Schema(dataKeys: ['x' => new Schema(basicTypes: ['int' => true])]),
+            new Schema(dataKeys: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true, 'int' => true])]),
         ];
         yield 'b canBeMissing' => [
-            new Schema(properties: ['x' => new Schema(basicTypes: ['int' => true])]),
-            new Schema(properties: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
-            new Schema(properties: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true, 'int' => true])]),
+            new Schema(dataKeys: ['x' => new Schema(basicTypes: ['int' => true])]),
+            new Schema(dataKeys: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
+            new Schema(dataKeys: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true, 'int' => true])]),
         ];
         yield 'a and b canBeMissing' => [
-            new Schema(properties: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
-            new Schema(properties: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
-            new Schema(properties: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
+            new Schema(dataKeys: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
+            new Schema(dataKeys: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
+            new Schema(dataKeys: ['x' => new Schema(canBeMissing: true, basicTypes: ['null' => true])]),
         ];
         yield 'a has properties b is a list' => [
-            new Schema(properties: ['x' => new Schema()]),
+            new Schema(dataKeys: ['x' => new Schema()]),
             new Schema(listElement: new Schema()),
-            new Schema(listElement: new Schema(), properties: ['x' => new Schema()]),
+            new Schema(listElement: new Schema(), dataKeys: ['x' => new Schema()]),
         ];
+    }
+
+    /**
+     * @return array{SchemaMerger, SchemaToNamedSchemaConverter}
+     */
+    protected function getSchemaMerger(): array
+    {
+        $container = new JsonToClassContainer();
+        return [$container->get(SchemaMerger::class), $container->get(SchemaToNamedSchemaConverter::class)];
     }
 }

@@ -8,13 +8,18 @@
             "canBeMissing": false,
             "basicTypes": [],
             "listElement": null,
-            "properties": null
+            "dataKeys": null
         },
-        "properties": null
+        "dataKeys": null
     },
     "expectedPhpType": "array",
     "expectedDocBlockType": "array{}",
-    "expectedAttribute": {}
+    "expectedAttributes": [
+        {}
+    ],
+    "expectedUsesAttributes": {
+        "Types": "Kanti\\JsonToClass\\Attribute\\Types"
+    }
 }
 ````
 ##### Kanti\GeneratedTest\Data:
@@ -27,13 +32,11 @@ namespace Kanti\GeneratedTest;
 
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Attribute\Types;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
+use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 
 #[RootClass]
-final readonly class Data
+final readonly class Data extends AbstractJsonReadonlyClass
 {
-    use MuteUninitializedPropertyError;
-
     /** @var array{} */
     #[Types([])]
     public array $a;

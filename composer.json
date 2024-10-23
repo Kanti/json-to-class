@@ -17,7 +17,7 @@
   "require-dev": {
     "infection/infection": "^0.29.7",
     "phpstan/phpstan-phpunit": "^1.4",
-    "phpunit/phpunit": "^11.4.1",
+    "phpunit/phpunit": "^11.4.2",
     "pluswerk/grumphp-config": "^7.1",
     "spatie/phpunit-snapshot-assertions": "^5.1.6",
     "symfony/var-dumper": "^7.1.5"

@@ -5,6 +5,7 @@
             "src"
         ]
     },
+    "timeout": 30,
     "logs": {
         "text": "test-result/infection.log",
         "html": "test-result/infection.html",

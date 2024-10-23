@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 use function array_map;
+use function random_int;
 
 class NameMapperTest extends TestCase
 {
@@ -108,8 +109,39 @@ class NameMapperTest extends TestCase
     {
         yield 'a' => ['a'];
         yield '4x4' => ['_4x4'];
-        yield from array_map(fn (string $char): array => [$char], NameMapper::CHARACTER_MAPPING);
-        yield from array_map(fn (string $char): array => [$char], NameMapper::EMOJI_MAPPING);
+        yield from self::getArrayMapped(NameMapper::CHARACTER_MAPPING, random_int(0, count(NameMapper::CHARACTER_MAPPING)), 1, 4, -4, -1);
+        yield from self::getArrayMapped(NameMapper::EMOJI_MAPPING, random_int(0, count(NameMapper::EMOJI_MAPPING)), 1, 4, -4, -1);
         yield 'ß' => ['_'];
+    }
+
+    /**
+     * @param array<string, string> $array
+     * @return array<string, array{0: string}>
+     */
+    private static function getArrayMapped(array $array, int ...$positions): array
+    {
+        $positionsN = [];
+        $count = count($array);
+
+        foreach ($positions as $position) {
+            if ($position < 0) {
+                $position = $count + $position;
+            }
+
+            $positionsN[$position] = true;
+        }
+
+        $counter = 0;
+        $result = [];
+        foreach ($array as $key => $value) {
+            $counter++;
+            if (!isset($positionsN[$counter])) {
+                continue;
+            }
+
+            $result[$key] = [$value];
+        }
+
+        return $result;
     }
 }

@@ -11,13 +11,13 @@ use ReflectionProperty;
 
 final readonly class MappingProperty
 {
-    public function __construct(private Property|ReflectionProperty $property)
+    private function __construct(private Property|ReflectionProperty $property)
     {
     }
 
     public static function from(Property|ReflectionProperty $property): MappingProperty
     {
-        return new MappingProperty($property);
+        return new MappingProperty(property: $property);
     }
 
     public function getPossibleTypes(): PossibleConvertTargets
@@ -43,10 +43,6 @@ final readonly class MappingProperty
 
     public function hasDefaultValue(): bool
     {
-        if ($this->property instanceof Property) {
-            return false;
-        }
-
         return $this->property->hasDefaultValue();
     }
 }

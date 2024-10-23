@@ -9,11 +9,12 @@ use Kanti\JsonToClass\CodeCreator\CodeCreator;
 use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Config\Enums\AppendSchema;
-use Kanti\JsonToClass\Schema\NamedSchema;
+use Kanti\JsonToClass\Config\Enums\ShouldCreateDevelopmentClasses;
+use Kanti\JsonToClass\FileSystemAbstraction\FileSystemInterface;
 use Kanti\JsonToClass\Schema\SchemaFromClassCreator;
 use Kanti\JsonToClass\Schema\SchemaFromDataCreator;
 use Kanti\JsonToClass\Schema\SchemaMerger;
-use Kanti\JsonToClass\Schema\SchemaSimplification;
+use Kanti\JsonToClass\Schema\SchemaToNamedSchemaConverter;
 use Kanti\JsonToClass\Writer\FileWriter;
 use stdClass;
 
@@ -22,11 +23,13 @@ final readonly class ClassCreator
     public function __construct(
         private SchemaFromClassCreator $schemaFromClassCreator,
         private SchemaFromDataCreator $schemaFromDataCreator,
+        private SchemaToNamedSchemaConverter $schemaToNamedSchemaConverter,
         private DevelopmentCodeCreator $developmentCodeCreator,
         private SchemaMerger $schemaMerger,
         //private SchemaSimplification $schemaSimplification,
         private CodeCreator $codeCreator,
         private FileWriter $fileWriter,
+        private FileSystemInterface $fileSystem,
     ) {
     }
 
@@ -44,7 +47,7 @@ final readonly class ClassCreator
         }
 
         $schema = $this->schemaFromDataCreator->fromData($data, $config);
-        $schema = NamedSchema::fromSchema($className, $schema);
+        $schema = $this->schemaToNamedSchemaConverter->convert($className, $schema, null);
 
         if ($config->appendSchema === AppendSchema::APPEND) {
             $schemaFromClass = $this->schemaFromClassCreator->fromClasses($className);
@@ -53,7 +56,7 @@ final readonly class ClassCreator
             /** @noinspection TypeUnsafeComparisonInspection */
             if ($schemaFromClass == $schema) {
                 // we do not need to update the files on disk
-//                return; // if the schema is right, it does not mean the files are right ( maybe the MuteUninitializedPropertyError is missing )
+//                return; // if the schema is right, it does not mean the files are right ( maybe some changes need to be done that do not effect the schema :/  )
             }
         }
 
@@ -64,13 +67,14 @@ final readonly class ClassCreator
 
         $files = $this->codeCreator->createFiles($schema->getFirstNonListChild());
 
-        if ($restartReasons = $this->fileWriter->writeIfNeeded($files)) {
-            $message = sprintf('Class %s already exists and cannot be reloaded', implode(', ', $restartReasons));
-            $message .= PHP_EOL . 'Please restart the application to reload the classes';
-            $message .= PHP_EOL . 'make sure you do not load the classes yourself, that would prevent the monkey patching';
-            throw new ShouldRestartException($message);
-        }
+        $locationsWritten = $this->fileWriter->writeIfNeeded($files);
 
-        $this->developmentCodeCreator->createDevelopmentClasses($schema);
+        if ($config->shouldCreateDevelopmentClasses === ShouldCreateDevelopmentClasses::YES) {
+            $this->developmentCodeCreator->createOrUpdateDevelopmentClasses($schema);
+        } else {
+            foreach ($locationsWritten as $location) {
+                $this->fileSystem->require($location);
+            }
+        }
     }
 }

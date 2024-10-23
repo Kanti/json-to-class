@@ -1336,7 +1336,7 @@ final readonly class NameMapper
     /**
      * @param list<string> $newKeys
      * @param array<string ,string> $currentDataNames
-     * @return array<string, string>
+     * @return array<string, string> propertyName => dataKey
      */
     public function map(array $newKeys, array $currentDataNames): array
     {

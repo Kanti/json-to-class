@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\Tests\Converter\__fixture__;
 
 use Kanti\JsonToClass\Attribute\Key;
+use Kanti\JsonToClass\Dto\AbstractJsonClass;
 
-final class DiffrentKeys
+final class DiffrentKeys extends AbstractJsonClass
 {
     #[Key('name✨')]
     public string $name;
