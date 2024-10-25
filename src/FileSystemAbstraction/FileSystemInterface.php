@@ -12,5 +12,5 @@ interface FileSystemInterface
 
     public function writeContent(string $filename, string $content): void;
 
-    public function require(string $location): void;
+    public function require(string $location): mixed;
 }

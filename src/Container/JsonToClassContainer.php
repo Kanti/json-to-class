@@ -15,8 +15,6 @@ use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 
-use function is_string;
-
 final class JsonToClassContainer implements ContainerInterface
 {
     public static ?JsonToClassContainer $instance = null;
@@ -36,11 +34,19 @@ final class JsonToClassContainer implements ContainerInterface
      */
     public function __construct(array $overwriteFactories = [])
     {
+        $possibleAutoloadLocations = [
+            $GLOBALS['_composer_autoload_path'] ?? '',
+            __DIR__ . '/../../../autoload.php',
+            __DIR__ . '/../../../vendor/autoload.php',
+            __DIR__ . '/../../vendor/autoload.php',
+            __DIR__ . '/../../../../autoload.php',
+        ];
+
         $this->factories = [
             LoggerInterface::class => fn(): object => new StdErrLogger(),
-            ClassLoader::class => $this->getClassLoader(...),
             FileSystemInterface::class => fn(): object => new FileSystem(),
             Printer::class => fn(): object => new PsrPrinter(),
+            ClassLoader::class => fn(): ClassLoader => self::getClassLoader($possibleAutoloadLocations),
             ...$overwriteFactories,
         ];
     }
@@ -80,18 +86,6 @@ final class JsonToClassContainer implements ContainerInterface
             return $this->fromFactory($this->factories[$className], $className);
         }
 
-        // This is currenlty not needed as we do not have interfaces without a factory
-        //if (str_ends_with($className, 'Interface') && interface_exists($className)) {
-        //    $concreateClassName = str_replace('Interface', '', $className);
-        //    if (class_exists($concreateClassName)) {
-        //        if (!is_subclass_of($concreateClassName, $className)) {
-        //            throw new ContainerException('Class ' . $concreateClassName . ' dose not implement ' . $className);
-        //        }
-        //
-        //        $className = $concreateClassName;
-        //    }
-        //}
-
         if (!class_exists($className)) {
             throw new ContainerException('Class ' . $className . ' not found');
         }
@@ -112,10 +106,6 @@ final class JsonToClassContainer implements ContainerInterface
             }
 
             if (!str_contains($childClassName, '\\')) {
-                if ($parameter->isDefaultValueAvailable()) {
-                    continue;
-                }
-
                 throw new ContainerException('Parameter ' . $className . '->' . $parameter->getName() . ' type not possible ' . $childClassName);
             }
 
@@ -137,7 +127,7 @@ final class JsonToClassContainer implements ContainerInterface
                 return $factory;
             }
 
-            throw new ContainerException('Factory for ' . $className . ' is not callable or instance of ' . $className);
+            throw new ContainerException('Factory for ' . $className . ' is not callable or instance of ' . $className . ' given: ' . $factory::class);
         }
 
         $result = $factory();
@@ -149,18 +139,15 @@ final class JsonToClassContainer implements ContainerInterface
         return $result;
     }
 
-    private function getClassLoader(): ClassLoader
+    /**
+     * @param list<string> $possibleAutoloadLocations
+     * @throws ContainerException
+     */
+    public static function getClassLoader(array $possibleAutoloadLocations): ClassLoader
     {
         // if defined use this: (composer wraps this file and adds this global:)
-        $possibleAutoloadLocations = [
-            $GLOBALS['_composer_autoload_path'] ?? '',
-            __DIR__ . '/../../../autoload.php',
-            __DIR__ . '/../../../vendor/autoload.php',
-            __DIR__ . '/../../vendor/autoload.php',
-            __DIR__ . '/../../../../autoload.php',
-        ];
         foreach ($possibleAutoloadLocations as $autoloadLocation) {
-            if (is_string($autoloadLocation) && file_exists($autoloadLocation)) {
+            if ($autoloadLocation && file_exists($autoloadLocation)) {
                 return require $autoloadLocation;
             }
         }

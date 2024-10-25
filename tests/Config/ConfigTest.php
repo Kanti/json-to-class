@@ -6,6 +6,7 @@ namespace Kanti\JsonToClass\Tests\Config;
 
 use Generator;
 use Kanti\JsonToClass\Config\Config;
+use Kanti\JsonToClass\Config\Enums\ShouldCreateClasses;
 use Kanti\JsonToClass\Config\SaneConfig;
 use PHPUnit\Framework\Attributes\BackupGlobals;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -20,7 +21,7 @@ class ConfigTest extends TestCase
     #[Test]
     #[DataProvider('dataProvider')]
     #[BackupGlobals(true)]
-    public function shouldCreateClasses(array $envs, bool $expected): void
+    public function shouldCreateClasses(array $envs, bool $expected, Config $config = new SaneConfig()): void
     {
         putenv('JSON_TO_CLASS_CREATE');
         putenv('IS_DDEV_PROJECT');
@@ -30,7 +31,6 @@ class ConfigTest extends TestCase
             putenv($env . '=' . $value);
         }
 
-        $config = new SaneConfig();
         $this->assertEquals($expected, $config->shouldCreateClasses());
     }
 
@@ -87,6 +87,11 @@ class ConfigTest extends TestCase
             'envs' => [
                 'APP_ENV' => 'production',
             ],
+            'expected' => false,
+        ];
+        yield 'ShouldCreateClasses::NO' => [
+            'envs' => [],
+            'config' => new SaneConfig(shouldCreateClasses: ShouldCreateClasses::NO),
             'expected' => false,
         ];
     }

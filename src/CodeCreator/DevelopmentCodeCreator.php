@@ -12,6 +12,7 @@ use Kanti\JsonToClass\Dto\AbstractJsonClass;
 use Kanti\JsonToClass\Dto\DevelopmentFakeClassInterface;
 use Kanti\JsonToClass\Dto\Property;
 use Kanti\JsonToClass\FileSystemAbstraction\ClassLocator;
+use Kanti\JsonToClass\Helpers\F;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Helpers;
@@ -82,9 +83,8 @@ final readonly class DevelopmentCodeCreator
             ?? $phpFile
                 ->addClass($className)
                 ->setFinal();
-        if (!$phpClass instanceof ClassType) {
-            throw new RuntimeException('Class ' . $className . ' not found it is a ' . $phpClass::class);
-        }
+
+        F::assertClassType($phpClass, $className);
 
         $phpClass
             ->setReadOnly(false)
@@ -95,27 +95,14 @@ final readonly class DevelopmentCodeCreator
         }
 
         $phpClass->addImplement(DevelopmentFakeClassInterface::class);
-        $hasAllowDynamicProperties = false;
-        foreach ($phpClass->getAttributes() as $attribute) {
-            if ($attribute->getName() === AllowDynamicProperties::class) {
-                $hasAllowDynamicProperties = true;
-                break;
-            }
-        }
 
-        if (!$hasAllowDynamicProperties) {
+        if (!F::getAttribute(AllowDynamicProperties::class, $phpClass)) {
             $phpClass->addAttribute(AllowDynamicProperties::class);
         }
 
         $namespace = Helpers::extractNamespace($className);
         $phpNamespace = $phpFile->getNamespaces()[$namespace] ?? throw new Exception(sprintf('Namespace %s not found', $namespace));
         $this->runEval($phpNamespace->__toString());
-
-        if (self::isDevelopmentDto($className)) {
-            return;
-        }
-
-        throw new Exception(sprintf("Class %s created, but is not a DataTrait", $className));
     }
 
     /**
@@ -129,6 +116,7 @@ final readonly class DevelopmentCodeCreator
             return false;
         }
 
+        // not a instanceof check as that would trigger the autoloader:
         return isset(class_implements($className, false)[DevelopmentFakeClassInterface::class]);
     }
 

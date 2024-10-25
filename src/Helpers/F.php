@@ -6,18 +6,25 @@ namespace Kanti\JsonToClass\Helpers;
 
 use Exception;
 use Nette\PhpGenerator\ClassLike;
+use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Closure;
 use Nette\PhpGenerator\Constant;
 use Nette\PhpGenerator\EnumCase;
+use Nette\PhpGenerator\EnumType;
 use Nette\PhpGenerator\GlobalFunction;
 use Nette\PhpGenerator\Helpers;
+use Nette\PhpGenerator\InterfaceType;
 use Nette\PhpGenerator\Literal;
 use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\Parameter;
 use Nette\PhpGenerator\Property;
+use Nette\PhpGenerator\TraitType;
+use RuntimeException;
 
 use function array_filter;
 use function array_values;
+use function get_debug_type;
+use function sprintf;
 
 enum F
 {
@@ -84,5 +91,18 @@ enum F
     {
         /** @var class-string $name */
         return $name;
+    }
+
+    /**
+     * @phpstan-assert ClassType $class
+     * @param class-string $className
+     */
+    public static function assertClassType(mixed $class, string $className): void
+    {
+        if ($class instanceof ClassType) {
+            return;
+        }
+
+        throw new RuntimeException(sprintf("Expected ClassType, got %s for class %s", get_debug_type($class), $className));
     }
 }

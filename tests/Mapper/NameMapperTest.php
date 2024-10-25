@@ -10,7 +10,6 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-use function array_map;
 use function random_int;
 
 class NameMapperTest extends TestCase

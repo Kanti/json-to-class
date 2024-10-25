@@ -42,9 +42,9 @@ final readonly class FileSystem implements FileSystemInterface
         return $contents;
     }
 
-    public function require(string $location): void
+    public function require(string $location): mixed
     {
-        require $location;
+        return require $location;
     }
 
     private function realpathIfPossible(string $path): string

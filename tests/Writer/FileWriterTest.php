@@ -6,11 +6,9 @@ namespace Kanti\JsonToClass\Tests\Writer;
 
 use ArrayObject;
 use Composer\Autoload\ClassLoader;
-use Exception;
 use Generator;
 use Kanti\JsonToClass\ClassCreator\ShouldRestartException;
 use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
-use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\FileSystemAbstraction\ClassLocator;
 use Kanti\JsonToClass\FileSystemAbstraction\FileSystemInterface;

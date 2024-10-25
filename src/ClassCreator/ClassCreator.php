@@ -47,6 +47,10 @@ final readonly class ClassCreator
         }
 
         $schema = $this->schemaFromDataCreator->fromData($data, $config);
+        if ($schema->dataKeys === null && $schema->listElement) {
+            $schema = $schema->listElement;
+        }
+
         $schema = $this->schemaToNamedSchemaConverter->convert($className, $schema, null);
 
         if ($config->appendSchema === AppendSchema::APPEND) {

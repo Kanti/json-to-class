@@ -19,7 +19,7 @@
         }
     },
     "expectedPhpType": "Kanti\\GeneratedTest\\Data|null",
-    "expectedUses": {
+    "expectedPhpTypeUses": {
         "Data": "Kanti\\GeneratedTest\\Data"
     }
 }

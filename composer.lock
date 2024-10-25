@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d70f1044103ebd1c9dea46a74b9a8e56",
+    "content-hash": "a7a7d80833c9d6e19ed0f9a207d567bc",
     "packages": [
         {
             "name": "nette/php-generator",
@@ -2906,17 +2906,11 @@
         },
         {
             "name": "infection/infection",
-            "version": "0.29.7",
+            "version": "dev-fix-phpunit-config",
             "source": {
                 "type": "git",
-                "url": "https://github.com/infection/infection.git",
-                "reference": "243d501ab48a028f714993bc0c217f023af7cdbc"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/infection/infection/zipball/243d501ab48a028f714993bc0c217f023af7cdbc",
-                "reference": "243d501ab48a028f714993bc0c217f023af7cdbc",
-                "shasum": ""
+                "url": "https://github.com/Kanti/infection.git",
+                "reference": "5e7bf96c5b913c99b6cc99916d5963782eedc4ba"
             },
             "require": {
                 "colinodell/json5": "^2.2 || ^3.0",
@@ -2974,7 +2968,18 @@
                     "Infection\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Infection\\Benchmark\\": "tests/benchmark",
+                    "Infection\\Tests\\": "tests/phpunit"
+                },
+                "classmap": [
+                    "tests/autoloaded"
+                ],
+                "files": [
+                    "tests/phpunit/Helpers.php"
+                ]
+            },
             "license": [
                 "BSD-3-Clause"
             ],
@@ -3018,20 +3023,9 @@
                 "unit testing"
             ],
             "support": {
-                "issues": "https://github.com/infection/infection/issues",
-                "source": "https://github.com/infection/infection/tree/0.29.7"
+                "issues": "https://github.com/infection/infection/issues"
             },
-            "funding": [
-                {
-                    "url": "https://github.com/infection",
-                    "type": "github"
-                },
-                {
-                    "url": "https://opencollective.com/infection",
-                    "type": "open_collective"
-                }
-            ],
-            "time": "2024-10-06T12:20:00+00:00"
+            "time": "2024-10-25T10:41:16+00:00"
         },
         {
             "name": "infection/mutator",
@@ -4044,16 +4038,16 @@
         },
         {
             "name": "phpro/grumphp",
-            "version": "v2.8.0",
+            "version": "v2.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpro/grumphp.git",
-                "reference": "b150d47490fba1027445c078f81e879937d1cf00"
+                "reference": "14117189d0c1ce622eabec52b51edab56f1715fc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpro/grumphp/zipball/b150d47490fba1027445c078f81e879937d1cf00",
-                "reference": "b150d47490fba1027445c078f81e879937d1cf00",
+                "url": "https://api.github.com/repos/phpro/grumphp/zipball/14117189d0c1ce622eabec52b51edab56f1715fc",
+                "reference": "14117189d0c1ce622eabec52b51edab56f1715fc",
                 "shasum": ""
             },
             "require": {
@@ -4066,7 +4060,7 @@
                 "laravel/serializable-closure": "^1.1",
                 "monolog/monolog": "^2.0 || ^3.0",
                 "ondram/ci-detector": "^4.0",
-                "php": "~8.1.0 || ~8.2.0 || ~8.3.0",
+                "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0",
                 "psr/container": "^1.1 || ^2.0",
                 "seld/jsonlint": "^1.8",
                 "symfony/config": "^5.4 || ^6.0 || ^7.0",
@@ -4156,9 +4150,9 @@
             "description": "A composer plugin that enables source code quality checks.",
             "support": {
                 "issues": "https://github.com/phpro/grumphp/issues",
-                "source": "https://github.com/phpro/grumphp/tree/v2.8.0"
+                "source": "https://github.com/phpro/grumphp/tree/v2.9.0"
             },
-            "time": "2024-09-16T08:25:39+00:00"
+            "time": "2024-10-25T10:11:05+00:00"
         },
         {
             "name": "phpstan/extension-installer",
@@ -8884,7 +8878,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "infection/infection": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

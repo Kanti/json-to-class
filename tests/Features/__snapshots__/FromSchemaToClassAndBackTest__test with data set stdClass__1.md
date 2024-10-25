@@ -8,7 +8,7 @@
         "dataKeys": []
     },
     "expectedPhpType": "Kanti\\GeneratedTest\\Data",
-    "expectedUses": {
+    "expectedPhpTypeUses": {
         "Data": "Kanti\\GeneratedTest\\Data"
     }
 }

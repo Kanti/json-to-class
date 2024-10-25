@@ -1,6 +1,7 @@
 # Tested "dataKey"
 ````json
 {
+    "dataKey": "class-Schema",
     "schema": {
         "canBeMissing": false,
         "basicTypes": [],
@@ -24,14 +25,13 @@
         }
     },
     "expectedPhpType": "Kanti\\GeneratedTest\\Data",
+    "expectedPhpTypeUses": {
+        "Data": "Kanti\\GeneratedTest\\Data"
+    },
     "expectedAttributes": [
         {}
     ],
-    "dataKey": "class-Schema",
-    "expectedUses": {
-        "Data": "Kanti\\GeneratedTest\\Data"
-    },
-    "expectedUsesAttributes": {
+    "expectedAttributesUses": {
         "Key": "Kanti\\JsonToClass\\Attribute\\Key"
     }
 }

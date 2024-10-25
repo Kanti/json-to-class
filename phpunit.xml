@@ -16,15 +16,16 @@
          failOnRisky="true"
          failOnDeprecation="true"
          failOnNotice="true"
-         failOnSkipped="false"
+         failOnSkipped="true"
          failOnIncomplete="true"
 
          displayDetailsOnIncompleteTests="true"
-         displayDetailsOnSkippedTests="false"
+         displayDetailsOnSkippedTests="true"
          displayDetailsOnTestsThatTriggerDeprecations="true"
          displayDetailsOnTestsThatTriggerErrors="true"
          displayDetailsOnTestsThatTriggerNotices="true"
          displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnPhpunitDeprecations="true"
 
          colors="true"
 >
@@ -56,7 +57,7 @@
             <crap4j outputFile="test-result/crap4j.xml" threshold="50"/>
             <html outputDirectory="test-result/html-coverage" lowUpperBound="90" highLowerBound="100"/>
             <php outputFile="test-result/coverage.php"/>
-            <text outputFile="test-result/coverage.txt" showUncoveredFiles="false" showOnlySummary="true"/>
+            <text outputFile="test-result/coverage.txt" showUncoveredFiles="true" showOnlySummary="true"/>
             <xml outputDirectory="test-result/xml-coverage"/>
         </report>
     </coverage>

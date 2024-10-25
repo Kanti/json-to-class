@@ -8,6 +8,7 @@ use Exception;
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Dto\AbstractJsonClass;
 use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
+use Kanti\JsonToClass\Helpers\F;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Helpers;
@@ -45,8 +46,6 @@ final readonly class PhpFileUpdater
         $class = $this->addClass($schema, $namespace);
         //  add RootClass Attribute if not exists
         $this->addRootClassAttribute($schema, $namespace, $class, $rootClassName);
-        // remove constructor if exists (it is never called in normal usage)
-        $this->removeConstructor($class);
         //  add or remove properties/parameters/promotedParameters if not exists
         //  update types for properties/parameters/promotedParameters
         //  update types in Types Attribute
@@ -64,23 +63,21 @@ final readonly class PhpFileUpdater
 
     private function addClass(NamedSchema $schema, PhpNamespace $namespace): ClassType
     {
-        $className = Helpers::extractShortName($schema->className);
-        $createNewClass = static function () use ($namespace, $className): ClassType {
+        $shortName = Helpers::extractShortName($schema->className);
+        $createNewClass = static function () use ($namespace, $shortName): ClassType {
 
             $namespace->addUse(AbstractJsonReadonlyClass::class);
 
             return $namespace
-                ->addClass($className)
+                ->addClass($shortName)
                 ->setFinal()
                 ->setReadOnly()
                 ->setExtends(AbstractJsonReadonlyClass::class);
         };
 
-        $class = $namespace->getClasses()[$className] ?? $createNewClass();
+        $class = $namespace->getClasses()[$shortName] ?? $createNewClass();
 
-        if (!$class instanceof ClassType) {
-            throw new Exception(sprintf('Expected ClassType, got %s for class %s', get_debug_type($class), $schema->className));
-        }
+        F::assertClassType($class, $schema->className);
 
         return $class;
     }
@@ -151,16 +148,6 @@ final readonly class PhpFileUpdater
         ksort($properties);
         uasort($properties, fn(NamedSchema $a, NamedSchema $b): int => $a->canBeMissing <=> $b->canBeMissing);
         return $properties;
-    }
-
-    private function removeConstructor(ClassType $class): void
-    {
-        if (!$class->hasMethod('__construct')) {
-            return;
-        }
-
-        $class->removeMethod('__construct');
-        $this->logger->warning('Removed constructor from ' . $class->getName());
     }
 
     private function updateDocBlock(Property $property, string $phpType, ?string $docBlockType): void

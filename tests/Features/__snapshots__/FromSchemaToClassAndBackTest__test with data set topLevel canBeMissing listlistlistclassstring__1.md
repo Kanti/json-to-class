@@ -37,13 +37,13 @@
     },
     "expectedPhpType": "array|null",
     "expectedDocBlockType": "list<list<list<Data___>>|string>|null",
-    "expectedUses": {
+    "expectedDocBlockUses": {
         "Data___": "Kanti\\GeneratedTest\\Data___"
     },
     "expectedAttributes": [
         {}
     ],
-    "expectedUsesAttributes": {
+    "expectedAttributesUses": {
         "Types": "Kanti\\JsonToClass\\Attribute\\Types",
         "Data___": "Kanti\\GeneratedTest\\Data___"
     }

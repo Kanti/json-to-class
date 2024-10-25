@@ -12,6 +12,7 @@ use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\Dto\DevelopmentFakeClassInterface;
 use Kanti\JsonToClass\FileSystemAbstraction\FileSystemInterface;
 use Kanti\JsonToClass\Helpers\F;
+use Kanti\JsonToClass\Schema\NamedSchema;
 use Kanti\JsonToClass\Schema\Schema;
 use Kanti\JsonToClass\Schema\SchemaToNamedSchemaConverter;
 use Kanti\JsonToClass\Tests\_helper\FakeFileSystem;
@@ -40,6 +41,33 @@ class DevelopmentCodeCreatorTest extends TestCase
         $namedSchema =  $schemaToNamedSchemaConverter->convert(Data::class, (new Schema(dataKeys: ['a' => new Schema(basicTypes: ['int' => true])])), null);
 
         $this->expectExceptionMessage('Class ' . Data::class . ' already exists and is not a ' . DevelopmentFakeClassInterface::class);
+        $developmentCodeCreator->createOrUpdateDevelopmentClasses($namedSchema);
+    }
+
+    #[Test]
+    #[RunInSeparateProcess]
+    #[TestDox('Expected ClassType, got Nette\PhpGenerator\TraitType for class Kanti\TraitA')]
+    public function exception2(): void
+    {
+        $classLoader = new ClassLoader();
+        $classLoader->addPsr4('Kanti\\', 'fake-src/');
+
+        $container = new JsonToClassContainer([
+            ClassLoader::class => $classLoader,
+            FileSystemInterface::class => new FakeFileSystem([
+                'fake-src/TraitA.php' => <<<'EOF'
+<?php
+namespace Kanti;
+trait TraitA {}
+EOF
+
+            ]),
+        ]);
+        $developmentCodeCreator = $container->get(DevelopmentCodeCreator::class);
+
+        $namedSchema = new NamedSchema(F::classString('Kanti\TraitA'), properties: ['a' => new NamedSchema(F::classString('A'))]);
+
+        $this->expectExceptionMessage('Expected ClassType, got Nette\PhpGenerator\TraitType for class Kanti\TraitA');
         $developmentCodeCreator->createOrUpdateDevelopmentClasses($namedSchema);
     }
 

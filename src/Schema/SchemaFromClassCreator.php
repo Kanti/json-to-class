@@ -58,6 +58,7 @@ final readonly class SchemaFromClassCreator
 
                 if ($property->isInitialized()) {
                     $schema->properties[$propertyName]->canBeMissing = true;
+                    continue;
                 }
 
                 $readonly = $property->isReadOnly() || $class->isReadOnly();

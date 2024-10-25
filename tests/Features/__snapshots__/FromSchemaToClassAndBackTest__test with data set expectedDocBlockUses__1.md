@@ -1,4 +1,4 @@
-# Tested "expectedUses"
+# Tested "expectedDocBlockUses"
 ````json
 {
     "schema": {
@@ -38,15 +38,18 @@
         }
     },
     "expectedPhpType": "Kanti\\GeneratedTest\\Data|array",
+    "expectedPhpTypeUses": {
+        "Data": "Kanti\\GeneratedTest\\Data"
+    },
     "expectedDocBlockType": "list<Data_>|Data",
-    "expectedUses": {
+    "expectedDocBlockUses": {
         "Data": "Kanti\\GeneratedTest\\Data",
         "Data_": "Kanti\\GeneratedTest\\Data_"
     },
     "expectedAttributes": [
         {}
     ],
-    "expectedUsesAttributes": {
+    "expectedAttributesUses": {
         "Types": "Kanti\\JsonToClass\\Attribute\\Types",
         "Data": "Kanti\\GeneratedTest\\Data",
         "Data_": "Kanti\\GeneratedTest\\Data_"

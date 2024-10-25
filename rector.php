@@ -6,6 +6,9 @@ use Rector\CodeQuality\Rector\Equal\UseIdenticalOverEqualWithSameTypeRector;
 use PLUS\GrumPHPConfig\RectorSettings;
 use Rector\Config\RectorConfig;
 use Rector\Caching\ValueObject\Storage\FileCacheStorage;
+use Rector\DeadCode\Rector\ClassMethod\RemoveEmptyClassMethodRector;
+use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedConstructorParamRector;
+use Rector\Php74\Rector\Property\RestoreDefaultNullToNullableTypePropertyRector;
 
 return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->parallel();
@@ -36,6 +39,19 @@ return static function (RectorConfig $rectorConfig): void {
             UseIdenticalOverEqualWithSameTypeRector::class => [
                 // this is a breaking change: == with objects is not the same as ===
                 __DIR__ . '/src/ClassCreator/ClassCreator.php',
+            ],
+
+            RestoreDefaultNullToNullableTypePropertyRector::class => [
+                // do not add = null to properties
+                __DIR__ . '/tests/Converter/__fixture__/DtoAllowsDynamicProperties.php',
+            ],
+            RemoveUnusedConstructorParamRector::class => [
+                // do not add = null to properties
+                __DIR__ . '/tests/Container/JsonToClassContainerTest.php',
+            ],
+            RemoveEmptyClassMethodRector::class => [
+                // do not add = null to properties
+                __DIR__ . '/tests/Container/JsonToClassContainerTest.php',
             ],
             /**
              * rector should not touch these files

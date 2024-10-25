@@ -17,7 +17,7 @@
     "expectedAttributes": [
         {}
     ],
-    "expectedUsesAttributes": {
+    "expectedAttributesUses": {
         "Types": "Kanti\\JsonToClass\\Attribute\\Types"
     }
 }

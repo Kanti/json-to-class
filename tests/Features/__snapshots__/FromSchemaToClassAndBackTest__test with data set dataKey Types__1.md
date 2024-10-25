@@ -1,6 +1,7 @@
 # Tested "dataKey Types"
 ````json
 {
+    "dataKey": "class🌏Schema",
     "schema": {
         "canBeMissing": false,
         "basicTypes": [],
@@ -38,17 +39,19 @@
         }
     },
     "expectedPhpType": "Kanti\\GeneratedTest\\Data|array",
+    "expectedPhpTypeUses": {
+        "Data": "Kanti\\GeneratedTest\\Data"
+    },
     "expectedDocBlockType": "list<Data_>|Data",
-    "expectedUses": {
+    "expectedDocBlockUses": {
         "Data": "Kanti\\GeneratedTest\\Data",
         "Data_": "Kanti\\GeneratedTest\\Data_"
     },
-    "dataKey": "class🌏Schema",
     "expectedAttributes": [
         {},
         {}
     ],
-    "expectedUsesAttributes": {
+    "expectedAttributesUses": {
         "Key": "Kanti\\JsonToClass\\Attribute\\Key",
         "Types": "Kanti\\JsonToClass\\Attribute\\Types",
         "Data": "Kanti\\GeneratedTest\\Data",

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\Tests\Attribute;
 
 use Kanti\JsonToClass\Attribute\RootClass;
-use Kanti\JsonToClass\Helpers\F;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

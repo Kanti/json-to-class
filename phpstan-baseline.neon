@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Cannot access offset class\\-string on mixed\\.$#"
-			count: 1
-			path: src/CodeCreator/DevelopmentCodeCreator.php
-
-		-
 			message: "#^Parameter \\#1 \\.\\.\\.\\$types of class Kanti\\\\JsonToClass\\\\Attribute\\\\Types constructor expects list\\<list\\<list\\<string\\>\\|string\\>\\|string\\>\\|string, list\\<mixed\\>\\|string given\\.$#"
 			count: 1
 			path: src/CodeCreator/DevelopmentCodeCreator.php
@@ -47,6 +42,11 @@ parameters:
 
 		-
 			message: "#^Method Kanti\\\\JsonToClass\\\\Container\\\\JsonToClassContainer\\:\\:get\\(\\) should return T of object but returns object\\.$#"
+			count: 1
+			path: src/Container/JsonToClassContainer.php
+
+		-
+			message: "#^Parameter \\#1 \\$possibleAutoloadLocations of static method Kanti\\\\JsonToClass\\\\Container\\\\JsonToClassContainer\\:\\:getClassLoader\\(\\) expects list\\<string\\>, array\\{mixed, literal\\-string&non\\-falsy\\-string, literal\\-string&non\\-falsy\\-string, literal\\-string&non\\-falsy\\-string, literal\\-string&non\\-falsy\\-string\\} given\\.$#"
 			count: 1
 			path: src/Container/JsonToClassContainer.php
 
@@ -96,6 +96,41 @@ parameters:
 			path: tests/Container/JsonToClassContainerTest.php
 
 		-
+			message: "#^Constructor of an anonymous class has an unused parameter \\$x\\.$#"
+			count: 2
+			path: tests/Container/JsonToClassContainerTest.php
+
+		-
+			message: "#^Method class@anonymous/tests/Container/JsonToClassContainerTest\\.php\\:45\\:\\:__construct\\(\\) has parameter \\$x with no type specified\\.$#"
+			count: 1
+			path: tests/Container/JsonToClassContainerTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$data of method Kanti\\\\JsonToClass\\\\Converter\\\\Converter\\:\\:convertList\\(\\) expects array\\<array\\|stdClass\\>, array\\<string, int\\> given\\.$#"
+			count: 1
+			path: tests/Converter/ConverterTest.php
+
+		-
+			message: "#^Class Kanti\\\\JsonToClass\\\\Tests\\\\Converter\\\\__fixture__\\\\ChildClass not found\\.$#"
+			count: 1
+			path: tests/Converter/__fixture__/ChildClassNotFound.php
+
+		-
+			message: "#^Property Kanti\\\\JsonToClass\\\\Tests\\\\Converter\\\\__fixture__\\\\ChildClassNotFound\\:\\:\\$childClass type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: tests/Converter/__fixture__/ChildClassNotFound.php
+
+		-
+			message: "#^Access to an undefined property Kanti\\\\JsonToClass\\\\Tests\\\\Converter\\\\__fixture__\\\\DtoAllowsDynamicProperties\\:\\:\\$isAdult\\.$#"
+			count: 1
+			path: tests/Dto/AbstractJsonClassTraitTest.php
+
+		-
 			message: "#^Offset 'a' might not exist on array\\<string, Kanti\\\\JsonToClass\\\\Schema\\\\NamedSchema\\>\\|null\\.$#"
 			count: 1
 			path: tests/Features/FromSchemaToClassAndBackTest.php
+
+		-
+			message: "#^Access to an undefined property Kanti\\\\GeneratedTest\\\\Data\\:\\:\\$a\\.$#"
+			count: 4
+			path: tests/Features/NiceErrorMessagesTest.php

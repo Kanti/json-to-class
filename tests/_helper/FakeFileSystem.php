@@ -66,7 +66,7 @@ final class FakeFileSystem implements FileSystemInterface
         return $this->fileState[$filename] ?? null;
     }
 
-    public function require(string $location): void
+    public function require(string $location): mixed
     {
         $location = realpath($location) ?: $location;
         $fileContent = $this->fileLocationsWrittenTo[$location] ?? null;
@@ -77,11 +77,14 @@ final class FakeFileSystem implements FileSystemInterface
         $fileName = sys_get_temp_dir() . '/require' . microtime(true) . '.php';
         file_put_contents($fileName, $fileContent, FILE_APPEND);
         try {
-            require $fileName;
+            $result = require $fileName;
             unlink($fileName);
-        } catch (Throwable) {
+        } catch (Throwable $throwable) {
             unlink($fileName);
+            throw $throwable;
         }
+
+        return $result;
     }
 
     /**

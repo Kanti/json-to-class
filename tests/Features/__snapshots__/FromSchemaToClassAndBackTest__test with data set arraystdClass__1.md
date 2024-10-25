@@ -13,14 +13,17 @@
         "dataKeys": []
     },
     "expectedPhpType": "Kanti\\GeneratedTest\\Data|array",
+    "expectedPhpTypeUses": {
+        "Data": "Kanti\\GeneratedTest\\Data"
+    },
     "expectedDocBlockType": "array{}|Data",
-    "expectedUses": {
+    "expectedDocBlockUses": {
         "Data": "Kanti\\GeneratedTest\\Data"
     },
     "expectedAttributes": [
         {}
     ],
-    "expectedUsesAttributes": {
+    "expectedAttributesUses": {
         "Types": "Kanti\\JsonToClass\\Attribute\\Types",
         "Data": "Kanti\\GeneratedTest\\Data"
     }

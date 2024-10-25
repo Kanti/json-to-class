@@ -27,22 +27,26 @@ class SchemaSimplificationTest extends TestCase
 
     public static function dataProvider(): Generator
     {
-        $properties = ['a' => new Schema(basicTypes: ['int' => true])];
+        $dataKeys = ['a' => new Schema(basicTypes: ['int' => true])];
 
         yield 'empty' => [
             'schema' => new Schema(),
             'expected' => null,
         ];
-        yield 'empty properties' => [
+        yield 'empty dataKeys' => [
             'schema' => new Schema(dataKeys: []),
             'expected' => null,
         ];
         yield 'empty listElement' => [
-            'schema' => new Schema(listElement: new Schema(), dataKeys: $properties),
-            'expected' => new Schema(dataKeys: $properties),
+            'schema' => new Schema(listElement: new Schema(), dataKeys: $dataKeys),
+            'expected' => new Schema(dataKeys: $dataKeys),
         ];
-        yield 'empty listElement->properties + properties' => [
+        yield 'empty listElement->dataKeys + dataKeys' => [
             'schema' => new Schema(listElement: new Schema(dataKeys: []), dataKeys: []),
+            'expected' => null,
+        ];
+        yield 'dataKeys' => [
+            'schema' => new Schema(dataKeys: ['a' => new Schema()]),
             'expected' => null,
         ];
     }

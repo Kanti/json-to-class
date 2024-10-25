@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\Mapper;
 
 use Kanti\JsonToClass\Attribute\Key;
-use Kanti\JsonToClass\Converter\PossibleConvertTargets;
 use Kanti\JsonToClass\Dto\Property;
 use ReflectionProperty;
 

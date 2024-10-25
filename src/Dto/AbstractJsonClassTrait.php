@@ -9,9 +9,11 @@ use Kanti\JsonToClass\Attribute\Key;
 use Kanti\JsonToClass\Cache\RuntimeCache;
 use ReflectionClass;
 use ReflectionProperty;
+use RuntimeException;
 
 use function array_keys;
 use function assert;
+use function sprintf;
 
 /**
  * @internal
@@ -29,14 +31,16 @@ trait AbstractJsonClassTrait
                 return $this->{$name} ?? null; // mute error Typed property %s::$%s must not be accessed before initialization
             }
 
-            return $this->{$name}; // throws error Typed property %s::$%s must not be accessed before initialization
+            $fallback = new RuntimeException(sprintf('Typed property %s::$%s must not be accessed before initialization', $this::class, $name));
+            RuntimeCache::throwWarning($this, $name, $fallback);
         }
 
         if ((new ReflectionClass($this))->getAttributes(AllowDynamicProperties::class)) {
             return $this->{$name} ?? null;
         }
 
-        return $this->{$name}; // triggers Warning: Undefined property: %s::$%s in %s on line %d
+        $fallback = new RuntimeException(sprintf('Undefined property %s::$%s', $this::class, $name));
+        RuntimeCache::throwWarning($this, $name, $fallback);
     }
 
     /**
