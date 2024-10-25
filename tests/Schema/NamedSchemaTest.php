@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\Tests\Schema;
 
 use Generator;
-use Kanti\JsonToClass\Helpers\SH;
-use Kanti\JsonToClass\Schema\NamedSchema;
+use Kanti\JsonToClass\Container\JsonToClassContainer;
+use Kanti\JsonToClass\Helpers\F;
 use Kanti\JsonToClass\Schema\Schema;
+use Kanti\JsonToClass\Schema\SchemaToNamedSchemaConverter;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -18,13 +19,13 @@ class NamedSchemaTest extends TestCase
     public function exception1(): void
     {
         $this->expectExceptionMessage('Class name must contain namespace given: A');
-        NamedSchema::fromSchema(SH::classString('A'), new Schema());
+        $this->getNamedSchemaConverter()->convert(F::classString('A'), (new Schema()), null);
     }
 
     #[Test]
     public function getFirstNonListChild(): void
     {
-        $schema = NamedSchema::fromSchema(SH::classString('Kanti\A'), new Schema(listElement: new Schema()));
+        $schema = $this->getNamedSchemaConverter()->convert(F::classString('Kanti\A'), (new Schema(listElement: new Schema())), null);
         $expectedSchema = $schema->listElement;
         $this->assertSame($expectedSchema, $schema->getFirstNonListChild());
     }
@@ -33,7 +34,7 @@ class NamedSchemaTest extends TestCase
     #[DataProvider('dataProvider')]
     public function isOnlyAList(Schema $schema, bool $expected): void
     {
-        $schema = NamedSchema::fromSchema(SH::classString('Kanti\A'), $schema);
+        $schema = $this->getNamedSchemaConverter()->convert(F::classString('Kanti\A'), $schema, null);
         $this->assertEquals($expected, $schema->isOnlyAList());
     }
 
@@ -52,11 +53,11 @@ class NamedSchemaTest extends TestCase
             true,
         ];
         yield 'properties empty' => [
-            new Schema(properties: []),
+            new Schema(dataKeys: []),
             false,
         ];
         yield 'properties set' => [
-            new Schema(properties: ['a' => new Schema()]),
+            new Schema(dataKeys: ['a' => new Schema()]),
             false,
         ];
         yield 'canBeMissing' => [
@@ -67,5 +68,11 @@ class NamedSchemaTest extends TestCase
             new Schema(canBeMissing: true, listElement: new Schema()),
             false,
         ];
+    }
+
+    protected function getNamedSchemaConverter(): SchemaToNamedSchemaConverter
+    {
+        $container = new JsonToClassContainer();
+        return $container->get(SchemaToNamedSchemaConverter::class);
     }
 }

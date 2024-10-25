@@ -9,7 +9,7 @@ use Kanti\JsonToClass\ClassCreator\ClassCreator;
 use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
-use Kanti\JsonToClass\Validator\Validator;
+use Kanti\JsonToClass\Mapper\ClassMapper;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use stdClass;
@@ -25,7 +25,6 @@ use function is_array;
 final readonly class Converter
 {
     public function __construct(
-        private Validator $validator,
         private ClassCreator $classCreator,
         private ClassMapper $classMapper,
         private LoggerInterface $logger,
@@ -91,8 +90,6 @@ final readonly class Converter
             throw new InvalidArgumentException('If you want to convert an array of objects, use convertList method instead');
         }
 
-        $this->validator->validateData($data, $config);
-
         $shouldCreateClasses = $config->shouldCreateClasses();
         $this->logger->debug('shouldCreateClasses', ['shouldCreateClasses' => $shouldCreateClasses]);
         if ($shouldCreateClasses) {
@@ -121,8 +118,6 @@ final readonly class Converter
         if (!array_is_list($data)) {
             throw new InvalidArgumentException('If you want to convert an object, use convert method instead');
         }
-
-        $this->validator->validateData($data, $config);
 
         $shouldCreateClasses = $config->shouldCreateClasses();
         $this->logger->debug('shouldCreateClasses', ['shouldCreateClasses' => $shouldCreateClasses]);

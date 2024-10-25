@@ -7,7 +7,7 @@
             "int": true
         },
         "listElement": null,
-        "properties": null
+        "dataKeys": null
     },
     "expectedPhpType": "int"
 }
@@ -21,13 +21,11 @@ declare(strict_types=1);
 namespace Kanti\GeneratedTest;
 
 use Kanti\JsonToClass\Attribute\RootClass;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
+use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 
 #[RootClass]
-final readonly class Data
+final readonly class Data extends AbstractJsonReadonlyClass
 {
-    use MuteUninitializedPropertyError;
-
     public int $a;
 }
 ````

@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\CodeCreator;
 
+use Kanti\JsonToClass\Attribute\Key;
 use Kanti\JsonToClass\Attribute\Types;
 use Kanti\JsonToClass\Schema\NamedSchema;
 use Nette\PhpGenerator\Attribute;
 use Nette\PhpGenerator\Literal;
 use Nette\PhpGenerator\PhpNamespace;
+
+use function array_filter;
+use function array_values;
 
 final class TypeCreator
 {
@@ -131,7 +135,18 @@ final class TypeCreator
         return $this->sortTypes($types);
     }
 
-    public function getAttribute(NamedSchema $property, PhpNamespace $namespace): ?Attribute
+    /**
+     * @return list<Attribute>
+     */
+    public function getAttributes(string $propertyName, NamedSchema $property, PhpNamespace $namespace): array
+    {
+        return array_values(array_filter([
+            $this->getKeyAttribute($propertyName, $property, $namespace),
+            $this->getTypesAttribute($property, $namespace),
+        ]));
+    }
+
+    public function getTypesAttribute(NamedSchema $property, PhpNamespace $namespace): ?Attribute
     {
         if (!$property->listElement) {
             return null;
@@ -140,6 +155,20 @@ final class TypeCreator
         $types = $this->getAttributeTypes($property, $namespace);
         $namespace->addUse(Types::class);
         return new Attribute(Types::class, $types);
+    }
+
+    private function getKeyAttribute(string $propertyName, NamedSchema $property, PhpNamespace $namespace): ?Attribute
+    {
+        if ($property->dataKey === null) {
+            return null;
+        }
+
+        if ($property->dataKey === $propertyName) {
+            return null;
+        }
+
+        $namespace->addUse(Key::class);
+        return new Attribute(Key::class, [$property->dataKey]);
     }
 
     /**

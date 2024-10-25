@@ -2,21 +2,30 @@
 
 declare(strict_types=1);
 
-namespace Kanti\JsonToClass\Tests\Converter;
+namespace Kanti\JsonToClass\Tests\Mapper;
 
+use Closure;
+use Exception;
 use Generator;
 use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
-use Kanti\JsonToClass\Converter\ClassMapper;
-use Kanti\JsonToClass\Helpers\SH;
+use Kanti\JsonToClass\Helpers\F;
+use Kanti\JsonToClass\Mapper\ClassMapper;
+use Kanti\JsonToClass\Tests\Converter\__fixture__\ChildClass;
+use Kanti\JsonToClass\Tests\Converter\__fixture__\ChildClassNotFound;
 use Kanti\JsonToClass\Tests\Converter\__fixture__\Children;
+use Kanti\JsonToClass\Tests\Converter\__fixture__\DiffrentKeys;
 use Kanti\JsonToClass\Tests\Converter\__fixture__\Dto;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\AbstractLogger;
+use Psr\Log\LoggerInterface;
 use stdClass;
+use Stringable;
 
 class ClassMapperTest extends TestCase
 {
@@ -27,7 +36,7 @@ class ClassMapperTest extends TestCase
         $classMapper = $this->getClassMapper();
 
         $this->expectExceptionMessage('Class MissingClass does not exist $');
-        $classMapper->map(SH::classString('MissingClass'), [1, 2, 3], new SaneConfig());
+        $classMapper->map(F::classString('MissingClass'), [1, 2, 3], new SaneConfig());
     }
 
     #[Test]
@@ -38,6 +47,39 @@ class ClassMapperTest extends TestCase
 
         $this->expectExceptionMessage('Data must be an associative array or stdclass, list is not allowed $');
         $classMapper->map(Children::class, [1, 2, 3], new SaneConfig());
+    }
+
+    #[Test]
+    #[TestDox('Error at $.childClass.0: Class Kanti\JsonToClass\Tests\Converter\__fixture__\ChildClass does not exist $.childClass.0')]
+    public function exception3(): void
+    {
+        $classMapper = $this->getClassMapper();
+
+        $this->expectExceptionMessage('Error at $.childClass.0: Class Kanti\JsonToClass\Tests\Converter\__fixture__\ChildClass does not exist $.childClass.0');
+        $classMapper->map(ChildClassNotFound::class, ['childClass' => [['a' => 1]]], new SaneConfig());
+    }
+
+    #[Test]
+    #[TestDox('Class Kanti\JsonToClass\Tests\Mapper\ClassMapperTest has a constructor. This is not supported, it will not be called')]
+    public function loggerWrite(): void
+    {
+        $classMapper = $this->getClassMapper([
+            LoggerInterface::class => new class extends AbstractLogger {
+                public function log($level, Stringable|string $message, array $context = []): void
+                {
+                    Assert::assertEquals('Class Kanti\JsonToClass\Tests\Mapper\ClassMapperTest has a constructor. This is not supported, it will not be called', $message);
+                    throw new Exception('stopTest');
+                }
+            },
+        ]);
+
+        try {
+            $classMapper->map(self::class, (object)[], new SaneConfig());
+        } catch (Exception $exception) {
+            if ($exception->getMessage() !== 'stopTest') {
+                throw $exception;
+            }
+        }
     }
 
     /**
@@ -64,6 +106,14 @@ class ClassMapperTest extends TestCase
                 'age' => 1,
             ],
             'expected' => Children::from(name: 'A', age: 1),
+        ];
+        yield [
+            'className' => DiffrentKeys::class,
+            'data' => [
+                'name✨' => 'A🌏',
+                'age✨' => 1337,
+            ],
+            'expected' => DiffrentKeys::from(name: 'A🌏', age: 1337),
         ];
         yield [
             'className' => Children::class,
@@ -137,9 +187,11 @@ class ClassMapperTest extends TestCase
         ];
     }
 
-    protected function getClassMapper(): ClassMapper
+    /**
+     * @param array<string, Closure|object> $overwriteFactories
+     */
+    private function getClassMapper(array $overwriteFactories = []): ClassMapper
     {
-        $container = new JsonToClassContainer();
-        return $container->get(ClassMapper::class);
+        return (new JsonToClassContainer($overwriteFactories))->get(ClassMapper::class);
     }
 }

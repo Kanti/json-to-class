@@ -30,7 +30,7 @@ final readonly class CodeCreator
         $classes = $this->flatten($schema);
         $result = [];
         foreach ($classes as $className => $classSchema) {
-            $file = $this->classLocator->gePhpFileForClass($className) ?? new PhpFile();
+            $file = $this->classLocator->getClassFile($className) ?? new PhpFile();
             $fileString = $this->phpFileUpdater->updateFile($schema->className, $classSchema, $file);
             $result[$className] = $fileString;
         }

@@ -22,7 +22,7 @@ class FileSystemTest extends TestCase
         try {
             $fileSystem = new FileSystem();
             $functionName = 'f' . time();
-            $content = '<?php function ' . $functionName . '() {}';
+            $content = '<?php function ' . $functionName . '() {} return 1337;';
             # test writeContent
             $fileSystem->writeContent($fileName, $content);
             $this->assertEquals($content, file_get_contents($fileName), 'File should exist and have content');
@@ -33,6 +33,7 @@ class FileSystemTest extends TestCase
             $actual = $fileSystem->readContentIfExists($fileName);
             $this->assertEquals($content, $actual, 'File should exist and have content');
 
+            $this->assertEquals(1337, $fileSystem->require($fileName));
             unlink($fileName);
             $actual = $fileSystem->readContentIfExists($fileName);
             $this->assertNull($actual, 'File should not exist');

@@ -7,6 +7,7 @@ namespace Kanti\JsonToClass\Schema;
 use InvalidArgumentException;
 use Kanti\JsonToClass\Config\Config;
 use Kanti\JsonToClass\Config\Enums\OnInvalidCharacterProperties;
+use Kanti\JsonToClass\Mapper\NameMapper;
 use Nette\PhpGenerator\Helpers;
 use stdClass;
 
@@ -26,18 +27,6 @@ final class SchemaFromDataCreator
         return $schema;
     }
 
-    public static function toProperty(string $key, Config $config): string
-    {
-        if (Helpers::isIdentifier($key)) {
-            return $key;
-        }
-
-        return match ($config->onInvalidCharacterProperties) {
-            OnInvalidCharacterProperties::TRY_PREFIX_WITH_UNDERSCORE => Helpers::isIdentifier('_' . $key) ? '_' . $key : throw new InvalidArgumentException('key ' . $key . ' is not a valid property name (even with _ prefix)'),
-            OnInvalidCharacterProperties::THROW_EXCEPTION => throw new InvalidArgumentException('key ' . $key . ' is not a valid property name'),
-        };
-    }
-
     /**
      * @param null|bool|int|float|string|array<array-key, mixed>|stdClass $data
      */
@@ -48,24 +37,23 @@ final class SchemaFromDataCreator
             return;
         }
 
-        $beforeThisRun = $currentSchema->properties;
+        $beforeThisRun = $currentSchema->dataKeys;
 
         $isList = is_array($data) && array_is_list($data);
         if ($isList) {
             $currentSchema->listElement ??= new Schema();
         } else {
-            $currentSchema->properties ??= [];
+            $currentSchema->dataKeys ??= [];
         }
 
-        foreach ((array)$data as $property => $value) {
+        foreach ((array)$data as $dataKey => $value) {
             if ($isList) {
                 $this->generateInternal($value, $currentSchema->listElement, $config);
                 continue;
             }
 
-            $property = SchemaFromDataCreator::toProperty($property, $config);
-            $currentSchema->properties[$property] ??= new Schema();
-            $this->generateInternal($value, $currentSchema->properties[$property], $config);
+            $currentSchema->dataKeys[$dataKey] ??= new Schema();
+            $this->generateInternal($value, $currentSchema->dataKeys[$dataKey], $config);
         }
 
         if ($isList) {
@@ -78,23 +66,21 @@ final class SchemaFromDataCreator
         }
 
         // canBeMissing implementation:
-        foreach (array_keys((array)$data) as $property) {
-            if (!array_key_exists($property, $beforeThisRun)) {
-                $property = SchemaFromDataCreator::toProperty($property, $config);
+        foreach (array_keys((array)$data) as $dataKey) {
+            if (!array_key_exists($dataKey, $beforeThisRun)) {
                 // was missing in a previous iteration so it is sometimes unset:
-                $currentSchema->properties[$property] ??= new Schema();
-                $currentSchema->properties[$property]->canBeMissing = true;
-                $currentSchema->properties[$property]->basicTypes['null'] = true;
+                $currentSchema->dataKeys[$dataKey] ??= new Schema();
+                $currentSchema->dataKeys[$dataKey]->canBeMissing = true;
+                $currentSchema->dataKeys[$dataKey]->basicTypes['null'] = true;
             }
         }
 
-        foreach (array_keys($beforeThisRun) as $property) {
-            if (!array_key_exists($property, (array)$data)) {
-                $property = SchemaFromDataCreator::toProperty($property, $config);
+        foreach (array_keys($beforeThisRun) as $dataKey) {
+            if (!array_key_exists($dataKey, (array)$data)) {
                 // was missing in current iteration so it is sometimes unset
-                assert(isset($currentSchema->properties[$property]));
-                $currentSchema->properties[$property]->canBeMissing = true;
-                $currentSchema->properties[$property]->basicTypes['null'] = true;
+                assert(isset($currentSchema->dataKeys[$dataKey]));
+                $currentSchema->dataKeys[$dataKey]->canBeMissing = true;
+                $currentSchema->dataKeys[$dataKey]->basicTypes['null'] = true;
             }
         }
     }

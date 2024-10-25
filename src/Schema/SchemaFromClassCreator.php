@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Kanti\JsonToClass\Schema;
 
 use Exception;
+use Kanti\JsonToClass\Attribute\Key;
 use Kanti\JsonToClass\Attribute\Types;
 use Kanti\JsonToClass\Cache\RuntimeCache;
 use Kanti\JsonToClass\Dto\Type;
 use Kanti\JsonToClass\FileSystemAbstraction\ClassLocator;
-use Kanti\JsonToClass\Helpers\SH;
+use Kanti\JsonToClass\Helpers\F;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Property;
 
@@ -46,16 +47,18 @@ final readonly class SchemaFromClassCreator
         $schema->properties ??= [];
 
         foreach ($class->getProperties() as $property) {
+            $dataKey = $this->getDataKey($property);
             $propertyName = $property->getName();
             $types = $this->getTypesFromPhpProperty($property, $schema->className);
-            $childClassName = SH::getChildClass($schema->className, $propertyName);
+            $childClassName = F::getChildClass($schema->className, $propertyName);
             foreach ($types as $type) {
-                $schema->properties[$propertyName] ??= new NamedSchema($childClassName);
+                $schema->properties[$propertyName] ??= new NamedSchema($childClassName, $dataKey);
 
                 $this->addType($type, $schema->properties[$propertyName]);
 
                 if ($property->isInitialized()) {
                     $schema->properties[$propertyName]->canBeMissing = true;
+                    continue;
                 }
 
                 $readonly = $property->isReadOnly() || $class->isReadOnly();
@@ -74,13 +77,9 @@ final readonly class SchemaFromClassCreator
     private function getTypesFromPhpProperty(Property $parameter, string $className): array
     {
         try {
-            $attributes = $parameter->getAttributes();
-            foreach ($attributes as $attribute) {
-                if ($attribute->getName() === Types::class) {
-                    $types = SH::getAttributes($attribute);
-                    assert($types instanceof Types);
-                    return $types->types;
-                }
+            $types = F::getAttribute(Types::class, $parameter);
+            if ($types) {
+                return $types->types;
             }
 
             $type = $parameter->getType(true);
@@ -108,17 +107,14 @@ final readonly class SchemaFromClassCreator
     private function addType(Type $type, NamedSchema $schema): void
     {
         if ($type->isClass()) {
-            if ($schema->className !== $type->name) {
-                throw new Exception('Class name mismatch ' . $schema->className . ' !== ' . $type->name . ' this must be a BUG please report it');
-            }
-
+            $schema->className = F::classString($type->name);
             $class = $this->classLocator->getClass($schema->className) ?? throw new Exception('Class not found ' . $schema->className);
             $this->loopSchema($schema, $class);
             return;
         }
 
         if ($type->isEmptyArray()) {
-            $schema->listElement ??= new NamedSchema(SH::classString($schema->className . '_'));
+            $schema->listElement ??= new NamedSchema(F::classString($schema->className . '_'));
             return;
         }
 
@@ -127,7 +123,13 @@ final readonly class SchemaFromClassCreator
             return;
         }
 
-        $schema->listElement ??= new NamedSchema(SH::classString($schema->className . '_'));
+        $schema->listElement ??= new NamedSchema(F::classString($schema->className . '_'));
         $this->addType($type->unpackOnce(), $schema->listElement);
+    }
+
+    private function getDataKey(Property $property): string
+    {
+        $key = F::getAttribute(Key::class, $property);
+        return $key->key ?? $property->getName();
     }
 }

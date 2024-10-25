@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Kanti\JsonToClass\Converter;
+namespace Kanti\JsonToClass\Mapper;
 
 use InvalidArgumentException;
 use Kanti\JsonToClass\Attribute\Types;
@@ -11,8 +11,11 @@ use Kanti\JsonToClass\Dto\Type;
 use ReflectionIntersectionType;
 use ReflectionNamedType;
 use ReflectionProperty;
+use ReflectionType;
 use ReflectionUnionType;
 use Stringable;
+
+use function assert;
 
 final readonly class PossibleConvertTargets implements Stringable
 {
@@ -22,7 +25,7 @@ final readonly class PossibleConvertTargets implements Stringable
     public function __construct(
         public array $types,
     ) {
-        array_map(fn(Type $type): int => 0, $this->types);
+        array_map(fn(Type $type): int => 0, $this->types); // check types
     }
 
     public function getMatch(Type $type): ?Type
@@ -59,10 +62,7 @@ final readonly class PossibleConvertTargets implements Stringable
 
         // if no attribute is set, it is never a list
 
-        $type = $property->getType();
-        if (!$type) {
-            throw new InvalidArgumentException("Type cannot be null");
-        }
+        $type = $property->getType() ?? throw new InvalidArgumentException("Type cannot be null");
 
         if ($type instanceof ReflectionIntersectionType) {
             throw new InvalidArgumentException("Intersection types are not supported");
@@ -77,10 +77,9 @@ final readonly class PossibleConvertTargets implements Stringable
             return new self($types);
         }
 
+        assert($type instanceof ReflectionUnionType);
+
         $types = [];
-        if (!$type instanceof ReflectionUnionType) {
-            throw new InvalidArgumentException("Union types are not supported");
-        }
 
         foreach ($type->getTypes() as $unionType) {
             if (!$unionType instanceof ReflectionNamedType) {
@@ -88,10 +87,6 @@ final readonly class PossibleConvertTargets implements Stringable
             }
 
             $types[] = Type::from($unionType->getName());
-        }
-
-        if ($type->allowsNull()) {
-            $types[] = Type::from('null');
         }
 
         return new self($types);
@@ -105,11 +100,11 @@ final readonly class PossibleConvertTargets implements Stringable
                 continue;
             }
 
-            $types[] = $type->unpackOnce();
-        }
+            if ($type->isEmptyArray()) {
+                continue;
+            }
 
-        if (!$types) {
-            throw new InvalidArgumentException('Max possible depth reached');
+            $types[] = $type->unpackOnce();
         }
 
         return new self($types);

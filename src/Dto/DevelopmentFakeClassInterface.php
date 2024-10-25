@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Dto;
 
-enum KeepDefaultValue
+interface DevelopmentFakeClassInterface
 {
-    case KeepDefaultValue;
 }

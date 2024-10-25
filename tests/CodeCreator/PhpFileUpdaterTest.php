@@ -8,10 +8,9 @@ use Generator;
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\CodeCreator\PhpFileUpdater;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
-use Kanti\JsonToClass\Helpers\SH;
-use Kanti\JsonToClass\Schema\NamedSchema;
+use Kanti\JsonToClass\Helpers\F;
 use Kanti\JsonToClass\Schema\Schema;
+use Kanti\JsonToClass\Schema\SchemaToNamedSchemaConverter;
 use Nette\PhpGenerator\PhpFile;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -40,7 +39,7 @@ class PhpFileUpdaterTest extends TestCase
             $file = PhpFile::fromCode($phpFile);
         }
 
-        $namedSchema = NamedSchema::fromSchema(SH::classString($className), $schema);
+        $namedSchema = $container->get(SchemaToNamedSchemaConverter::class)->convert(F::classString($className), $schema, null);
         $actual = $updater->updateFile($rootClassName, $namedSchema, $file);
         $this->assertEquals($expected, $actual);
     }
@@ -48,9 +47,9 @@ class PhpFileUpdaterTest extends TestCase
     public static function dataProvider(): Generator
     {
         $schema = new Schema(
-            properties: [
+            dataKeys: [
                 'expand' => new Schema(listElement: new Schema(basicTypes: ['string' => true])),
-                'fields' => new Schema(properties: []),
+                'fields' => new Schema(dataKeys: []),
                 'id' => new Schema(basicTypes: ['string' => true]),
                 'key' => new Schema(canBeMissing: true, basicTypes: ['string' => true]),
                 'self' => new Schema(basicTypes: ['string' => true]),
@@ -66,13 +65,11 @@ namespace Kanti\GeneratedTest;
 use Kanti\GeneratedTest\Data\Fields;
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Attribute\Types;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
+use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 
 #[RootClass]
-final readonly class Data
+final readonly class Data extends AbstractJsonReadonlyClass
 {
-    use MuteUninitializedPropertyError;
-
     /** @var list<string> */
     #[Types(['string'])]
     public array $expand;
@@ -88,7 +85,10 @@ EOF;
             'phpFile' => '',
             'expected' => $result,
         ];
-        $result = <<<'EOF'
+        yield 'empty className !== $rootName' => [
+            'schema' => $schema,
+            'phpFile' => '',
+            'expected' => <<<'EOF'
 <?php
 
 declare(strict_types=1);
@@ -98,13 +98,11 @@ namespace Kanti\GeneratedTest;
 use Kanti\GeneratedTest\Data_\Fields;
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Attribute\Types;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
+use Kanti\JsonToClass\Dto\AbstractJsonReadonlyClass;
 
 #[RootClass(Data::class)]
-final readonly class Data_
+final readonly class Data_ extends AbstractJsonReadonlyClass
 {
-    use MuteUninitializedPropertyError;
-
     /** @var list<string> */
     #[Types(['string'])]
     public array $expand;
@@ -114,11 +112,7 @@ final readonly class Data_
     public ?string $key;
 }
 
-EOF;
-        yield 'empty className !== $rootName' => [
-            'schema' => $schema,
-            'phpFile' => '',
-            'expected' => $result,
+EOF,
             'className' => Data::class . '_',
         ];
         yield 'RootClass was present before' => [
@@ -138,7 +132,30 @@ final readonly class Data_ {
 }
 
 EOF,
-            'expected' => $result,
+            'expected' => <<<'EOF'
+<?php
+
+declare(strict_types=1);
+
+namespace Kanti\GeneratedTest;
+
+use Kanti\GeneratedTest\Data_\Fields;
+use Kanti\JsonToClass\Attribute\RootClass;
+use Kanti\JsonToClass\Attribute\Types;
+
+#[RootClass(Data::class)]
+final readonly class Data_
+{
+    /** @var list<string> */
+    #[Types(['string'])]
+    public array $expand;
+    public Fields $fields;
+    public string $id;
+    public string $self;
+    public ?string $key;
+}
+
+EOF,
             'className' => Data::class . '_',
         ];
         yield 'nearly empty file' => [
@@ -152,13 +169,10 @@ declare(strict_types=1);
 namespace Kanti\GeneratedTest\Data;
 
 use Kanti\GeneratedTest\Data\SubClass\Fields;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 
 #[\CustomAttribute]
 class SubClass
 {
-    use MuteUninitializedPropertyError;
-
     /** @var Fields */
     public Fields $fields;
     /** @var string this is not a UUid */
@@ -187,14 +201,11 @@ use Kanti\GeneratedTest\Data;
 use Kanti\GeneratedTest\Data\SubClass\Fields;
 use Kanti\JsonToClass\Attribute\RootClass;
 use Kanti\JsonToClass\Attribute\Types;
-use Kanti\JsonToClass\Dto\MuteUninitializedPropertyError;
 
 #[\CustomAttribute]
 #[RootClass(Data::class)]
 class SubClass
 {
-    use MuteUninitializedPropertyError;
-
     public Fields $fields;
 
     /** @var string this is not a UUid */

@@ -29,11 +29,8 @@ final class SchemaMerger
             return $schemaA;
         }
 
-        if ($schemaA->className !== $schemaB->className) {
-            throw new InvalidArgumentException('Class names must be the same ' . $schemaA->className . ' !== ' . $schemaB->className);
-        }
-
-        $result = new NamedSchema($schemaA->className);
+        $result = new NamedSchema($schemaB->className); // use class name from PhpFiles
+        $result->dataKey = $schemaB->dataKey ?? $schemaA->dataKey;
         $result->canBeMissing = $schemaA->canBeMissing || $schemaB->canBeMissing;
         $result->basicTypes = $schemaA->basicTypes + $schemaB->basicTypes;
         $result->listElement = $this->merge($schemaA->listElement, $schemaB->listElement, false);

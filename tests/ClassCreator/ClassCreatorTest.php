@@ -12,7 +12,7 @@ use Kanti\JsonToClass\Config\Enums\ShouldCreateClasses;
 use Kanti\JsonToClass\Config\SaneConfig;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\FileSystemAbstraction\FileSystemInterface;
-use Kanti\JsonToClass\Helpers\SH;
+use Kanti\JsonToClass\Helpers\F;
 use Kanti\JsonToClass\Tests\_helper\FakeFileSystem;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\Attributes\Test;
@@ -30,7 +30,7 @@ class ClassCreatorTest extends TestCase
         $classCreator = $this->getClassCreator();
 
         $this->expectExceptionMessage('$className must have a namespace ("Data" dose not include \\)');
-        $classCreator->createClasses(SH::classString('Data'), [], new SaneConfig());
+        $classCreator->createClasses(F::classString('Data'), [], new SaneConfig());
     }
 
     private function getClassCreator(): ClassCreator

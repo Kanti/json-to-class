@@ -39,7 +39,7 @@ class SchemaFromDataCreatorTest extends TestCase
                 'property' => null,
             ],
             'expectedSchema' => new Schema(
-                properties: [
+                dataKeys: [
                     'property' => new Schema(basicTypes: ['null' => true]),
                 ],
             ),
@@ -47,13 +47,13 @@ class SchemaFromDataCreatorTest extends TestCase
 
 
         $personSchema = new Schema(
-            properties: [
+            dataKeys: [
                 'name' => new Schema(basicTypes: ['string' => true]),
                 'age' => new Schema(basicTypes: ['int' => true]),
             ],
         );
         $allTypesSchema = new Schema(
-            properties: [
+            dataKeys: [
                 'string' => new Schema(basicTypes: ['string' => true]),
                 'int' => new Schema(basicTypes: ['int' => true]),
                 'null' => new Schema(basicTypes: ['null' => true]),
@@ -78,7 +78,7 @@ class SchemaFromDataCreatorTest extends TestCase
         yield 'emptyArray' => [
             'data' => ['emptyArray' => []],
             'expectedSchema' => new Schema(
-                properties: [
+                dataKeys: [
                     'emptyArray' => new Schema(
                         listElement: new Schema(),
                     ),
@@ -88,8 +88,8 @@ class SchemaFromDataCreatorTest extends TestCase
         yield 'emptyStdClass' => [
             'data' => ['emptyArray' => new stdClass()],
             'expectedSchema' => new Schema(
-                properties: [
-                    'emptyArray' => new Schema(properties: []),
+                dataKeys: [
+                    'emptyArray' => new Schema(dataKeys: []),
                 ],
             ),
         ];
@@ -111,12 +111,12 @@ class SchemaFromDataCreatorTest extends TestCase
             ],
             'expectedSchema' => new Schema(
                 listElement: new Schema(
-                    properties: [
+                    dataKeys: [
                         'mixedTypes' => new Schema(
                             canBeMissing: true,
                             basicTypes: ['string' => true, 'null' => true],
                             listElement: new Schema(basicTypes: ['int' => true]),
-                            properties: [
+                            dataKeys: [
                                 'name' => new Schema(basicTypes: ['string' => true]),
                                 'age' => new Schema(basicTypes: ['int' => true]),
                             ],
@@ -143,7 +143,7 @@ class SchemaFromDataCreatorTest extends TestCase
                 'person' => ['name' => 'Kanti', 'age' => 30],
             ],
             'expectedSchema' => new Schema(
-                properties: [
+                dataKeys: [
                     'person' => $personSchema,
                 ],
             ),
@@ -156,7 +156,7 @@ class SchemaFromDataCreatorTest extends TestCase
             ],
             'expectedSchema' => new Schema(
                 listElement: new Schema(
-                    properties: [
+                    dataKeys: [
                         'person' => $personSchema,
                     ],
                 ),
@@ -169,7 +169,7 @@ class SchemaFromDataCreatorTest extends TestCase
             ],
             'expectedSchema' => new Schema(
                 listElement: new Schema(
-                    properties: [
+                    dataKeys: [
                         'name' => new Schema(basicTypes: ['string' => true]),
                         'age' => new Schema(canBeMissing: true, basicTypes: ['int' => true, 'null' => true]),
                     ],
@@ -183,12 +183,12 @@ class SchemaFromDataCreatorTest extends TestCase
             ],
             'expectedSchema' => new Schema(
                 listElement: new Schema(
-                    properties: [
+                    dataKeys: [
                         'name' => new Schema(basicTypes: ['string' => true]),
                         'age' => new Schema(
                             canBeMissing: true,
                             basicTypes: ['null' => true],
-                            properties: [
+                            dataKeys: [
                                 'range' => new Schema(
                                     listElement: new Schema(basicTypes: ['int' => true]),
                                 ),
@@ -212,7 +212,7 @@ class SchemaFromDataCreatorTest extends TestCase
                 ),
             ),
         ];
-        yield 'AAAAAAAAAAAAAAAAAAAAAA' => [
+        yield 'DeepDataStructure' => [
             'data' => [
                 [
                     'age1' => 9999,
@@ -239,25 +239,25 @@ class SchemaFromDataCreatorTest extends TestCase
             ],
             'expectedSchema' => new Schema(
                 listElement: new Schema(
-                    properties: [
+                    dataKeys: [
                         'age1' => new Schema(basicTypes: ['int' => true]),
                         'name1' => new Schema(basicTypes: ['string' => true]),
                         'friends1' => new Schema(
                             listElement: new Schema(
-                                properties: [
+                                dataKeys: [
                                     'name2' => new Schema(basicTypes: ['string' => true]),
                                     'age2' => new Schema(basicTypes: ['int' => true]),
-                                    '_48x48' => new Schema(basicTypes: ['string' => true]),
+                                    '48x48' => new Schema(basicTypes: ['string' => true]),
                                     'friends2' => new Schema(
                                         listElement: new Schema(
-                                            properties: [
+                                            dataKeys: [
                                                 'name3' => new Schema(basicTypes: ['string' => true]),
                                                 'age3' => new Schema(basicTypes: ['int' => true, 'float' => true]),
                                                 'friends3' => new Schema(
                                                     canBeMissing: true,
                                                     basicTypes: ['null' => true],
                                                     listElement: new Schema(
-                                                        properties: [
+                                                        dataKeys: [
                                                             'name4' => new Schema(basicTypes: ['string' => true]),
                                                             'age4' => new Schema(basicTypes: ['int' => true, 'float' => true],),
                                                         ],

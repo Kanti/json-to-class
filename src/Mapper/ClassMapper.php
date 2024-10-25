@@ -2,24 +2,31 @@
 
 declare(strict_types=1);
 
-namespace Kanti\JsonToClass\Converter;
+namespace Kanti\JsonToClass\Mapper;
 
 use AllowDynamicProperties;
+use Exception;
 use InvalidArgumentException;
 use Kanti\JsonToClass\Cache\RuntimeCache;
 use Kanti\JsonToClass\CodeCreator\DevelopmentCodeCreator;
 use Kanti\JsonToClass\Config\Config;
-use Kanti\JsonToClass\Config\Enums\OnInvalidCharacterProperties;
-use Kanti\JsonToClass\Dto\KeepDefaultValue;
-use Kanti\JsonToClass\Dto\MakeUninitialized;
+use Kanti\JsonToClass\Config\StrictConfig;
 use Kanti\JsonToClass\Dto\Property;
 use Kanti\JsonToClass\Dto\Type;
-use Kanti\JsonToClass\Helpers\SH;
+use Kanti\JsonToClass\Helpers\F;
+use Kanti\JsonToClass\Mapper\Exception\MapperExceptionInterface;
+use Kanti\JsonToClass\Mapper\Exception\MissingDataException;
+use Kanti\JsonToClass\Mapper\Exception\MissingDataKeepDefaultValueException;
+use Kanti\JsonToClass\Mapper\Exception\NoPossibleTypesException;
+use Kanti\JsonToClass\Mapper\Exception\TypesDoNotMatchException;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use ReflectionProperty;
+use RuntimeException;
 use stdClass;
+use Throwable;
 
+use function array_map;
 use function assert;
 use function is_array;
 
@@ -63,19 +70,34 @@ final readonly class ClassMapper
             $classProperties = $this->cache->getClassProperties($className);
         }
 
+        $classProperties = array_map(MappingProperty::from(...), $classProperties);
+
         $properties = $this->convertProperties($classProperties, $config, $data, $path);
 
         $instance = $reflectionClass->newInstanceWithoutConstructor();
         $allowsDynamicProperties = (bool)$reflectionClass->getAttributes(AllowDynamicProperties::class);
         foreach ($properties as $key => $value) {
-            if ($value instanceof KeepDefaultValue) {
-                // do nothing
-                continue;
-            }
+            if ($value instanceof MapperExceptionInterface) {
+                // TODO config handling: (throwOnUse vs throwOnConvert)
+                if ($config instanceof StrictConfig) {
+                    throw $value;
+                }
 
-            if ($value instanceof MakeUninitialized) {
-                $this->unsetFromObject($instance, $key);
-                continue;
+                RuntimeCache::addWarning($instance, $key, $value);
+
+                $this->logger->warning($value->getMessage());
+                if ($value instanceof MissingDataKeepDefaultValueException) {
+                    continue;
+                }
+
+                if (
+                    $value instanceof TypesDoNotMatchException
+                    || $value instanceof MissingDataException
+                    || $value instanceof NoPossibleTypesException
+                ) {
+                    $this->unsetFromObject($instance, $key);
+                    continue;
+                }
             }
 
             if ($allowsDynamicProperties && !$reflectionClass->hasProperty($key)) {
@@ -90,7 +112,7 @@ final readonly class ClassMapper
     }
 
     /**
-     * @param list<Property|ReflectionProperty> $properties
+     * @param list<MappingProperty> $properties
      * @param array<mixed>|stdClass $data
      * @return array<string, mixed>
      */
@@ -100,57 +122,78 @@ final readonly class ClassMapper
 
         $args = [];
         foreach ($properties as $property) {
-            $possibleTypes = PossibleConvertTargets::fromParameter($property);
-            $dataKey = $property->getName();
-            $parameterName = $dataKey;
-            if (str_starts_with($parameterName, '_') && $config->onInvalidCharacterProperties === OnInvalidCharacterProperties::TRY_PREFIX_WITH_UNDERSCORE) {
-                $dataKey = substr($parameterName, 1);
-            }
+            $propertyName = $property->getName();
+            $dataKey = $property->getDataKey();
+            $possibleTypes = $property->getPossibleTypes();
 
             if (!array_key_exists($dataKey, $array)) {
                 if ($property->hasDefaultValue()) {
-                    $args[$parameterName] = KeepDefaultValue::KeepDefaultValue;
+                    $args[$propertyName] = new MissingDataKeepDefaultValueException($possibleTypes, $path . '.' . $dataKey);
                     continue;
                 }
 
-                // TODO Config
-                $args[$parameterName] = MakeUninitialized::MakeUninitialized;
+                $args[$propertyName] = new MissingDataException($possibleTypes, $path . '.' . $dataKey);
                 continue;
             }
 
-            $args[$parameterName] = $this->convertType($possibleTypes, $array[$dataKey] ?? null, $config, $path . '.' . $dataKey);
+
+            try {
+                $convertedType = $this->convertType($possibleTypes, $array[$dataKey] ?? null, $config, $path . '.' . $dataKey);
+            } catch (MapperExceptionInterface $exception) {
+                $convertedType = $exception;
+            }
+
+            $args[$propertyName] = $convertedType;
         }
 
         return $args;
     }
 
-    private function convertType(PossibleConvertTargets $possibleTypes, mixed $param, Config $config, string $path): mixed
+    /**
+     * @throws NoPossibleTypesException
+     * @throws TypesDoNotMatchException
+     * @throws RuntimeException
+     */
+    private function convertType(PossibleConvertTargets $possibleTypes, mixed $data, Config $config, string $path): mixed
     {
-        $sourceType = Type::fromData($param);
+        $sourceType = Type::fromData($data);
+
+        if (!$possibleTypes->types) {
+            throw new NoPossibleTypesException($sourceType, $path, $data);
+        }
 
         $type = $possibleTypes->getMatch($sourceType);
         if (!$type) {
-            return MakeUninitialized::MakeUninitialized;
-            // TODO CONFIG
-//            throw new TypesDoNotMatchException($possibleTypes, $sourceType, $path);
+            throw new TypesDoNotMatchException($possibleTypes, $sourceType, $path, $data);
         }
 
         if ($type->isBasicType()) {
-            return $param;
+            return $data;
         }
 
-        assert(is_array($param) || $param instanceof stdClass, 'This should be an array or stdClass at this point in the code');
+        assert(
+            is_array($data) || $data instanceof stdClass,
+            'This should be an array or stdClass at this point in the code',
+        );
 
         if ($type->isArray()) {
             $result = [];
-            foreach ((array)$param as $key => $value) {
-                $result[$key] = $this->convertType($possibleTypes->unpackOnce(), $value, $config, $path . '.' . $key);
+            foreach ((array)$data as $key => $value) {
+                try {
+                    $result[$key] = $this->convertType($possibleTypes->unpackOnce(), $value, $config, $path . '.' . $key);
+                } catch (Throwable $throwable) {
+                    if ($throwable instanceof MapperExceptionInterface) {
+                        throw $throwable;
+                    }
+
+                    throw new RuntimeException('Error at ' . $path . '.' . $key . ': ' . $throwable->getMessage(), 0, $throwable);
+                }
             }
 
             return $result;
         }
 
-        return $this->map(SH::classString($type->name), $param, $config, $path);
+        return $this->map(F::classString($type->name), $data, $config, $path);
     }
 
     /**

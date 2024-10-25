@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\Converter\__fixture__;
 
-final class Children
+use Kanti\JsonToClass\Dto\AbstractJsonClass;
+
+final class Children extends AbstractJsonClass
 {
     public string $name;
 

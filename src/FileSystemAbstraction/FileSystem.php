@@ -42,6 +42,11 @@ final readonly class FileSystem implements FileSystemInterface
         return $contents;
     }
 
+    public function require(string $location): mixed
+    {
+        return require $location;
+    }
+
     private function realpathIfPossible(string $path): string
     {
         return realpath($path) ?: $path;

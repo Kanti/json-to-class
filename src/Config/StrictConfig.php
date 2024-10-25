@@ -9,6 +9,7 @@ use Kanti\JsonToClass\Config\Enums\OnExtraProperties;
 use Kanti\JsonToClass\Config\Enums\OnInvalidCharacterProperties;
 use Kanti\JsonToClass\Config\Enums\OnMissingProperties;
 use Kanti\JsonToClass\Config\Enums\ShouldCreateClasses;
+use Kanti\JsonToClass\Config\Enums\ShouldCreateDevelopmentClasses;
 
 final readonly class StrictConfig extends Config
 {
@@ -18,6 +19,7 @@ final readonly class StrictConfig extends Config
         public OnInvalidCharacterProperties $onInvalidCharacterProperties = OnInvalidCharacterProperties::THROW_EXCEPTION,
         public AppendSchema $appendSchema = AppendSchema::OVERRIDE,
         public ShouldCreateClasses $shouldCreateClasses = ShouldCreateClasses::TRY_TO_DETECT,
+        public ShouldCreateDevelopmentClasses $shouldCreateDevelopmentClasses = ShouldCreateDevelopmentClasses::YES,
     ) {
     }
 }

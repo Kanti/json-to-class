@@ -4,10 +4,17 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\_helper;
 
+use Exception;
+use Throwable;
 use Kanti\JsonToClass\FileSystemAbstraction\FileSystemInterface;
+use PHPUnit\Framework\Assert;
 use RuntimeException;
 
-use function PHPUnit\Framework\assertEquals;
+use function Safe\file_put_contents;
+use function Safe\unlink;
+use function microtime;
+use function realpath;
+use function sys_get_temp_dir;
 
 final class FakeFileSystem implements FileSystemInterface
 {
@@ -59,6 +66,27 @@ final class FakeFileSystem implements FileSystemInterface
         return $this->fileState[$filename] ?? null;
     }
 
+    public function require(string $location): mixed
+    {
+        $location = realpath($location) ?: $location;
+        $fileContent = $this->fileLocationsWrittenTo[$location] ?? null;
+        if ($fileContent === null) {
+            throw new Exception('File dose not exist: ' . $location);
+        }
+
+        $fileName = sys_get_temp_dir() . '/require' . microtime(true) . '.php';
+        file_put_contents($fileName, $fileContent, FILE_APPEND);
+        try {
+            $result = require $fileName;
+            unlink($fileName);
+        } catch (Throwable $throwable) {
+            unlink($fileName);
+            throw $throwable;
+        }
+
+        return $result;
+    }
+
     /**
      * @param array<string, string|true> $expectedFiles
      */
@@ -70,6 +98,6 @@ final class FakeFileSystem implements FileSystemInterface
             $expected[realpath($filename) ?: $filename] = $content === true ? self::CONTENT : $content;
         }
 
-        assertEquals($expected, $this->fileLocationsWrittenTo);
+        Assert::assertEquals($expected, $this->fileLocationsWrittenTo);
     }
 }
