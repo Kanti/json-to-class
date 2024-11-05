@@ -10,7 +10,7 @@ automatically generated PHP Classes from JSON or other data(database Rows, CSV, 
 ## Installation
 
 ````bash
-compsoer require kanti/json-to-class
+composer require kanti/json-to-class
 ````
 
 ## Usage
