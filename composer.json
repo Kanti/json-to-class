@@ -15,19 +15,13 @@
     "thecodingmachine/safe": "^2.5"
   },
   "require-dev": {
-    "infection/infection": "dev-fix-phpunit-config",
+    "infection/infection": "^0.29.8",
     "phpstan/phpstan-phpunit": "^1.4",
-    "phpunit/phpunit": "^11.4.2",
+    "phpunit/phpunit": "^11.4.3",
     "pluswerk/grumphp-config": "^7.1",
     "spatie/phpunit-snapshot-assertions": "^5.1.6",
-    "symfony/var-dumper": "^7.1.5"
+    "symfony/var-dumper": "^7.1.7"
   },
-  "repositories": [
-    {
-      "type": "git",
-      "url": "https://github.com/Kanti/infection.git"
-    }
-  ],
   "autoload": {
     "psr-4": {
       "Kanti\\JsonToClass\\": "src/",
