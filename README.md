@@ -2,6 +2,7 @@
 [![codecov](https://codecov.io/gh/Kanti/json-to-class/graph/badge.svg?token=RN6OGgDK19)](https://codecov.io/gh/Kanti/json-to-class)
 ![Packagist Downloads](https://img.shields.io/packagist/dm/kanti/json-to-class)
 ![Packagist Version](https://img.shields.io/packagist/v/kanti/json-to-class)
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fjson-to-class)](https://dashboard.stryker-mutator.io/reports/json-to-class)
 
 # json to class (generates PHP)
 

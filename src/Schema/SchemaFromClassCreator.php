@@ -83,7 +83,9 @@ final readonly class SchemaFromClassCreator
             }
 
             $type = $parameter->getType(true);
-            assert($type !== null, 'Type is not defined');
+            if ($type === null) {
+                throw new Exception('Type is not defined');
+            }
 
             if ($type->isIntersection()) {
                 throw new Exception('Intersection types not supported');
@@ -98,7 +100,7 @@ final readonly class SchemaFromClassCreator
                 return $types;
             }
 
-            return [Type::from($type->getSingleName() ?? throw new Exception('Type must have a single type'))];
+            return [Type::from($type->getSingleName())];
         } catch (Exception $exception) {
             throw new Exception('Error in ' . $className . '->' . $parameter->getName() . ': ' . $exception->getMessage(), $exception->getCode(), previous: $exception);
         }
