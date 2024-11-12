@@ -6,11 +6,14 @@ namespace Kanti\JsonToClass\Container;
 
 use Closure;
 use Composer\Autoload\ClassLoader;
+use DateTimeImmutable;
 use Kanti\JsonToClass\FileSystemAbstraction\FileSystem;
 use Kanti\JsonToClass\FileSystemAbstraction\FileSystemInterface;
+use Kanti\JsonToClass\Logger\Dto\Writeable;
 use Kanti\JsonToClass\Logger\StdErrLogger;
 use Nette\PhpGenerator\Printer;
 use Nette\PhpGenerator\PsrPrinter;
+use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
@@ -43,9 +46,10 @@ final class JsonToClassContainer implements ContainerInterface
         ];
 
         $this->factories = [
-            LoggerInterface::class => fn(): object => new StdErrLogger(),
+            LoggerInterface::class => fn(): object => new StdErrLogger($this->getClock(), $this->getWriteable()),
             FileSystemInterface::class => fn(): object => new FileSystem(),
             Printer::class => fn(): object => new PsrPrinter(),
+            ClockInterface::class => $this->getClock(...),
             ClassLoader::class => fn(): ClassLoader => self::getClassLoader($possibleAutoloadLocations),
             ...$overwriteFactories,
         ];
@@ -153,5 +157,21 @@ final class JsonToClassContainer implements ContainerInterface
         }
 
         throw new ContainerException('Autoload file not found 😿');
+    }
+
+    private function getClock(): ClockInterface
+    {
+        return new class implements ClockInterface {
+            public function now(): DateTimeImmutable
+            {
+                return new DateTimeImmutable();
+            }
+        };
+    }
+
+    private function getWriteable(): Writeable
+    {
+        $phpUnit = defined('PHPUNIT_COMPOSER_INSTALL') || defined('__PHPUNIT_PHAR__');
+        return new Writeable($phpUnit ? 'phpunit.log' : STDERR);
     }
 }

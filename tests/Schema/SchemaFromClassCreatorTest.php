@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\JsonToClass\Tests\Schema;
 
+use Composer\Autoload\ClassLoader;
 use Kanti\GeneratedTest\Data;
 use Kanti\JsonToClass\Container\JsonToClassContainer;
 use Kanti\JsonToClass\Helpers\F;
@@ -45,13 +46,76 @@ PHP;
     }
 
     #[Test]
+    #[TestDox('Error in Kanti\GeneratedTest\Data->a: Union type must have a single type')]
+    public function exception2(): void
+    {
+        $classCode = <<<'PHP'
+            <?php
+            namespace Kanti\GeneratedTest;
+            class Data {
+                public (A&B)|C $a;
+            }
+            PHP;
+        $schemaFromClassCreator = $this->getSchemaFromClassCreator();
+
+        $schema = new NamedSchema(Data::class, properties: ['a' => new NamedSchema(F::classString('Kanti\GeneratedTest\Data\A'))]);
+        $class = ClassType::fromCode($classCode);
+        $this->assertInstanceOf(ClassType::class, $class);
+
+        $this->expectExceptionMessage('Error in Kanti\GeneratedTest\Data->a: Union type must have a single type');
+        $schemaFromClassCreator->loopSchema($schema, $class);
+    }
+
+    #[Test]
+    #[TestDox('Error in Kanti\GeneratedTest\Data->a: Type is not defined')]
+    public function exception3(): void
+    {
+        $classCode = <<<'PHP'
+            <?php
+            namespace Kanti\GeneratedTest;
+            class Data {
+                public $a;
+            }
+            PHP;
+        $schemaFromClassCreator = $this->getSchemaFromClassCreator();
+
+        $schema = new NamedSchema(Data::class, properties: ['a' => new NamedSchema(F::classString('Kanti\GeneratedTest\Data\A'))]);
+        $class = ClassType::fromCode($classCode);
+        $this->assertInstanceOf(ClassType::class, $class);
+
+        $this->expectExceptionMessage('Error in Kanti\GeneratedTest\Data->a: Type is not defined');
+        $schemaFromClassCreator->loopSchema($schema, $class);
+    }
+
+    #[Test]
+    #[TestDox('Class not found Kanti\GeneratedTest\A')]
+    public function exception4(): void
+    {
+        $classCode = <<<'PHP'
+            <?php
+            namespace Kanti\GeneratedTest;
+            class Data {
+                public A $a;
+            }
+            PHP;
+        $schemaFromClassCreator = $this->getSchemaFromClassCreator();
+
+        $schema = new NamedSchema(Data::class, properties: ['a' => new NamedSchema(F::classString('Kanti\GeneratedTest\Data\A'))]);
+        $class = ClassType::fromCode($classCode);
+        $this->assertInstanceOf(ClassType::class, $class);
+
+        $this->expectExceptionMessage('Class not found Kanti\GeneratedTest\A');
+        $schemaFromClassCreator->loopSchema($schema, $class);
+    }
+
+    #[Test]
     public function readableClass(): void
     {
         $classCode = <<<'PHP'
 <?php
 namespace Kanti\GeneratedTest;
 class Data {
-    public ?string $a = null;
+    public string|float|int|null $a = null;
 }
 PHP;
         $schemaFromClassCreator = $this->getSchemaFromClassCreator();
@@ -61,10 +125,49 @@ PHP;
         $this->assertInstanceOf(ClassType::class, $class);
 
         $schemaFromClassCreator->loopSchema($schema, $class);
+        $this->assertIsArray($schema->properties);
+        $this->assertArrayHasKey('a', $schema->properties);
+        $this->assertTrue($schema->properties['a']->canBeMissing);
+        $this->assertEquals([
+            'string' => true,
+            'float' => true,
+            'int' => true,
+            'null' => true,
+        ], $schema->properties['a']->basicTypes);
+    }
+
+    #[Test]
+    public function doNotOverwriteListElementWithEmptyArray(): void
+    {
+        $classCode = <<<'PHP'
+<?php
+namespace Kanti\GeneratedTest;
+use Kanti\JsonToClass\Attribute\Types;
+
+class Data {
+    #[Types(['string'], [])]
+    public array $a = null;
+}
+PHP;
+        $schemaFromClassCreator = $this->getSchemaFromClassCreator();
+
+        $schema = new NamedSchema(Data::class);
+        $class = ClassType::fromCode($classCode);
+        $this->assertInstanceOf(ClassType::class, $class);
+
+        $schemaFromClassCreator->loopSchema($schema, $class);
+        $expected = new NamedSchema(F::classString('Kanti\GeneratedTest\Data\A_'), basicTypes: ['string' => true]);
+        $this->assertIsArray($schema->properties);
+        $this->assertArrayHasKey('a', $schema->properties);
+        $this->assertEquals($expected, $schema->properties['a']->listElement);
     }
 
     private function getSchemaFromClassCreator(): SchemaFromClassCreator
     {
-        return (new JsonToClassContainer())->get(SchemaFromClassCreator::class);
+        $classLoader = new ClassLoader();
+        $classLoader->addPsr4('Kanti\\', 'a');
+        return (new JsonToClassContainer([
+            ClassLoader::class => $classLoader,
+        ]))->get(SchemaFromClassCreator::class);
     }
 }
